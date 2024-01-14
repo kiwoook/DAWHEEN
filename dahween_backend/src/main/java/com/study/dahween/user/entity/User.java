@@ -1,5 +1,8 @@
 package com.study.dahween.user.entity;
 
+import com.study.dahween.common.entity.BaseTimeEntity;
+import com.study.dahween.oauth.entity.ProviderType;
+import com.study.dahween.organization.entity.Organization;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -9,16 +12,18 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class User {
+public class User extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
+    private String userId;
+
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String email;
 
     @Column(nullable = false)
@@ -32,21 +37,42 @@ public class User {
     @Column
     private Role role;
 
+    @Column(name = "PROVIDER_TYPE", length = 20, nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ProviderType providerType;
+
+
     @Builder
-    public User(String name, String email, String phone, Address address) {
+    public User(String userId, String name, String email, ProviderType providerType) {
+        this.userId = userId;
+        this.name = name;
+        this.email = email;
+        this.role = new Role(RoleType.MEMBER);
+        this.providerType = providerType;
+    }
+    public User updateUserId(String userId){
+        this.userId = userId;
+
+        return this;
+    }
+
+    public User update(String name, String email, String phone, Address address) {
         this.name = name;
         this.email = email;
         this.phone = phone;
         this.address = address;
-        this.role = new Role(RoleType.MEMBER);
+
+        return this;
     }
 
 
-    public void grantAdmin(){
+    public void grantAdmin() {
         this.role = new Role(RoleType.ADMIN);
     }
 
-    @Builder
+    public void grantOrganization(Organization organization) {
+        this.role = new Role(RoleType.ORGANIZATION, organization);
+    }
 
 
 }
