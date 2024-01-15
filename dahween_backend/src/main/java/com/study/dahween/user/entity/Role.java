@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Embeddable
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Role {
