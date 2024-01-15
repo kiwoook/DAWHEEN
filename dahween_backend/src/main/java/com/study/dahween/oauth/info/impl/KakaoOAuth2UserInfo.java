@@ -1,7 +1,6 @@
 package com.study.dahween.oauth.info.impl;
 
 import com.study.dahween.oauth.info.OAuth2UserInfo;
-import com.study.dahween.oauth.info.Oauth2UserInfo;
 
 import java.util.Map;
 
@@ -32,14 +31,4 @@ public class KakaoOAuth2UserInfo extends OAuth2UserInfo {
         return (String) attributes.get("account_email");
     }
 
-    @Override
-    public String getImageUrl() {
-        Map<String, Object> properties = (Map<String, Object>) attributes.get("properties");
-
-        if (properties == null) {
-            return null;
-        }
-
-        return (String) properties.get("thumbnail_image");
-    }
 }
