@@ -24,10 +24,16 @@ public class QOrganization extends EntityPathBase<Organization> {
 
     public final com.study.dahween.common.entity.QBaseTimeEntity _super = new com.study.dahween.common.entity.QBaseTimeEntity(this);
 
-    public final com.study.dahween.user.entity.QAddress address;
+    public final com.study.dahween.common.entity.QAddress address;
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdDate = _super.createdDate;
+
+    public final StringPath email = createString("email");
+
+    public final StringPath facilityPhone = createString("facilityPhone");
+
+    public final StringPath facilityType = createString("facilityType");
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
@@ -35,6 +41,8 @@ public class QOrganization extends EntityPathBase<Organization> {
     public final DateTimePath<java.time.LocalDateTime> modifiedDate = _super.modifiedDate;
 
     public final StringPath name = createString("name");
+
+    public final StringPath representName = createString("representName");
 
     public QOrganization(String variable) {
         this(Organization.class, forVariable(variable), INITS);
@@ -54,7 +62,7 @@ public class QOrganization extends EntityPathBase<Organization> {
 
     public QOrganization(Class<? extends Organization> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.address = inits.isInitialized("address") ? new com.study.dahween.user.entity.QAddress(forProperty("address")) : null;
+        this.address = inits.isInitialized("address") ? new com.study.dahween.common.entity.QAddress(forProperty("address")) : null;
     }
 
 }

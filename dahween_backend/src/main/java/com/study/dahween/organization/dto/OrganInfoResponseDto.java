@@ -1,7 +1,6 @@
 package com.study.dahween.organization.dto;
 
 import com.study.dahween.common.dto.AddressDto;
-import com.study.dahween.common.entity.Address;
 import com.study.dahween.organization.entity.Organization;
 import jakarta.validation.constraints.Email;
 import lombok.Data;

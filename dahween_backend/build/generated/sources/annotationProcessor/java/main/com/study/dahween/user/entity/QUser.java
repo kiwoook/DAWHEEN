@@ -24,7 +24,7 @@ public class QUser extends EntityPathBase<User> {
 
     public final com.study.dahween.common.entity.QBaseTimeEntity _super = new com.study.dahween.common.entity.QBaseTimeEntity(this);
 
-    public final QAddress address;
+    public final com.study.dahween.common.entity.QAddress address;
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdDate = _super.createdDate;
@@ -37,6 +37,8 @@ public class QUser extends EntityPathBase<User> {
     public final DateTimePath<java.time.LocalDateTime> modifiedDate = _super.modifiedDate;
 
     public final StringPath name = createString("name");
+
+    public final StringPath password = createString("password");
 
     public final StringPath phone = createString("phone");
 
@@ -64,7 +66,7 @@ public class QUser extends EntityPathBase<User> {
 
     public QUser(Class<? extends User> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.address = inits.isInitialized("address") ? new QAddress(forProperty("address")) : null;
+        this.address = inits.isInitialized("address") ? new com.study.dahween.common.entity.QAddress(forProperty("address")) : null;
         this.role = inits.isInitialized("role") ? new QRole(forProperty("role"), inits.get("role")) : null;
     }
 

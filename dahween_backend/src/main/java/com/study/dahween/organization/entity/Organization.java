@@ -3,7 +3,7 @@ package com.study.dahween.organization.entity;
 
 import com.study.dahween.common.entity.Address;
 import com.study.dahween.common.entity.BaseTimeEntity;
-import com.study.dahween.organization.dto.OrganCreateRequestDto;
+import com.study.dahween.organization.dto.OrganRequestDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -48,7 +48,7 @@ public class Organization extends BaseTimeEntity {
         this.address = address;
     }
 
-    public static Organization toEntity(OrganCreateRequestDto requestDto) {
+    public static Organization toEntity(OrganRequestDto requestDto) {
         return Organization.builder()
                 .name(requestDto.getName())
                 .address(Address.toEntity(requestDto.getAddress()))
@@ -57,5 +57,14 @@ public class Organization extends BaseTimeEntity {
                 .facilityPhone(requestDto.getFacilityPhone())
                 .representName(requestDto.getRepresentName())
                 .build();
+    }
+
+    public void update(OrganRequestDto requestDto) {
+        this.name = requestDto.getName();
+        this.facilityType = requestDto.getFacilityType();
+        this.email = requestDto.getEmail();
+        this.facilityPhone = requestDto.getFacilityPhone();
+        this.representName = requestDto.getRepresentName();
+        this.address = Address.toEntity(requestDto.getAddress());
     }
 }
