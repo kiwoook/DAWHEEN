@@ -15,7 +15,7 @@ public class Role {
     @Enumerated(EnumType.STRING)
     private RoleType roleType;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "organization_id")
     private Organization organization;
 
