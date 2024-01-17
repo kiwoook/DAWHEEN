@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.Map;
 
 @Getter
-
 @AllArgsConstructor
 @RequiredArgsConstructor
 public class UserPrincipal implements OAuth2User, UserDetails, OidcUser {
@@ -34,7 +33,7 @@ public class UserPrincipal implements OAuth2User, UserDetails, OidcUser {
     public static UserPrincipal create(User user) {
         return new UserPrincipal(
                 user.getUserId(),
-                null,
+                user.getPassword(),
                 user.getProviderType(),
                 RoleType.MEMBER,
                 Collections.singletonList(new SimpleGrantedAuthority(RoleType.MEMBER.getCode()))
@@ -104,4 +103,6 @@ public class UserPrincipal implements OAuth2User, UserDetails, OidcUser {
     public OidcIdToken getIdToken() {
         return null;
     }
+
+
 }

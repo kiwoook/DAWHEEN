@@ -1,7 +1,10 @@
 package com.study.dahween.oauth.info;
 
+import lombok.Getter;
+
 import java.util.Map;
 
+@Getter
 public abstract class OAuth2UserInfo {
 
     protected static final String RESPONSE = "RESPONSE";
@@ -9,10 +12,6 @@ public abstract class OAuth2UserInfo {
 
     protected OAuth2UserInfo(Map<String, Object> attributes) {
         this.attributes = attributes;
-    }
-
-    public Map<String, Object> getAttributes() {
-        return attributes;
     }
 
     public abstract String getId();
