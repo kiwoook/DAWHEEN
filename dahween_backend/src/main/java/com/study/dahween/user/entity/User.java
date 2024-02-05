@@ -52,6 +52,9 @@ public class User extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private ProviderType providerType;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organization_id")
+    private Organization organization;
 
     @Builder
     public User(String userId, String name, String email, ProviderType providerType) {
@@ -82,8 +85,12 @@ public class User extends BaseTimeEntity {
         this.role = new Role(RoleType.ADMIN);
     }
 
-    public void grantOrganization(Organization organization) {
-        this.role = new Role(RoleType.ORGANIZATION, organization);
+    public void grantOrganization() {
+        this.role = new Role(RoleType.ORGANIZATION);
+    }
+
+    public void associateOrganization(Organization organization) {
+        this.organization = organization;
     }
 
 

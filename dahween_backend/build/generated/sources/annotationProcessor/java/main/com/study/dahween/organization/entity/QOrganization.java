@@ -44,6 +44,10 @@ public class QOrganization extends EntityPathBase<Organization> {
 
     public final StringPath representName = createString("representName");
 
+    public final ListPath<com.study.dahween.user.entity.User, com.study.dahween.user.entity.QUser> users = this.<com.study.dahween.user.entity.User, com.study.dahween.user.entity.QUser>createList("users", com.study.dahween.user.entity.User.class, com.study.dahween.user.entity.QUser.class, PathInits.DIRECT2);
+
+    public final ListPath<com.study.dahween.volunteer.entity.VolunteerWork, com.study.dahween.volunteer.entity.QVolunteerWork> workList = this.<com.study.dahween.volunteer.entity.VolunteerWork, com.study.dahween.volunteer.entity.QVolunteerWork>createList("workList", com.study.dahween.volunteer.entity.VolunteerWork.class, com.study.dahween.volunteer.entity.QVolunteerWork.class, PathInits.DIRECT2);
+
     public QOrganization(String variable) {
         this(Organization.class, forVariable(variable), INITS);
     }

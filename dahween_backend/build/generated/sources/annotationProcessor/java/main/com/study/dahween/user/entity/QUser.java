@@ -38,6 +38,8 @@ public class QUser extends EntityPathBase<User> {
 
     public final StringPath name = createString("name");
 
+    public final com.study.dahween.organization.entity.QOrganization organization;
+
     public final StringPath password = createString("password");
 
     public final StringPath phone = createString("phone");
@@ -67,7 +69,8 @@ public class QUser extends EntityPathBase<User> {
     public QUser(Class<? extends User> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.address = inits.isInitialized("address") ? new com.study.dahween.common.entity.QAddress(forProperty("address")) : null;
-        this.role = inits.isInitialized("role") ? new QRole(forProperty("role"), inits.get("role")) : null;
+        this.organization = inits.isInitialized("organization") ? new com.study.dahween.organization.entity.QOrganization(forProperty("organization"), inits.get("organization")) : null;
+        this.role = inits.isInitialized("role") ? new QRole(forProperty("role")) : null;
     }
 
 }

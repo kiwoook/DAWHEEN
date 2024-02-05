@@ -4,36 +4,40 @@ package com.study.dahween.organization.entity;
 import com.study.dahween.common.entity.Address;
 import com.study.dahween.common.entity.BaseTimeEntity;
 import com.study.dahween.organization.dto.OrganRequestDto;
+import com.study.dahween.user.entity.User;
+import com.study.dahween.volunteer.entity.VolunteerWork;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class Organization extends BaseTimeEntity {
+
+    @OneToMany(mappedBy = "organization", fetch = FetchType.LAZY)
+    List<User> users = new ArrayList<>();
+    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<VolunteerWork> workList = new ArrayList<>();
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @Column(nullable = false)
     private Long id;
-
     @Column(nullable = false)
     private String name;
-
     @Column(name = "FACILITY", nullable = false)
     private String facilityPhone;
-
     @Column(nullable = false)
     private String email;
-
     @Column(name = "FACILITY_TYPE", nullable = false)
     private String facilityType;
-
     @Column(name = "REPRESENT_NAME")
     private String representName;
-
     @Embedded
     @Column(nullable = false)
     private Address address;
