@@ -15,16 +15,10 @@ public class Role {
     @Enumerated(EnumType.STRING)
     private RoleType roleType;
 
-    @OneToOne
-    @JoinColumn(name = "organization_id")
-    private Organization organization;
 
     public Role(RoleType roleType) {
         this.roleType = roleType;
     }
 
-    public Role(RoleType roleType, Organization organization) {
-        this.roleType = roleType;
-        this.organization = organization;
-    }
+
 }
