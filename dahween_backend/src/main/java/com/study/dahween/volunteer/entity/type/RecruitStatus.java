@@ -2,7 +2,6 @@ package com.study.dahween.volunteer.entity.type;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
 @Getter

@@ -2,6 +2,8 @@ package com.study.dahween.volunteer.entity;
 
 import com.study.dahween.common.entity.BaseTimeEntity;
 import com.study.dahween.organization.entity.Organization;
+import com.study.dahween.volunteer.dto.VolunteerCreateRequestDto;
+import com.study.dahween.volunteer.dto.VolunteerUpdateResponseDto;
 import com.study.dahween.volunteer.entity.type.TargetAudience;
 import com.study.dahween.volunteer.entity.type.VolunteerType;
 import jakarta.persistence.*;
@@ -14,8 +16,11 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+
 
 @Entity
 @Getter
@@ -32,8 +37,8 @@ public class VolunteerWork extends BaseTimeEntity {
     @ManyToOne
     private Organization organization;
 
-    @OneToMany(mappedBy = "volunteerWork", fetch = FetchType.LAZY)
-    private List<UserVolunteerWork> users = new ArrayList<>();
+    @OneToMany(mappedBy = "volunteerWork")
+    private Set<UserVolunteerWork> users = new HashSet<>();
 
     private String title;
 
@@ -80,10 +85,9 @@ public class VolunteerWork extends BaseTimeEntity {
     private LocalDate recruitEndDate;
 
     @Column(name = "APPLIED_PARTICIPANTS")
-    private int appliedParticipants;
-
+    private AtomicInteger appliedParticipants;
     @Column(name = "MAX_PARTICIPANTS")
-    private int maxParticipants;
+    private Integer maxParticipants;
 
     @Builder
     public VolunteerWork(Organization organization, String title, String content, LocalDate serviceStartDate, LocalDate serviceEndDate, LocalTime serviceStartTime, LocalTime serviceEndTime, Set<DayOfWeek> serviceDays, Set<TargetAudience> targetAudiences, Set<VolunteerType> volunteerTypes, LocalDate recruitStartDate, LocalDate recruitEndDate, int maxParticipants) {
@@ -100,5 +104,63 @@ public class VolunteerWork extends BaseTimeEntity {
         this.recruitStartDate = recruitStartDate;
         this.recruitEndDate = recruitEndDate;
         this.maxParticipants = maxParticipants;
+        this.appliedParticipants = new AtomicInteger(0);
+
     }
+
+    public static VolunteerWork toEntity(VolunteerCreateRequestDto requestDto) {
+        return VolunteerWork.builder()
+                .title(requestDto.getTitle())
+                .content(requestDto.getContent())
+                .serviceStartDate(requestDto.getServiceStartDate())
+                .serviceEndDate(requestDto.getServiceEndDate())
+                .serviceStartTime(requestDto.getServiceStartTime())
+                .serviceEndTime(requestDto.getServiceEndTime())
+                .serviceDays(requestDto.getServiceDays())
+                .recruitStartDate(requestDto.getRecruitStartDate())
+                .recruitEndDate(requestDto.getRecruitEndDate())
+                .maxParticipants(requestDto.getMaxParticipants())
+                .targetAudiences(requestDto.getTargetAudiences())
+                .volunteerTypes(requestDto.getVolunteerTypes())
+                .build();
+    }
+
+    public void update(VolunteerUpdateResponseDto volunteerUpdateResponseDto){
+        this.title = volunteerUpdateResponseDto.getTitle();
+        this.content = volunteerUpdateResponseDto.getContent();
+        this.serviceDays = volunteerUpdateResponseDto.getServiceDays();
+        this.serviceStartTime = volunteerUpdateResponseDto.getServiceStartTime();
+        this.serviceEndTime = volunteerUpdateResponseDto.getServiceEndTime();
+        this.serviceStartDate = volunteerUpdateResponseDto.getServiceStartDate();
+        this.serviceEndDate = volunteerUpdateResponseDto.getServiceEndDate();
+        this.recruitStartDate = volunteerUpdateResponseDto.getRecruitStartDate();
+        this.recruitEndDate = volunteerUpdateResponseDto.getRecruitEndDate();
+        this.maxParticipants = volunteerUpdateResponseDto.getMaxParticipants();
+        this.volunteerTypes = volunteerUpdateResponseDto.getVolunteerTypes();
+        this.targetAudiences = volunteerUpdateResponseDto.getTargetAudiences();
+    }
+
+    public void updateOrganization(Organization organization) {
+        this.organization = organization;
+    }
+
+    public int increaseParticipants() {
+        return appliedParticipants.incrementAndGet();
+    }
+
+    public int decreaseParticipants() throws IllegalStateException{
+        if (appliedParticipants.get() <= 0) {
+            throw new IllegalStateException();
+        }
+        return appliedParticipants.decrementAndGet();
+    }
+
+    public void attendUser(UserVolunteerWork userVolunteerWork){
+        users.add(userVolunteerWork);
+    }
+
+    public void leaveUser(UserVolunteerWork userVolunteerWork){
+        users.remove(userVolunteerWork);
+    }
+
 }

@@ -24,6 +24,8 @@ public class QUserVolunteerWork extends EntityPathBase<UserVolunteerWork> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
+    public final EnumPath<com.study.dahween.volunteer.entity.type.ApplyStatus> status = createEnum("status", com.study.dahween.volunteer.entity.type.ApplyStatus.class);
+
     public final com.study.dahween.user.entity.QUser user;
 
     public final QVolunteerWork volunteerWork;

@@ -28,6 +28,10 @@ public class OrganService {
         return new OrganInfoResponseDto(organization);
     }
 
+    public List<OrganInfoResponseDto> getPendingOrganList() throws EntityNotFoundException {
+        return organRepository.getAllByApproved(false).orElseThrow(EntityNotFoundException::new).stream().map(OrganInfoResponseDto::new).toList();
+    }
+
     @Transactional
     public OrganInfoResponseDto create(OrganRequestDto requestDto) {
         Organization organization = Organization.toEntity(requestDto);
@@ -63,5 +67,44 @@ public class OrganService {
         return user.getOrganization().equals(organization);
     }
 
+    @Transactional
+    public void enroll(Long id) {
+        Organization organization = organRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        if (Boolean.TRUE.equals(organization.getApproved())) {
+            organization.approved();
+        } else {
+            throw new IllegalStateException();
+        }
+    }
+
+    @Transactional
+    public void denied(Long id) {
+        Organization organization = organRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        if (Boolean.FALSE.equals(organization.getApproved())) {
+            organRepository.delete(organization);
+        } else {
+            throw new IllegalStateException();
+        }
+    }
+
+    @Transactional
+    public void grantOrganizationRole(String userId, Long organId) {
+        Organization organization = organRepository.findById(organId).orElseThrow(EntityNotFoundException::new);
+        if (Boolean.FALSE.equals(organization.getApproved())) {
+            throw new IllegalStateException();
+        }
+        User user = userRepository.findByUserId(userId).orElseThrow(EntityNotFoundException::new);
+        organization.addUser(user);
+        user.grantOrganization(organization);
+    }
+
+    @Transactional
+    public void revokeOrganizationRole(String userId, Long organId) {
+        User user = userRepository.findByUserId(userId).orElseThrow(EntityNotFoundException::new);
+        Organization organization = organRepository.findById(organId).orElseThrow(EntityNotFoundException::new);
+
+        user.revokeOrganization();
+        organization.revokeUser(user);
+    }
 
 }
