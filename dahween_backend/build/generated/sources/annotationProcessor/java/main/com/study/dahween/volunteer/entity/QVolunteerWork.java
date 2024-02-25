@@ -24,7 +24,7 @@ public class QVolunteerWork extends EntityPathBase<VolunteerWork> {
 
     public final com.study.dahween.common.entity.QBaseTimeEntity _super = new com.study.dahween.common.entity.QBaseTimeEntity(this);
 
-    public final NumberPath<Integer> appliedParticipants = createNumber("appliedParticipants", Integer.class);
+    public final SimplePath<java.util.concurrent.atomic.AtomicInteger> appliedParticipants = createSimple("appliedParticipants", java.util.concurrent.atomic.AtomicInteger.class);
 
     public final StringPath content = createString("content");
 
@@ -58,7 +58,7 @@ public class QVolunteerWork extends EntityPathBase<VolunteerWork> {
 
     public final StringPath title = createString("title");
 
-    public final ListPath<UserVolunteerWork, QUserVolunteerWork> users = this.<UserVolunteerWork, QUserVolunteerWork>createList("users", UserVolunteerWork.class, QUserVolunteerWork.class, PathInits.DIRECT2);
+    public final SetPath<UserVolunteerWork, QUserVolunteerWork> users = this.<UserVolunteerWork, QUserVolunteerWork>createSet("users", UserVolunteerWork.class, QUserVolunteerWork.class, PathInits.DIRECT2);
 
     public final SetPath<com.study.dahween.volunteer.entity.type.VolunteerType, EnumPath<com.study.dahween.volunteer.entity.type.VolunteerType>> volunteerTypes = this.<com.study.dahween.volunteer.entity.type.VolunteerType, EnumPath<com.study.dahween.volunteer.entity.type.VolunteerType>>createSet("volunteerTypes", com.study.dahween.volunteer.entity.type.VolunteerType.class, EnumPath.class, PathInits.DIRECT2);
 

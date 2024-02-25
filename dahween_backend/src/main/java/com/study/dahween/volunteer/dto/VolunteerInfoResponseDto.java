@@ -47,7 +47,7 @@ public class VolunteerInfoResponseDto {
         this.volunteerTypes = volunteerWork.getVolunteerTypes();
         this.recruitStartDate = volunteerWork.getRecruitStartDate();
         this.recruitEndDate = volunteerWork.getRecruitEndDate();
-        this.appliedParticipants = volunteerWork.getAppliedParticipants();
+        this.appliedParticipants = volunteerWork.getAppliedParticipants().get();
         this.maxParticipants = volunteerWork.getMaxParticipants();
     }
 }

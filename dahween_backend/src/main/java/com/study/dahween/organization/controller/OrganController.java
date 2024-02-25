@@ -4,6 +4,8 @@ import com.study.dahween.organization.dto.OrganInfoResponseDto;
 import com.study.dahween.organization.dto.OrganRequestDto;
 import com.study.dahween.organization.service.OrganService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -14,6 +16,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -34,19 +38,6 @@ public class OrganController {
         }
     }
 
-    // 기관 개설
-    @PostMapping
-    public ResponseEntity<OrganInfoResponseDto> createOrganization(@RequestBody OrganRequestDto requestDto) {
-        try {
-            OrganInfoResponseDto responseDto = organService.create(requestDto);
-            return ResponseEntity.ok(responseDto);
-        } catch (Exception e) {
-            // TODO 적절한 예외처리를 만들 필요가 있음.
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-
     @PreAuthorize("hasRole('ROLE_ORGANIZATION') or hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<OrganInfoResponseDto> updateOrganization(@PathVariable("id") Long id, @RequestBody OrganRequestDto requestDto) {
@@ -61,9 +52,10 @@ public class OrganController {
                 return ResponseEntity.ok().build();
             }
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-
-        } catch (Exception e) {
+        } catch (EntityNotFoundException e) {
             return ResponseEntity.badRequest().build();
+        } catch (RuntimeException e){
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -89,11 +81,91 @@ public class OrganController {
         }
     }
 
-
     // TODO 해당 기관의 후기 모음
-
-    // TODO 특정 유저에게 해당 기관 권한 부여
 
     // TODO 기관 평점
 
+    // TODO 특정 유저에게 해당 기관 권한 부여
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping
+    public ResponseEntity<List<OrganInfoResponseDto>> getPendingOrganizationList() {
+        try {
+            return ResponseEntity.ok(organService.getPendingOrganList());
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
+    @PostMapping("/apply")
+    public ResponseEntity<OrganInfoResponseDto> applyOrganization(@RequestBody OrganRequestDto requestDto) {
+        try {
+            OrganInfoResponseDto responseDto = organService.create(requestDto);
+            return ResponseEntity.ok(responseDto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping("/enroll/{id}")
+    public ResponseEntity<OrganInfoResponseDto> enrollOrganization(@PathVariable Long id) {
+        try {
+            organService.enroll(id);
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping("/denied/{id}")
+    public ResponseEntity<OrganInfoResponseDto> deniedOrganization(@PathVariable Long id) {
+        try {
+            organService.denied(id);
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_ORGANIZATION') or hasRole('ROLE_ADMIN')")
+    @PostMapping("/grant")
+    public ResponseEntity<OrganInfoResponseDto> grantRole(@RequestBody RoleRequestDto roleRequestDto) {
+        try {
+            organService.grantOrganizationRole(roleRequestDto.getUserId(), roleRequestDto.getOrganizationId());
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_ORGANIZATION') or hasRole('ROLE_ADMIN')")
+    @PostMapping("/revoke")
+    public ResponseEntity<OrganInfoResponseDto> revokeRole(@RequestBody RoleRequestDto roleRequestDto) {
+        try {
+            organService.revokeOrganizationRole(roleRequestDto.getUserId(), roleRequestDto.getOrganizationId());
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+
+    @Data
+    public static class RoleRequestDto {
+        @NotNull
+        private String userId;
+        @NotNull
+        private Long organizationId;
+    }
 }

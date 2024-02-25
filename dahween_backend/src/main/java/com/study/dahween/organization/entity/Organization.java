@@ -20,9 +20,9 @@ import java.util.List;
 @Entity
 public class Organization extends BaseTimeEntity {
 
-    @OneToMany(mappedBy = "organization", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "organization", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     List<User> users = new ArrayList<>();
-    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "organization", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     List<VolunteerWork> workList = new ArrayList<>();
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,6 +42,8 @@ public class Organization extends BaseTimeEntity {
     @Column(nullable = false)
     private Address address;
 
+    private Boolean approved;
+
     @Builder
     public Organization(String name, String facilityPhone, String email, String facilityType, String representName, Address address) {
         this.name = name;
@@ -50,6 +52,7 @@ public class Organization extends BaseTimeEntity {
         this.facilityType = facilityType;
         this.representName = representName;
         this.address = address;
+        this.approved = false;
     }
 
     public static Organization toEntity(OrganRequestDto requestDto) {
@@ -71,4 +74,19 @@ public class Organization extends BaseTimeEntity {
         this.representName = requestDto.getRepresentName();
         this.address = Address.toEntity(requestDto.getAddress());
     }
+
+    public void approved() {
+        this.approved = true;
+    }
+
+    public void addUser(User user) {
+        this.users.add(user);
+        user.grantOrganization(this);
+    }
+
+    public void revokeUser(User user) {
+        this.users.remove(user);
+    }
+
+
 }

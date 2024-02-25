@@ -50,6 +50,8 @@ public class QUser extends EntityPathBase<User> {
 
     public final StringPath userId = createString("userId");
 
+    public final SetPath<com.study.dahween.volunteer.entity.UserVolunteerWork, com.study.dahween.volunteer.entity.QUserVolunteerWork> volunteerWorks = this.<com.study.dahween.volunteer.entity.UserVolunteerWork, com.study.dahween.volunteer.entity.QUserVolunteerWork>createSet("volunteerWorks", com.study.dahween.volunteer.entity.UserVolunteerWork.class, com.study.dahween.volunteer.entity.QUserVolunteerWork.class, PathInits.DIRECT2);
+
     public QUser(String variable) {
         this(User.class, forVariable(variable), INITS);
     }

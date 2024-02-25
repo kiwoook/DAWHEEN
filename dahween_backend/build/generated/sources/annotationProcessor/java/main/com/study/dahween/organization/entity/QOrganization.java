@@ -26,6 +26,8 @@ public class QOrganization extends EntityPathBase<Organization> {
 
     public final com.study.dahween.common.entity.QAddress address;
 
+    public final BooleanPath approved = createBoolean("approved");
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdDate = _super.createdDate;
 
