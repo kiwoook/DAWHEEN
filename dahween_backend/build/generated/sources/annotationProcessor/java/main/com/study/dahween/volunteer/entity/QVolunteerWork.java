@@ -28,6 +28,8 @@ public class QVolunteerWork extends EntityPathBase<VolunteerWork> {
 
     public final StringPath content = createString("content");
 
+    public final com.study.dahween.common.entity.QCoordinate coordinate;
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdDate = _super.createdDate;
 
@@ -40,9 +42,9 @@ public class QVolunteerWork extends EntityPathBase<VolunteerWork> {
 
     public final com.study.dahween.organization.entity.QOrganization organization;
 
-    public final DatePath<java.time.LocalDate> recruitEndDate = createDate("recruitEndDate", java.time.LocalDate.class);
+    public final DateTimePath<java.time.LocalDateTime> recruitEndDateTime = createDateTime("recruitEndDateTime", java.time.LocalDateTime.class);
 
-    public final DatePath<java.time.LocalDate> recruitStartDate = createDate("recruitStartDate", java.time.LocalDate.class);
+    public final DateTimePath<java.time.LocalDateTime> recruitStartDateTime = createDateTime("recruitStartDateTime", java.time.LocalDateTime.class);
 
     public final SetPath<java.time.DayOfWeek, EnumPath<java.time.DayOfWeek>> serviceDays = this.<java.time.DayOfWeek, EnumPath<java.time.DayOfWeek>>createSet("serviceDays", java.time.DayOfWeek.class, EnumPath.class, PathInits.DIRECT2);
 
@@ -80,6 +82,7 @@ public class QVolunteerWork extends EntityPathBase<VolunteerWork> {
 
     public QVolunteerWork(Class<? extends VolunteerWork> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.coordinate = inits.isInitialized("coordinate") ? new com.study.dahween.common.entity.QCoordinate(forProperty("coordinate")) : null;
         this.organization = inits.isInitialized("organization") ? new com.study.dahween.organization.entity.QOrganization(forProperty("organization"), inits.get("organization")) : null;
     }
 

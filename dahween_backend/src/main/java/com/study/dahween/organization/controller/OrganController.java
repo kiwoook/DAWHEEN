@@ -3,6 +3,8 @@ package com.study.dahween.organization.controller;
 import com.study.dahween.organization.dto.OrganInfoResponseDto;
 import com.study.dahween.organization.dto.OrganRequestDto;
 import com.study.dahween.organization.service.OrganService;
+import com.study.dahween.volunteer.dto.VolunteerInfoResponseDto;
+import jakarta.persistence.Entity;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -38,6 +40,19 @@ public class OrganController {
         }
     }
 
+
+    // 주변 위치한 기관 찾기
+    @GetMapping("/find")
+    public ResponseEntity<List<OrganInfoResponseDto>> getOrganizationInfoWithinRadius(@RequestParam double latitude, @RequestParam double longitude, @RequestParam int radius){
+
+        try {
+            List<OrganInfoResponseDto> organInfoResponseDtos = organService.findOrganizationsWithinRadius(latitude, longitude, radius);
+            return ResponseEntity.ok(organInfoResponseDtos);
+        }catch (EntityNotFoundException e){
+            return ResponseEntity.notFound().build();
+        }
+
+    }
     @PreAuthorize("hasRole('ROLE_ORGANIZATION') or hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<OrganInfoResponseDto> updateOrganization(@PathVariable("id") Long id, @RequestBody OrganRequestDto requestDto) {

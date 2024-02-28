@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Set;
 
@@ -23,7 +24,7 @@ public class VolunteerUpdateResponseDto {
     private Set<DayOfWeek> serviceDays;
     private Set<TargetAudience> targetAudiences;
     private Set<VolunteerType> volunteerTypes;
-    private LocalDate recruitStartDate;
-    private LocalDate recruitEndDate;
+    private LocalDateTime recruitStartDateTime;
+    private LocalDateTime recruitEndDateTime;
     private Integer maxParticipants;
 }
