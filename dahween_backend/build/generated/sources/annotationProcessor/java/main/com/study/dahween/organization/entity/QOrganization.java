@@ -28,6 +28,8 @@ public class QOrganization extends EntityPathBase<Organization> {
 
     public final BooleanPath approved = createBoolean("approved");
 
+    public final com.study.dahween.common.entity.QCoordinate coordinate;
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdDate = _super.createdDate;
 
@@ -69,6 +71,7 @@ public class QOrganization extends EntityPathBase<Organization> {
     public QOrganization(Class<? extends Organization> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.address = inits.isInitialized("address") ? new com.study.dahween.common.entity.QAddress(forProperty("address")) : null;
+        this.coordinate = inits.isInitialized("coordinate") ? new com.study.dahween.common.entity.QCoordinate(forProperty("coordinate")) : null;
     }
 
 }

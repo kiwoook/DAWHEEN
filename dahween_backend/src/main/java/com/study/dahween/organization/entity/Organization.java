@@ -1,8 +1,10 @@
 package com.study.dahween.organization.entity;
 
 
+import com.study.dahween.common.dto.CoordinateDto;
 import com.study.dahween.common.entity.Address;
 import com.study.dahween.common.entity.BaseTimeEntity;
+import com.study.dahween.common.entity.Coordinate;
 import com.study.dahween.organization.dto.OrganRequestDto;
 import com.study.dahween.user.entity.User;
 import com.study.dahween.volunteer.entity.VolunteerWork;
@@ -42,6 +44,10 @@ public class Organization extends BaseTimeEntity {
     @Column(nullable = false)
     private Address address;
 
+    @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "COORDINATE_ID")
+    private Coordinate coordinate;
+
     private Boolean approved;
 
     @Builder
@@ -73,6 +79,10 @@ public class Organization extends BaseTimeEntity {
         this.facilityPhone = requestDto.getFacilityPhone();
         this.representName = requestDto.getRepresentName();
         this.address = Address.toEntity(requestDto.getAddress());
+    }
+
+    public void updateCoordinate(CoordinateDto coordinateDto) {
+        this.coordinate = new Coordinate(coordinateDto.getLatitude(), coordinateDto.getLongitude());
     }
 
     public void approved() {

@@ -2,6 +2,7 @@ package com.study.dahween.volunteer.service;
 
 import com.study.dahween.common.exception.AlreadyProcessedException;
 import com.study.dahween.organization.entity.Organization;
+import com.study.dahween.organization.repository.OrganRepository;
 import com.study.dahween.user.dto.UserInfoResponseDto;
 import com.study.dahween.user.entity.User;
 import com.study.dahween.user.repository.UserRepository;
@@ -20,6 +21,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Semaphore;
@@ -29,6 +31,7 @@ import java.util.concurrent.Semaphore;
 @Slf4j
 public class VolunteerService {
 
+    private final OrganRepository organRepository;
     private final VolunteerWorkRepository volunteerWorkRepository;
     private final UserVolunteerRepository userVolunteerRepository;
     private final UserRepository userRepository;
@@ -75,6 +78,8 @@ public class VolunteerService {
         return new VolunteerInfoResponseDto(volunteerWork);
     }
 
+    // 대기중인 유저를 확인해 신청할지 안할지 정할 수 있음.
+    // 소속된 기관의 유저 리스트 반환
     public List<UserInfoResponseDto> getUserListByStatusForOrganization(String userId, ApplyStatus status) {
         User user = userRepository.findByUserId(userId).orElseThrow(EntityNotFoundException::new);
         Long volunteerWorkId = Optional.ofNullable(user.getOrganization())
@@ -94,14 +99,21 @@ public class VolunteerService {
     }
 
     public List<UserInfoResponseDto> getUserListByStatusForAdmin(Long volunteerWorkId, ApplyStatus status) {
-        // Status 에 따라 UserList가 반환이 다름
         return userVolunteerRepository.findUsersByVolunteerWorkIdAndStatus(volunteerWorkId, status)
                 .stream()
                 .map(UserInfoResponseDto::new)
                 .toList();
     }
 
-    // TODO 특정 ORGANIZATION 에서 전체 봉사활동 확인
+    public List<VolunteerInfoResponseDto> getAllVolunteersByOrganization(Long organizationId) {
+        Organization organization = organRepository.findById(organizationId).orElseThrow(EntityNotFoundException::new);
+
+        List<VolunteerWork> volunteerWorks = volunteerWorkRepository.getAllByOrganization(organization).orElseThrow(EntityNotFoundException::new);
+
+        return volunteerWorks.stream().map(VolunteerInfoResponseDto::new).toList();
+
+    }
+
     public List<UserInfoResponseDto> getAllUsersListById(Long volunteerWorkId) {
         return userVolunteerRepository.findUsersByVolunteerWorkId(volunteerWorkId).orElseThrow(EntityNotFoundException::new)
                 .stream()
@@ -126,7 +138,6 @@ public class VolunteerService {
 
     @Transactional
     public void apply(Long volunteerWorkId, String userId) {
-        // 수락중이거나 대기 중이라면 신청이 안되도록 해야함.
 
         if (userVolunteerRepository.existsByVolunteerWorkAndUserAndStatus(volunteerWorkId, userId, List.of(ApplyStatus.APPROVED, ApplyStatus.PENDING))) {
             log.info("이미 신청한 아이디 userId = {}, volunteerWorkId = {}", userId, volunteerWorkId);
@@ -135,6 +146,11 @@ public class VolunteerService {
 
         User user = userRepository.findByUserId(userId).orElseThrow(EntityNotFoundException::new);
         VolunteerWork volunteerWork = volunteerWorkRepository.findById(volunteerWorkId).orElseThrow(EntityNotFoundException::new);
+
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isAfter(volunteerWork.getRecruitEndDateTime())) {
+            throw new IllegalStateException();
+        }
 
         UserVolunteerWork userVolunteerWork = new UserVolunteerWork(user, volunteerWork);
 

@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 
 import java.util.Objects;
 
-@Embeddable
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+    @Embeddable
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Address {
     private String roadAddress;
     private String detailAddress;

@@ -29,8 +29,8 @@ public class VolunteerInfoResponseDto {
     private Set<DayOfWeek> serviceDays;
     private Set<TargetAudience> targetAudiences;
     private Set<VolunteerType> volunteerTypes;
-    private LocalDate recruitStartDate;
-    private LocalDate recruitEndDate;
+    private LocalDateTime recruitStartDateTime;
+    private LocalDateTime recruitEndDateTime;
 
     public VolunteerInfoResponseDto(VolunteerWork volunteerWork) {
         this.createdDate = volunteerWork.getCreatedDate();
@@ -45,8 +45,8 @@ public class VolunteerInfoResponseDto {
         this.serviceDays = volunteerWork.getServiceDays();
         this.targetAudiences = volunteerWork.getTargetAudiences();
         this.volunteerTypes = volunteerWork.getVolunteerTypes();
-        this.recruitStartDate = volunteerWork.getRecruitStartDate();
-        this.recruitEndDate = volunteerWork.getRecruitEndDate();
+        this.recruitStartDateTime = volunteerWork.getRecruitStartDateTime();
+        this.recruitEndDateTime = volunteerWork.getRecruitEndDateTime();
         this.appliedParticipants = volunteerWork.getAppliedParticipants().get();
         this.maxParticipants = volunteerWork.getMaxParticipants();
     }

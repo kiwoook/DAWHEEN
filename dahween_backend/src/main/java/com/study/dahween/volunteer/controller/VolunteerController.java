@@ -1,9 +1,8 @@
 package com.study.dahween.volunteer.controller;
 
+import com.study.dahween.volunteer.dto.VolunteerInfoResponseDto;
 import com.study.dahween.volunteer.service.VolunteerService;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.PersistenceException;
-import jakarta.validation.ConstraintDeclarationException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,16 +25,20 @@ public class VolunteerController {
     private final VolunteerService volunteerService;
 
     @PostMapping("/join/{id}")
-    public ResponseEntity<?> applyVolunteer(@PathVariable("id") Long id) {
-        try{
+    public ResponseEntity<VolunteerInfoResponseDto> applyVolunteer(@PathVariable("id") Long id) {
+        try {
             String userId = SecurityContextHolder.getContext().getAuthentication().getName();
             volunteerService.apply(id, userId);
             return ResponseEntity.ok().build();
-        }catch (EntityNotFoundException | ConstraintViolationException e){
+        } catch (EntityNotFoundException | ConstraintViolationException e) {
             return ResponseEntity.badRequest().build();
-        }catch (RuntimeException e){
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(408).build();
+
+        } catch (RuntimeException e) {
             return ResponseEntity.internalServerError().build();
         }
     }
+
 
 }

@@ -1,6 +1,5 @@
 package com.study.dahween.volunteer.repository;
 
-import com.study.dahween.user.entity.User;
 import com.study.dahween.volunteer.entity.UserVolunteerWork;
 import org.springframework.data.jpa.repository.JpaRepository;
 

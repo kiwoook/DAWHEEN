@@ -8,6 +8,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface OrganRepository extends JpaRepository<Organization, Long> {
+public interface OrganRepository extends JpaRepository<Organization, Long>, OrganRepositoryCustom {
     Optional<List<Organization>> getAllByApproved(boolean bool);
 }

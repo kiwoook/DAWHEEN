@@ -1,6 +1,5 @@
 package com.study.dahween.volunteer.dto;
 
-import com.study.dahween.volunteer.entity.VolunteerWork;
 import com.study.dahween.volunteer.entity.type.TargetAudience;
 import com.study.dahween.volunteer.entity.type.VolunteerType;
 import jakarta.validation.constraints.FutureOrPresent;
@@ -11,6 +10,7 @@ import lombok.Data;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Set;
 
@@ -32,18 +32,15 @@ public class VolunteerCreateRequestDto {
     @NotNull
     Set<DayOfWeek> serviceDays;
     @FutureOrPresent
-    LocalDate recruitStartDate;
+    LocalDateTime recruitStartDateTime;
     @FutureOrPresent
-    LocalDate recruitEndDate;
+    LocalDateTime recruitEndDateTime;
     @Positive
     int maxParticipants;
     @NotNull
     Set<TargetAudience> targetAudiences;
     @NotNull
     Set<VolunteerType> volunteerTypes;
-
-
-
 
 
 }

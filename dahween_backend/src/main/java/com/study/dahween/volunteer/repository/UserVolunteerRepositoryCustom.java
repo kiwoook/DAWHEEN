@@ -20,6 +20,13 @@ public interface UserVolunteerRepositoryCustom {
 
     Optional<UserVolunteerWork> findByVolunteerWorkIdAndUserId(Long volunteerWorkId, String userId);
 
+    // 반경 범위 내에서 모집 기간 전인 리스트 반환
+
+    Optional<List<VolunteerWork>> findByRadiusAndBeforeEndDate(double latitude, double longitude, int radius);
+
+    // 반경 범위 내에서 모집 기간 사이인 리스트 반환
+
+    Optional<List<VolunteerWork>> findByRadiusAndBetweenPeriod(double latitude, double longitude, int radius);
 
     // 봉사활동 ID와 STATUS 로 개수 찾기
     int countAllByVolunteerWorkIdAndStatus(Long volunteerWorkId, ApplyStatus status);
