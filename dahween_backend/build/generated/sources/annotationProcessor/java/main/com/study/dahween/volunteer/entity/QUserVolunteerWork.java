@@ -22,7 +22,15 @@ public class QUserVolunteerWork extends EntityPathBase<UserVolunteerWork> {
 
     public static final QUserVolunteerWork userVolunteerWork = new QUserVolunteerWork("userVolunteerWork");
 
+    public final com.study.dahween.common.entity.QBaseTimeEntity _super = new com.study.dahween.common.entity.QBaseTimeEntity(this);
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdDate = _super.createdDate;
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> modifiedDate = _super.modifiedDate;
 
     public final EnumPath<com.study.dahween.volunteer.entity.type.ApplyStatus> status = createEnum("status", com.study.dahween.volunteer.entity.type.ApplyStatus.class);
 

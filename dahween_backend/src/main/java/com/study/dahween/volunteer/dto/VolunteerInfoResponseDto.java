@@ -1,5 +1,6 @@
 package com.study.dahween.volunteer.dto;
 
+import com.study.dahween.common.dto.CoordinateInfoResponseDto;
 import com.study.dahween.organization.dto.OrganInfoResponseDto;
 import com.study.dahween.volunteer.entity.VolunteerWork;
 import com.study.dahween.volunteer.entity.type.TargetAudience;
@@ -31,6 +32,7 @@ public class VolunteerInfoResponseDto {
     private Set<VolunteerType> volunteerTypes;
     private LocalDateTime recruitStartDateTime;
     private LocalDateTime recruitEndDateTime;
+    private CoordinateInfoResponseDto coordinateInfoResponseDto;
 
     public VolunteerInfoResponseDto(VolunteerWork volunteerWork) {
         this.createdDate = volunteerWork.getCreatedDate();
@@ -49,5 +51,6 @@ public class VolunteerInfoResponseDto {
         this.recruitEndDateTime = volunteerWork.getRecruitEndDateTime();
         this.appliedParticipants = volunteerWork.getAppliedParticipants().get();
         this.maxParticipants = volunteerWork.getMaxParticipants();
+        this.coordinateInfoResponseDto = new CoordinateInfoResponseDto(volunteerWork.getCoordinate());
     }
 }

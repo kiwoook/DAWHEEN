@@ -3,6 +3,7 @@ package com.study.dahween.volunteer.repository.impl;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.study.dahween.common.entity.QCoordinate;
 import com.study.dahween.user.entity.QUser;
 import com.study.dahween.user.entity.User;
 import com.study.dahween.volunteer.entity.QUserVolunteerWork;
@@ -107,6 +108,7 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
     public Optional<List<VolunteerWork>> findByRadiusAndBeforeEndDate(double latitude, double longitude, int radius) {
 
         QVolunteerWork volunteerWork = QVolunteerWork.volunteerWork;
+        QCoordinate coordinate = QCoordinate.coordinate;
 
         NumberTemplate<Double> haversineFormula = Expressions.numberTemplate(Double.class,
                 "6371 * acos(cos(radians({0}))*cos(radians({1}))*cos(radians({2}) - radians({3})) + sin(radians({4}))*sin(radians({5})))",
@@ -116,6 +118,8 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
 
         List<VolunteerWork> result = queryFactory
                 .selectFrom(volunteerWork)
+                .join(volunteerWork.coordinate, coordinate)
+                .fetchJoin()
                 .where(haversineFormula.loe(radius)
                         .and(volunteerWork.recruitEndDateTime.after(now))
                 ).fetch();
@@ -126,6 +130,8 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
     @Override
     public Optional<List<VolunteerWork>> findByRadiusAndBetweenPeriod(double latitude, double longitude, int radius) {
         QVolunteerWork volunteerWork = QVolunteerWork.volunteerWork;
+        QCoordinate coordinate = QCoordinate.coordinate;
+
 
         NumberTemplate<Double> haversineFormula = Expressions.numberTemplate(Double.class,
                 "6371 * acos(cos(radians({0}))*cos(radians({1}))*cos(radians({2}) - radians({3})) + sin(radians({4}))*sin(radians({5})))",
@@ -135,6 +141,8 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
 
         List<VolunteerWork> result = queryFactory
                 .selectFrom(volunteerWork)
+                .join(volunteerWork.coordinate, coordinate)
+                .fetchJoin()
                 .where(haversineFormula.loe(radius)
                         .and(volunteerWork.recruitEndDateTime.after(now))
                         .and(volunteerWork.recruitStartDateTime.before(now))

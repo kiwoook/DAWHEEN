@@ -34,7 +34,7 @@ public class ApiResponse<T> {
         return new ApiResponse<>(new ApiResponseHeader(FAILED, FAILED_MESSAGE), null);
     }
 
-    public static <T> ApiResponse<T> notFound() {
+    public static <T> ApiResponse<T> badRequest() {
         return new ApiResponse<>(new ApiResponseHeader(NOT_FOUND, NOT_FOUND_MESSAGE), null);
     }
 

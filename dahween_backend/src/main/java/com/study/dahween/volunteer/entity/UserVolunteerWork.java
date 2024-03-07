@@ -1,5 +1,6 @@
 package com.study.dahween.volunteer.entity;
 
+import com.study.dahween.common.entity.BaseTimeEntity;
 import com.study.dahween.user.entity.User;
 import com.study.dahween.volunteer.entity.type.ApplyStatus;
 import jakarta.persistence.*;
@@ -12,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "USER_VOLUNTEERWORK", uniqueConstraints = @UniqueConstraint(columnNames = {"VOLUNTEER_WORK_ID", "USER_ID"}))
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserVolunteerWork {
+public class UserVolunteerWork extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
