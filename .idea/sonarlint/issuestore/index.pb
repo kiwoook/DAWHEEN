@@ -184,3 +184,7 @@ y
 Idahween_backend/src/main/java/com/study/dahween/config/SwaggerConfig.java,6\3\638795c964bce98aea90b0998e5354824e4aa456
 ;
 qodana.yaml,8\5\85c3a901608a6b9adf48d245fa84828b66304e51
+—
+gdahween_backend/src/main/java/com/study/dahween/volunteer/repository/VolunteerWorkRepositoryCustom.java,b\1\b1c99084ab1d627f62109feaad5954d264c95ea6
+ 
+pdahween_backend/src/main/java/com/study/dahween/volunteer/repository/impl/VolunteerWorkRepositoryCustomImpl.java,9\5\9523e3434f0e1fa3951f322b90c427ac3e97299d

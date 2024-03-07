@@ -40,7 +40,6 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
                         .and(userVolunteerWork.volunteerWork.id.eq(volunteerWorkId))
                         .and(userVolunteerWork.status.in(statuses)))
                 .fetchFirst() != null;
-
     }
 
     @Override
@@ -104,67 +103,7 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
                 ).fetchOne());
     }
 
-    @Override
-    public Optional<List<VolunteerWork>> findByRadiusAndBeforeEndDate(double latitude, double longitude, int radius) {
 
-        QVolunteerWork volunteerWork = QVolunteerWork.volunteerWork;
-        QCoordinate coordinate = QCoordinate.coordinate;
-
-        NumberTemplate<Double> haversineFormula = Expressions.numberTemplate(Double.class,
-                "6371 * acos(cos(radians({0}))*cos(radians({1}))*cos(radians({2}) - radians({3})) + sin(radians({4}))*sin(radians({5})))",
-                latitude, volunteerWork.coordinate.latitude, volunteerWork.coordinate.longitude, longitude, latitude, volunteerWork.coordinate.latitude);
-
-        LocalDateTime now = LocalDateTime.now();
-
-        List<VolunteerWork> result = queryFactory
-                .selectFrom(volunteerWork)
-                .join(volunteerWork.coordinate, coordinate)
-                .fetchJoin()
-                .where(haversineFormula.loe(radius)
-                        .and(volunteerWork.recruitEndDateTime.after(now))
-                ).fetch();
-
-        return Optional.ofNullable(result);
-    }
-
-    @Override
-    public Optional<List<VolunteerWork>> findByRadiusAndBetweenPeriod(double latitude, double longitude, int radius) {
-        QVolunteerWork volunteerWork = QVolunteerWork.volunteerWork;
-        QCoordinate coordinate = QCoordinate.coordinate;
-
-
-        NumberTemplate<Double> haversineFormula = Expressions.numberTemplate(Double.class,
-                "6371 * acos(cos(radians({0}))*cos(radians({1}))*cos(radians({2}) - radians({3})) + sin(radians({4}))*sin(radians({5})))",
-                latitude, volunteerWork.coordinate.latitude, volunteerWork.coordinate.longitude, longitude, latitude, volunteerWork.coordinate.latitude);
-
-        LocalDateTime now = LocalDateTime.now();
-
-        List<VolunteerWork> result = queryFactory
-                .selectFrom(volunteerWork)
-                .join(volunteerWork.coordinate, coordinate)
-                .fetchJoin()
-                .where(haversineFormula.loe(radius)
-                        .and(volunteerWork.recruitEndDateTime.after(now))
-                        .and(volunteerWork.recruitStartDateTime.before(now))
-                ).fetch();
-
-        return Optional.ofNullable(result);
-    }
-
-    @Override
-    public int countAllByVolunteerWorkIdAndStatus(Long volunteerWorkId, ApplyStatus status) {
-        QUserVolunteerWork userVolunteerWork = QUserVolunteerWork.userVolunteerWork;
-        QVolunteerWork volunteerWork = QVolunteerWork.volunteerWork;
-
-        return queryFactory
-                .selectFrom(userVolunteerWork)
-                .join(userVolunteerWork.volunteerWork, volunteerWork).fetchJoin()
-                .where(
-                        userVolunteerWork.volunteerWork.id.eq(volunteerWorkId)
-                                .and(userVolunteerWork.status.eq(status))
-                )
-                .fetch().size();
-    }
 
 
 }

@@ -44,6 +44,10 @@ public class VolunteerService {
         return new VolunteerInfoResponseDto(volunteerWork);
     }
 
+    public List<VolunteerInfoResponseDto> getVolunteersWithinRadius(double latitude, double longitude, int radius){
+        return null;
+    }
+
     @Transactional
     public VolunteerInfoResponseDto create(String userId, VolunteerCreateRequestDto createResponseDto) {
         User user = userRepository.findByUserId(userId).orElseThrow(EntityNotFoundException::new);

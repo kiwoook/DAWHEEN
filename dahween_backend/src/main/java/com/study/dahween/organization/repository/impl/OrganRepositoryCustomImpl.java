@@ -7,9 +7,12 @@ import com.study.dahween.common.entity.QCoordinate;
 import com.study.dahween.organization.entity.Organization;
 import com.study.dahween.organization.entity.QOrganization;
 import com.study.dahween.organization.repository.OrganRepositoryCustom;
+import com.study.dahween.volunteer.entity.type.TargetAudience;
+import com.study.dahween.volunteer.entity.type.VolunteerType;
 import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 

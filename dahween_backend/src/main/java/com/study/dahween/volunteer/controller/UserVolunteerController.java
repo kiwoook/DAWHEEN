@@ -1,6 +1,7 @@
 package com.study.dahween.volunteer.controller;
 
 import com.study.dahween.volunteer.service.UserVolunteerService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,10 +20,10 @@ public class UserVolunteerController {
 
     private final UserVolunteerService userVolunteerService;
 
-
+    @Operation(summary = "봉사활동 유저 삭제", description = "봉사활동에서 유저를 삭제합니다. ")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteUserVolunteer(@PathVariable Long id){
+    public ResponseEntity<Object> deleteUserVolunteer(@PathVariable Long id) {
         try {
             userVolunteerService.deleteUserVolunteerWork(id);
             return ResponseEntity.ok().build();

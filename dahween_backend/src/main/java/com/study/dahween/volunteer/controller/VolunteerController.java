@@ -6,6 +6,8 @@ import com.study.dahween.volunteer.dto.VolunteerInfoResponseDto;
 import com.study.dahween.volunteer.dto.VolunteerUpdateResponseDto;
 import com.study.dahween.volunteer.entity.type.ApplyStatus;
 import com.study.dahween.volunteer.service.VolunteerService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,15 @@ public class VolunteerController {
     private final Semaphore semaphore;
     private final VolunteerService volunteerService;
 
+    @GetMapping()
+    public ResponseEntity<List<VolunteerInfoResponseDto>> getVolunteerListWithInRadius(
+            @Parameter(name = "경도", required = true) @RequestParam double latitude,
+            @Parameter(name = "경도", required = true) @RequestParam double longitude,
+            @Parameter(name = "반경", description = "단위 : m", required = true) @RequestParam int radius
+    ) {
+        return null;
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<VolunteerInfoResponseDto> getVolunteerWorkInfo(@PathVariable Long id) {
         try {
@@ -40,10 +51,7 @@ public class VolunteerController {
         }
     }
 
-    /**
-     * 특정 기관과 관련된 봉사활동 반환
-     */
-
+    @Operation(summary = "특정 기관 봉사활동 반환", description = "id 값을 받아 모든 봉사활동")
     @GetMapping("/organization/{organizationId}")
     public ResponseEntity<List<VolunteerInfoResponseDto>> getVolunteerListByOrganization(@PathVariable Long organizationId) {
         try {
@@ -109,15 +117,12 @@ public class VolunteerController {
         }
     }
 
-    /**
-     * 기관역할을 가진 사람이 해당 기관의 등록 상태를 알 수 있음
-     *
-     * @param status Pending, APPROVED, REJECT 를 받음.
-     */
-
+    @Operation(summary = "등록 대기 명단 확인", description = "status 에 따라 등록 상태 명단을 확인합니다.")
     @PreAuthorize("hasRole('ROLE_ORGANIZATION')")
     @GetMapping("/pending/{status}/{id}/organization")
-    public ResponseEntity<List<UserInfoResponseDto>> getUserListForOrganization(@PathVariable Long id, @PathVariable ApplyStatus status) {
+    public ResponseEntity<List<UserInfoResponseDto>> getUserListForOrganization(
+            @PathVariable Long id,
+            @Parameter(description = "Pending, APPROVED, REJECT 를 받음.") @PathVariable ApplyStatus status) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
 
         try {
@@ -164,16 +169,13 @@ public class VolunteerController {
         }
     }
 
-    /**
-     * Organization 역할을 가진 사용자가 추방함
-     *
-     * @param id     volunteerWorkId에 대한 정보.
-     * @param status Pending, APPROVED 를 받음.
-     */
-
+    @Operation(summary = "봉사활동 유저 취소", description = "기관 역할을 가진 사용자가 취소")
     @PreAuthorize("hasRole('ROLE_ORGANIZATION')")
     @PostMapping("/{id}/cancel/{userId}/organization")
-    public ResponseEntity<UserInfoResponseDto> cancelForOrganization(@PathVariable Long id, @PathVariable String userId, @RequestParam ApplyStatus status) {
+    public ResponseEntity<UserInfoResponseDto> cancelForOrganization(
+            @Parameter(description = "volunteerWorkId에 대한 정보", required = true) @PathVariable Long id,
+            @Parameter(name = "유저 정보") @PathVariable String userId,
+            @Parameter(name = "등록 상태", description = "등록 상태에 따라 유저가 추방되거나 거절됨 pending, approved 여야만 함") @RequestParam ApplyStatus status) {
         try {
             if (status == ApplyStatus.APPROVED) {
                 volunteerService.cancelApprovedForOrganization(id, userId);
@@ -189,9 +191,13 @@ public class VolunteerController {
         }
     }
 
+    @Operation(summary = "봉사활동 유저 추방", description = "기관 역할을 가진 사용자가 추방")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/{id}/cancel/{userId}/admin")
-    public ResponseEntity<UserInfoResponseDto> cancelForAdmin(@PathVariable Long id, @PathVariable String userId, @RequestParam ApplyStatus status) {
+    public ResponseEntity<UserInfoResponseDto> cancelForAdmin(
+            @Parameter(description = "volunteerWorkId에 대한 정보", required = true) @PathVariable Long id,
+            @Parameter(name = "유저 정보", required = true) @PathVariable String userId,
+            @Parameter(name = "등록 상태", description = "등록 상태에 따라 유저가 추방되거나 거절됨 pending, approved 여야만 함", required = true) @RequestParam ApplyStatus status) {
         try {
             if (status == ApplyStatus.APPROVED) {
                 volunteerService.cancelApproved(id, userId);

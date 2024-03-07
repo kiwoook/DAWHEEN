@@ -4,6 +4,7 @@ import com.study.dahween.organization.dto.OrganInfoResponseDto;
 import com.study.dahween.organization.dto.OrganRequestDto;
 import com.study.dahween.organization.service.OrganService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
@@ -45,7 +46,11 @@ public class OrganController {
     // 주변 위치한 기관 찾기
     @Operation(summary = "기관 찾기", description = "위도와 경도 그리고 범위(m)를 사용해 주변에 존재하는 기관들을 반환합니다.")
     @GetMapping("/find")
-    public ResponseEntity<List<OrganInfoResponseDto>> getOrganizationInfoWithinRadius(@RequestParam double latitude, @RequestParam double longitude, @RequestParam int radius) {
+
+    public ResponseEntity<List<OrganInfoResponseDto>> getOrganizationInfoWithinRadius(
+            @Parameter(name = "경도", required = true) @RequestParam double latitude,
+            @Parameter(name = "경도", required = true) @RequestParam double longitude,
+            @Parameter(name = "반경", description = "단위 : m", required = true) @RequestParam int radius) {
 
         try {
             List<OrganInfoResponseDto> organInfoResponseDtos = organService.findOrganizationsWithinRadius(latitude, longitude, radius);
@@ -156,7 +161,7 @@ public class OrganController {
         }
     }
 
-    @Operation(summary = "사용자 기관 권한 부여" )
+    @Operation(summary = "사용자 기관 권한 부여")
     @PreAuthorize("hasRole('ROLE_ORGANIZATION') or hasRole('ROLE_ADMIN')")
     @PostMapping("/grant")
     public ResponseEntity<OrganInfoResponseDto> grantRole(@RequestBody RoleRequestDto roleRequestDto) {
