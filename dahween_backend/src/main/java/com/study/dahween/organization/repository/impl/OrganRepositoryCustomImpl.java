@@ -3,6 +3,7 @@ package com.study.dahween.organization.repository.impl;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.study.dahween.common.entity.QCoordinate;
 import com.study.dahween.organization.entity.Organization;
 import com.study.dahween.organization.entity.QOrganization;
 import com.study.dahween.organization.repository.OrganRepositoryCustom;
@@ -25,6 +26,7 @@ public class OrganRepositoryCustomImpl implements OrganRepositoryCustom {
     public Optional<List<Organization>> findOrganizationsWithinRadius(double latitude, double longitude, int radius) {
 
         QOrganization organization = QOrganization.organization;
+        QCoordinate coordinate = QCoordinate.coordinate;
 
         NumberTemplate<Double> haversineFormula = Expressions.numberTemplate(Double.class,
                 "6371 * acos(cos(radians({0}))*cos(radians({1}))*cos(radians({2}) - radians({3})) + sin(radians({4}))*sin(radians({5})))",
@@ -32,6 +34,8 @@ public class OrganRepositoryCustomImpl implements OrganRepositoryCustom {
 
         List<Organization> result = queryFactory
                 .selectFrom(organization)
+                .join(organization.coordinate, coordinate)
+                .fetchJoin()
                 .where(haversineFormula.loe(radius))
                 .fetch();
 

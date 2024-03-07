@@ -27,4 +27,6 @@ public class VolunteerUpdateResponseDto {
     private LocalDateTime recruitStartDateTime;
     private LocalDateTime recruitEndDateTime;
     private Integer maxParticipants;
+    private Double longitude;
+    private Double latitude;
 }

@@ -100,8 +100,6 @@ Edahween_backend/src/main/java/com/study/dahween/config/JwtConfig.java,a\0\a041
 Ldahween_backend/src/main/java/com/study/dahween/common/utils/HeaderUtil.java,a\9\a90d1a994bbf89a071d12e1006fda6a597c3e4fe
 {
 Kdahween_backend/src/main/java/com/study/dahween/oauth/dto/AuthReqModel.java,8\b\8bdaccbc431c0ed7bd3c4b50ac2497e0320310a8
-ˆ
-Xdahween_backend/src/main/java/com/study/dahween/oauth/filter/UserDetailedInfoFilter.java,c\b\cbb69c625a4971bf500a9f8fb052d7e2ad9460d0
 Œ
 \dahween_backend/src/main/java/com/study/dahween/organization/repository/OrganRepository.java,9\1\91cf52fffc9568fca1c0314c879c1831fa5cdbb1
 †
@@ -164,10 +162,6 @@ _dahween_backend/src/main/java/com/study/dahween/common/exception/AlreadyProcess
 -.idea/sonarlint/securityhotspotstore/index.pb,8\8\88a9255124c95bdc913197c120a8d560edc59c8e
 }
 Mdahween_backend/src/main/java/com/study/dahween/common/entity/Coordinate.java,6\a\6a4b1b587cc1d3ce97a186ff5a576ba5eff1d999
-™
-idahween_backend/src/main/java/com/study/dahween/organization/repository/OrganizationRepositoryCustom.java,8\4\8441e7de6bb9f37ee228526ba1e62618ebd9be73
-¢
-rdahween_backend/src/main/java/com/study/dahween/organization/repository/impl/OrganizationRepositoryCustomImpl.java,7\8\7859dead65a8b432daf79a44450f301984b37b2d
 —
 gdahween_backend/src/test/java/com/study/dahween/organization/repository/OrganizationRepositoryTest.java,c\c\cc3c0144fb39b7d04e40854685c3fc53990e957b
 z
@@ -178,3 +172,15 @@ Mdahween_backend/src/main/java/com/study/dahween/common/dto/CoordinateDto.java,
 kdahween_backend/src/main/java/com/study/dahween/organization/repository/impl/OrganRepositoryCustomImpl.java,3\e\3e3eef3c2f0499b2526a783457d7e0da0e72f6b0
 ’
 bdahween_backend/src/main/java/com/study/dahween/organization/repository/OrganRepositoryCustom.java,e\8\e8ac35738eef839d38a244d5827929902906c17f
+‰
+Ydahween_backend/src/main/java/com/study/dahween/common/dto/CoordinateInfoResponseDto.java,8\0\809cca4661dc1355877c44d980b31426728f0df8
+’
+bdahween_backend/src/main/java/com/study/dahween/common/exception/AuthorizationFailedException.java,a\2\a2c483c64a98dfa70db4d82c279dc34215c37dae
+‹
+[dahween_backend/src/main/java/com/study/dahween/volunteer/service/UserVolunteerService.java,4\e\4e263d54939b908618f53fd07f797c569c3cd955
+‘
+adahween_backend/src/main/java/com/study/dahween/volunteer/controller/UserVolunteerController.java,9\2\927c4c5327ccdf90dda9a5edc3c9608ac744c195
+y
+Idahween_backend/src/main/java/com/study/dahween/config/SwaggerConfig.java,6\3\638795c964bce98aea90b0998e5354824e4aa456
+;
+qodana.yaml,8\5\85c3a901608a6b9adf48d245fa84828b66304e51

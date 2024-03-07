@@ -65,7 +65,7 @@ public class VolunteerWork extends BaseTimeEntity {
     private Set<DayOfWeek> serviceDays;
 
     @ElementCollection(targetClass = TargetAudience.class)
-    @CollectionTable(name = "TARGET_ADUDIENCE", joinColumns =
+    @CollectionTable(name = "TARGET_AUDIENCE", joinColumns =
     @JoinColumn(name = "VOLUNTEER_WORK_ID"))
     @Enumerated(EnumType.STRING)
     private Set<TargetAudience> targetAudiences;
@@ -141,6 +141,7 @@ public class VolunteerWork extends BaseTimeEntity {
         this.maxParticipants = volunteerUpdateResponseDto.getMaxParticipants();
         this.volunteerTypes = volunteerUpdateResponseDto.getVolunteerTypes();
         this.targetAudiences = volunteerUpdateResponseDto.getTargetAudiences();
+        this.coordinate = new Coordinate(volunteerUpdateResponseDto.getLatitude(), volunteerUpdateResponseDto.getLongitude());
     }
 
     public void updateCoordinate(CoordinateDto coordinateDto) {

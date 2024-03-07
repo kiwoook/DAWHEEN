@@ -1,6 +1,7 @@
 package com.study.dahween.volunteer.service;
 
 import com.study.dahween.common.exception.AlreadyProcessedException;
+import com.study.dahween.common.exception.AuthorizationFailedException;
 import com.study.dahween.organization.entity.Organization;
 import com.study.dahween.organization.repository.OrganRepository;
 import com.study.dahween.user.dto.UserInfoResponseDto;
@@ -18,6 +19,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,15 +82,23 @@ public class VolunteerService {
 
     // 대기중인 유저를 확인해 신청할지 안할지 정할 수 있음.
     // 소속된 기관의 유저 리스트 반환
-    public List<UserInfoResponseDto> getUserListByStatusForOrganization(String userId, ApplyStatus status) {
+
+    public List<UserInfoResponseDto> getUserListByStatusForOrganization(Long volunteerWorkId, String userId, ApplyStatus status) {
         User user = userRepository.findByUserId(userId).orElseThrow(EntityNotFoundException::new);
-        Long volunteerWorkId = Optional.ofNullable(user.getOrganization())
+        Long organizationId = Optional.ofNullable(user.getOrganization())
                 .map(Organization::getId)
                 .orElse(null);
 
-        if (volunteerWorkId == null) {
+        if (organizationId == null) {
             log.info("소속된 기관이 없는 유저 userId = {}", userId);
             throw new IllegalStateException("소속된 기관이 없습니다.");
+        }
+
+        VolunteerWork volunteerWork = volunteerWorkRepository.findById(volunteerWorkId).orElseThrow(EntityNotFoundException::new);
+
+        if (!organizationId.equals(volunteerWork.getOrganization().getId())) {
+            log.info("해당 봉사활동과 관련된 기관 담당이 아닙니다");
+            throw new IllegalStateException();
         }
 
         // Status 에 따라 UserList가 반환이 다름
@@ -114,27 +124,15 @@ public class VolunteerService {
 
     }
 
-    public List<UserInfoResponseDto> getAllUsersListById(Long volunteerWorkId) {
+    public List<UserInfoResponseDto> getAllUsersByVolunteerWork(Long volunteerWorkId) {
         return userVolunteerRepository.findUsersByVolunteerWorkId(volunteerWorkId).orElseThrow(EntityNotFoundException::new)
                 .stream()
                 .map(UserInfoResponseDto::new)
                 .toList();
     }
 
-    @Transactional
-    public void deleteUserVolunteerWork(Long id) throws EmptyResultDataAccessException, EntityNotFoundException {
-        UserVolunteerWork userVolunteerWork = userVolunteerRepository.findById(id).orElseThrow(EntityNotFoundException::new);
 
-        if (userVolunteerWork.getStatus() == ApplyStatus.APPROVED) {
-            User user = userVolunteerWork.getUser();
-            VolunteerWork volunteerWork = userVolunteerWork.getVolunteerWork();
 
-            user.leaveVolunteerWork(userVolunteerWork);
-            volunteerWork.leaveUser(userVolunteerWork);
-        }
-
-        userVolunteerRepository.delete(userVolunteerWork);
-    }
 
     @Transactional
     public void apply(Long volunteerWorkId, String userId) {
@@ -157,30 +155,27 @@ public class VolunteerService {
         userVolunteerRepository.save(userVolunteerWork);
     }
 
-    public void approve(Long volunteerWorkId, String userId) throws InterruptedException {
 
+    @Transactional
+    public void approve(Long volunteerWorkId, String userId) throws IllegalAccessException {
+        // 승인권한은 해당 기관담당만 가능하도록 해야함.
         UserVolunteerWork userVolunteerWork = userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId).orElseThrow(EntityNotFoundException::new);
         VolunteerWork volunteerWork = userVolunteerWork.getVolunteerWork();
+        String requestUserId = SecurityContextHolder.getContext().getAuthentication().getName();
+        Organization organization = userRepository.findByUserId(requestUserId).orElseThrow(EntityNotFoundException::new).getOrganization();
 
-        if (volunteerWork.getAppliedParticipants().get() == volunteerWork.getMaxParticipants()) {
-            throw new IllegalStateException();
+        if (!volunteerWork.getOrganization().equals(organization)) {
+            throw new AuthorizationFailedException("you are not allowed to approve method");
         }
 
-        try {
-            semaphore.acquire();
-            // 동기화가 필요한 로직에 대해서만 넣자
-            if (userVolunteerWork.getUser().getUserId().equals(userId) && userVolunteerWork.getStatus().equals(ApplyStatus.PENDING)) {
-                User user = userVolunteerWork.getUser();
-                user.attendVolunteerWork(userVolunteerWork);
-                volunteerWork.attendUser(userVolunteerWork);
-                volunteerWork.increaseParticipants();
-            } else {
-                throw new IllegalStateException();
-            }
-
-        } finally {
-            semaphore.release();
+        if (volunteerWork.getAppliedParticipants().get() >= volunteerWork.getMaxParticipants()) {
+            throw new IllegalAccessException();
         }
+
+        User user = userVolunteerWork.getUser();
+        user.attendVolunteerWork(userVolunteerWork);
+        volunteerWork.attendUser(userVolunteerWork);
+        volunteerWork.increaseParticipants();
     }
 
     @Transactional
@@ -194,7 +189,7 @@ public class VolunteerService {
         userVolunteerWork.updateStatus(ApplyStatus.REJECTED);
     }
 
-    @Transactional
+
     public void cancelApproved(Long volunteerWorkId, String userId) {
         UserVolunteerWork userVolunteerWork = userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId).orElseThrow(EntityNotFoundException::new);
 
@@ -211,5 +206,39 @@ public class VolunteerService {
         volunteerWork.leaveUser(userVolunteerWork);
     }
 
+    @Transactional
+    public void cancelPendingForOrganization(Long volunteerWorkId, String userId) {
+        String requestUserId = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        if(equalOrganizationByUserAndVolunteerWork(requestUserId, volunteerWorkId)){
+            throw new AuthorizationFailedException("you are not allowed to approve method");
+        }
+
+        UserVolunteerWork userVolunteerWork = userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId).orElseThrow(EntityNotFoundException::new);
+
+        if (userVolunteerWork.getStatus() != ApplyStatus.PENDING) {
+            throw new IllegalStateException();
+        }
+
+        userVolunteerWork.updateStatus(ApplyStatus.REJECTED);
+    }
+
+    @Transactional
+    public void cancelApprovedForOrganization(Long volunteerWorkId, String userId) {
+        String requestUserId = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        if(equalOrganizationByUserAndVolunteerWork(requestUserId, volunteerWorkId)){
+            throw new AuthorizationFailedException("you are not allowed to approve method");
+        }
+
+        cancelApproved(volunteerWorkId, userId);
+    }
+
+    private boolean equalOrganizationByUserAndVolunteerWork(String userId, Long volunteerWorkId) {
+        Organization userOrganization = userRepository.findByUserId(userId).orElseThrow(EntityNotFoundException::new).getOrganization();
+        Organization volunteerOrganization = volunteerWorkRepository.findById(volunteerWorkId).orElseThrow(EntityNotFoundException::new).getOrganization();
+        return !userOrganization.equals(volunteerOrganization);
+    }
 
 }
+

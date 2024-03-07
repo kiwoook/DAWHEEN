@@ -4,10 +4,8 @@ import com.study.dahween.organization.dto.OrganInfoResponseDto;
 import com.study.dahween.organization.dto.OrganRequestDto;
 import com.study.dahween.organization.entity.Organization;
 import com.study.dahween.organization.repository.OrganRepository;
-import com.study.dahween.user.dto.UserInfoResponseDto;
 import com.study.dahween.user.entity.User;
 import com.study.dahween.user.repository.UserRepository;
-import com.study.dahween.volunteer.entity.type.ApplyStatus;
 import com.study.dahween.volunteer.repository.UserVolunteerRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
