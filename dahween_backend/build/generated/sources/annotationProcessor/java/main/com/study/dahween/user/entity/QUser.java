@@ -38,6 +38,8 @@ public class QUser extends EntityPathBase<User> {
 
     public final StringPath name = createString("name");
 
+    public final com.study.dahween.organization.entity.QOrganization organization;
+
     public final StringPath password = createString("password");
 
     public final StringPath phone = createString("phone");
@@ -47,6 +49,8 @@ public class QUser extends EntityPathBase<User> {
     public final QRole role;
 
     public final StringPath userId = createString("userId");
+
+    public final SetPath<com.study.dahween.volunteer.entity.UserVolunteerWork, com.study.dahween.volunteer.entity.QUserVolunteerWork> volunteerWorks = this.<com.study.dahween.volunteer.entity.UserVolunteerWork, com.study.dahween.volunteer.entity.QUserVolunteerWork>createSet("volunteerWorks", com.study.dahween.volunteer.entity.UserVolunteerWork.class, com.study.dahween.volunteer.entity.QUserVolunteerWork.class, PathInits.DIRECT2);
 
     public QUser(String variable) {
         this(User.class, forVariable(variable), INITS);
@@ -67,7 +71,8 @@ public class QUser extends EntityPathBase<User> {
     public QUser(Class<? extends User> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.address = inits.isInitialized("address") ? new com.study.dahween.common.entity.QAddress(forProperty("address")) : null;
-        this.role = inits.isInitialized("role") ? new QRole(forProperty("role"), inits.get("role")) : null;
+        this.organization = inits.isInitialized("organization") ? new com.study.dahween.organization.entity.QOrganization(forProperty("organization"), inits.get("organization")) : null;
+        this.role = inits.isInitialized("role") ? new QRole(forProperty("role")) : null;
     }
 
 }
