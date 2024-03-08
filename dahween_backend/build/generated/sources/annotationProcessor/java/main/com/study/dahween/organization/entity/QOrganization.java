@@ -26,6 +26,10 @@ public class QOrganization extends EntityPathBase<Organization> {
 
     public final com.study.dahween.common.entity.QAddress address;
 
+    public final BooleanPath approved = createBoolean("approved");
+
+    public final com.study.dahween.common.entity.QCoordinate coordinate;
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdDate = _super.createdDate;
 
@@ -43,6 +47,10 @@ public class QOrganization extends EntityPathBase<Organization> {
     public final StringPath name = createString("name");
 
     public final StringPath representName = createString("representName");
+
+    public final ListPath<com.study.dahween.user.entity.User, com.study.dahween.user.entity.QUser> users = this.<com.study.dahween.user.entity.User, com.study.dahween.user.entity.QUser>createList("users", com.study.dahween.user.entity.User.class, com.study.dahween.user.entity.QUser.class, PathInits.DIRECT2);
+
+    public final ListPath<com.study.dahween.volunteer.entity.VolunteerWork, com.study.dahween.volunteer.entity.QVolunteerWork> workList = this.<com.study.dahween.volunteer.entity.VolunteerWork, com.study.dahween.volunteer.entity.QVolunteerWork>createList("workList", com.study.dahween.volunteer.entity.VolunteerWork.class, com.study.dahween.volunteer.entity.QVolunteerWork.class, PathInits.DIRECT2);
 
     public QOrganization(String variable) {
         this(Organization.class, forVariable(variable), INITS);
@@ -63,6 +71,7 @@ public class QOrganization extends EntityPathBase<Organization> {
     public QOrganization(Class<? extends Organization> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.address = inits.isInitialized("address") ? new com.study.dahween.common.entity.QAddress(forProperty("address")) : null;
+        this.coordinate = inits.isInitialized("coordinate") ? new com.study.dahween.common.entity.QCoordinate(forProperty("coordinate")) : null;
     }
 
 }

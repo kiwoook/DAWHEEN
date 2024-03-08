@@ -2,3 +2,6 @@
 dahween_backend/src/main/resources/application.properties
 *.properties
 /.idea/
+/dahween_backend/build/
+/dahween_backend/.idea/
+.idea/

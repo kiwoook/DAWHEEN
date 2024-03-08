@@ -13,11 +13,13 @@ import com.study.dahween.user.entity.RoleType;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -33,6 +35,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true)
 @AllArgsConstructor
 public class SecurityConfig {
 
@@ -44,22 +47,18 @@ public class SecurityConfig {
 
 
     @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        // 스프링 시큐리티 예외처리
-        return web -> web.ignoring().requestMatchers("/swagger-resources/**", "/swagger-ui.html", "/webjars/**", "/swagger/**", "/v2/api-docs");
-    }
-
-    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .cors(c -> c.configurationSource(corsConfigurationSource()))
                 // 인증 필요 사이트
-                .authorizeHttpRequests(a -> a.requestMatchers("/css/** ", "/images/**", "/js/**").permitAll()
+                .authorizeHttpRequests(a -> a.requestMatchers("/css/** ", "/images/**", "/js/**", "/swagger-resources/**", "/swagger-ui/**", "/webjars/**", "/swagger/**", "/v3/**")
+                        .permitAll()
                         .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                         // 어드민 계정만 가능한 api 주소
-                        .requestMatchers("/api/admin/**").hasAuthority(RoleType.ADMIN.getCode())
+                        .requestMatchers("/api/v1/admin/**").hasAuthority(RoleType.ADMIN.getCode())
                         // 유저 이상 권한만 가능한 주소
-                        .requestMatchers("/api/user/**").hasAnyAuthority(RoleType.MEMBER.getCode())
+                        .requestMatchers("/api/v1/user/**").hasAnyAuthority(RoleType.MEMBER.getCode(), RoleType.ORGANIZATION.getCode(), RoleType.ADMIN.getCode())
+                        .requestMatchers("/api/v1/organ/**").hasAnyAuthority(RoleType.MEMBER.getCode(), RoleType.ORGANIZATION.getCode(), RoleType.ADMIN.getCode())
                         .anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
@@ -75,6 +74,7 @@ public class SecurityConfig {
                         .userInfoEndpoint(config -> config.userService(oAuth2UserService))
                         .successHandler(oAuth2AuthenticationSuccessHandler())
                         .failureHandler(oAuth2AuthenticationFailureHandler())
+
                 )
                 // UsernamePassword 필터에 대한 검증을 하기 전에 해당 필터를 동작시킨다.
                 .addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
@@ -143,6 +143,15 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
+    }
+
+
+    @Bean
+    protected MethodSecurityExpressionHandler methodSecurityExpressionHandler() {
+        DefaultMethodSecurityExpressionHandler expressionHandler =
+                new DefaultMethodSecurityExpressionHandler();
+        expressionHandler.setPermissionEvaluator(new ClientPermissionExpression());
+        return expressionHandler;
     }
 
 
