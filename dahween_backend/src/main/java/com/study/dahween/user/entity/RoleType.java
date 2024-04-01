@@ -10,7 +10,8 @@ import java.util.Arrays;
 public enum RoleType {
     ADMIN("ROLE_ADMIN"),
     ORGANIZATION("ROLE_ORGANIZATION"),
-    MEMBER("ROLE_MEMBER");
+    MEMBER("ROLE_MEMBER"),
+    GUEST("ROLE_GUEST");
 
     private final String code;
 
@@ -18,6 +19,6 @@ public enum RoleType {
         return Arrays.stream(RoleType.values())
                 .filter(r -> r.getCode().equals(code))
                 .findAny()
-                .orElse(MEMBER);
+                .orElse(GUEST);
     }
 }

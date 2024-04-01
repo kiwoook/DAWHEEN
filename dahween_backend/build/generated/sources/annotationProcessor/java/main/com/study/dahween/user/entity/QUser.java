@@ -44,11 +44,13 @@ public class QUser extends EntityPathBase<User> {
 
     public final StringPath phone = createString("phone");
 
-    public final EnumPath<com.study.dahween.oauth.entity.ProviderType> providerType = createEnum("providerType", com.study.dahween.oauth.entity.ProviderType.class);
+    public final EnumPath<com.study.dahween.auth.entity.ProviderType> providerType = createEnum("providerType", com.study.dahween.auth.entity.ProviderType.class);
 
-    public final QRole role;
+    public final StringPath refreshToken = createString("refreshToken");
 
-    public final StringPath userId = createString("userId");
+    public final EnumPath<RoleType> role = createEnum("role", RoleType.class);
+
+    public final StringPath socialId = createString("socialId");
 
     public final SetPath<com.study.dahween.volunteer.entity.UserVolunteerWork, com.study.dahween.volunteer.entity.QUserVolunteerWork> volunteerWorks = this.<com.study.dahween.volunteer.entity.UserVolunteerWork, com.study.dahween.volunteer.entity.QUserVolunteerWork>createSet("volunteerWorks", com.study.dahween.volunteer.entity.UserVolunteerWork.class, com.study.dahween.volunteer.entity.QUserVolunteerWork.class, PathInits.DIRECT2);
 
@@ -72,7 +74,6 @@ public class QUser extends EntityPathBase<User> {
         super(type, metadata, inits);
         this.address = inits.isInitialized("address") ? new com.study.dahween.common.entity.QAddress(forProperty("address")) : null;
         this.organization = inits.isInitialized("organization") ? new com.study.dahween.organization.entity.QOrganization(forProperty("organization"), inits.get("organization")) : null;
-        this.role = inits.isInitialized("role") ? new QRole(forProperty("role")) : null;
     }
 
 }

@@ -1,12 +1,12 @@
 package com.study.dahween.user.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.study.dahween.auth.entity.ProviderType;
+import com.study.dahween.auth.utils.PasswordUtil;
 import com.study.dahween.common.entity.Address;
 import com.study.dahween.common.entity.BaseTimeEntity;
-import com.study.dahween.oauth.entity.ProviderType;
 import com.study.dahween.organization.entity.Organization;
 import com.study.dahween.volunteer.entity.UserVolunteerWork;
-import com.study.dahween.volunteer.entity.VolunteerWork;
 import com.study.dahween.volunteer.entity.type.ApplyStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -15,10 +15,10 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -30,7 +30,11 @@ public class User extends BaseTimeEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    private String userId;
+    @Column(name = "EMAIL", nullable = false, unique = true)
+    private String email;
+
+    @Column(name = "SOCIAL_ID")
+    private String socialId;
 
     @JsonIgnore
     @Column(name = "PASSWORD", length = 128)
@@ -38,25 +42,23 @@ public class User extends BaseTimeEntity {
     @Size(max = 128)
     private String password;
 
-    @Column(nullable = false)
+    @Column()
     private String name;
 
-    @Column(nullable = false)
-    private String email;
 
-    @Column(nullable = false)
+    @Column
     private String phone;
 
-    @Embedded
-    @Column
+    @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL)
     private Address address;
 
-    @Embedded
     @Column
-    private Role role;
+    @Enumerated(EnumType.STRING)
+    private RoleType role;
 
+    private String refreshToken;
 
-    @Column(name = "PROVIDER_TYPE", length = 20, nullable = false)
+    @Column(name = "PROVIDER_TYPE", length = 20)
     @Enumerated(EnumType.STRING)
     private ProviderType providerType;
 
@@ -68,17 +70,17 @@ public class User extends BaseTimeEntity {
     private Set<UserVolunteerWork> volunteerWorks = new HashSet<>();
 
     @Builder
-    public User(String userId, String name, String email, ProviderType providerType) {
-        this.userId = userId;
-        this.password = "NO_PASSWORD";
+    public User(String socialId, String password, String name, String email, ProviderType providerType, RoleType roleType) {
+        this.socialId = socialId;
+        this.password = passwordEncode(password);
         this.name = name;
         this.email = email;
-        this.role = new Role(RoleType.MEMBER);
         this.providerType = providerType;
+        this.role = roleType;
     }
 
-    public User updateUserId(String userId) {
-        this.userId = userId;
+    public User updateSocialId(String socialId) {
+        this.socialId = socialId;
         return this;
     }
 
@@ -91,19 +93,22 @@ public class User extends BaseTimeEntity {
         return this;
     }
 
+    public void verifyOAuth2User(){
+        this.role = RoleType.MEMBER;
+    }
 
     public void grantAdmin() {
-        this.role = new Role(RoleType.ADMIN);
+        this.role = RoleType.ADMIN;
     }
 
     public void grantOrganization(Organization organization) {
-        this.role = new Role(RoleType.ORGANIZATION);
+        this.role = RoleType.ORGANIZATION;
         this.organization = organization;
         organization.addUser(this);
     }
 
-    public void revokeOrganization(){
-        this.role = new Role(RoleType.MEMBER);
+    public void revokeOrganization() {
+        this.role = RoleType.MEMBER;
         this.organization = null;
     }
 
@@ -111,13 +116,25 @@ public class User extends BaseTimeEntity {
         this.organization = organization;
     }
 
-    public void attendVolunteerWork(UserVolunteerWork userVolunteerWork){
+    public void attendVolunteerWork(UserVolunteerWork userVolunteerWork) {
         this.volunteerWorks.add(userVolunteerWork);
         userVolunteerWork.updateStatus(ApplyStatus.APPROVED);
     }
 
-    public void leaveVolunteerWork(UserVolunteerWork userVolunteerWork){
+    public void leaveVolunteerWork(UserVolunteerWork userVolunteerWork) {
         this.volunteerWorks.remove(userVolunteerWork);
+    }
+
+    private String passwordEncode(String rawPassword) {
+        if (rawPassword == null) {
+            return PasswordUtil.generateRandomPassword();
+        }
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        return passwordEncoder.encode(rawPassword);
+    }
+
+    public void updateRefreshToken(String updateRefreshToken) {
+        this.refreshToken = updateRefreshToken;
     }
 
 

@@ -10,13 +10,11 @@ import lombok.Data;
  */
 @Data
 public class AddressDto {
-    @NotBlank
+
     private String roadAddress;
     @Size(max = 25)
-    @NotBlank
     private String detailAddress;
     @Size(max = 5)
-    @NotBlank
     private String zipCode;
 
 
