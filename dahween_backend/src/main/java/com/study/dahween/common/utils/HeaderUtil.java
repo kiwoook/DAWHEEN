@@ -1,7 +1,10 @@
 package com.study.dahween.common.utils;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class HeaderUtil {
 
     private static final String HEADER_AUTHORIZATION = "Authorization";

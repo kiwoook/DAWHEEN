@@ -79,8 +79,8 @@ public class VolunteerController {
     @PostMapping("/join/{id}")
     public ResponseEntity<VolunteerInfoResponseDto> applyVolunteerWork(@PathVariable("id") Long id) {
         try {
-            String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-            volunteerService.apply(id, userId);
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            volunteerService.apply(id, email);
             return ResponseEntity.ok().build();
         } catch (EntityNotFoundException | ConstraintViolationException e) {
             return ResponseEntity.badRequest().build();
@@ -123,10 +123,10 @@ public class VolunteerController {
     public ResponseEntity<List<UserInfoResponseDto>> getUserListForOrganization(
             @PathVariable Long id,
             @Parameter(description = "Pending, APPROVED, REJECT 를 받음.") @PathVariable ApplyStatus status) {
-        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
         try {
-            List<UserInfoResponseDto> infoResponseDtos = volunteerService.getUserListByStatusForOrganization(id, userId, status);
+            List<UserInfoResponseDto> infoResponseDtos = volunteerService.getUserListByStatusForOrganization(id, email, status);
             return ResponseEntity.ok(infoResponseDtos);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.badRequest().build();

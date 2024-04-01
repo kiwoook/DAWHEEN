@@ -1,7 +1,7 @@
 package com.study.dahween.common.entity;
 
 import com.study.dahween.common.dto.AddressDto;
-import jakarta.persistence.Embeddable;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,10 +9,16 @@ import lombok.NoArgsConstructor;
 
 import java.util.Objects;
 
-@Embeddable
+
+@Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Address {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
+    private Long id;
+
     private String roadAddress;
     private String detailAddress;
     private String zipCode;

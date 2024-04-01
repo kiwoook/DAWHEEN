@@ -12,14 +12,16 @@ import com.querydsl.core.types.Path;
 /**
  * QAddress is a Querydsl query type for Address
  */
-@Generated("com.querydsl.codegen.DefaultEmbeddableSerializer")
-public class QAddress extends BeanPath<Address> {
+@Generated("com.querydsl.codegen.DefaultEntitySerializer")
+public class QAddress extends EntityPathBase<Address> {
 
     private static final long serialVersionUID = 1231209710L;
 
     public static final QAddress address = new QAddress("address");
 
     public final StringPath detailAddress = createString("detailAddress");
+
+    public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final StringPath roadAddress = createString("roadAddress");
 

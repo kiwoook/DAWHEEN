@@ -30,13 +30,13 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
 
 
     @Override
-    public boolean existsByVolunteerWorkAndUserAndStatus(Long volunteerWorkId, String userId, List<ApplyStatus> statuses) {
+    public boolean existsByVolunteerWorkAndUserAndStatus(Long volunteerWorkId, String email, List<ApplyStatus> statuses) {
         QUserVolunteerWork userVolunteerWork = QUserVolunteerWork.userVolunteerWork;
 
         // Exist 관련 조회는 First 로 한 다음에 Null Check 를 하는게 성능 개선에 도움이 된다.
 
         return queryFactory.selectFrom(userVolunteerWork)
-                .where(userVolunteerWork.user.userId.eq(userId)
+                .where(userVolunteerWork.user.email.eq(email)
                         .and(userVolunteerWork.volunteerWork.id.eq(volunteerWorkId))
                         .and(userVolunteerWork.status.in(statuses)))
                 .fetchFirst() != null;
@@ -89,7 +89,7 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
 
 
     @Override
-    public Optional<UserVolunteerWork> findByVolunteerWorkIdAndUserId(Long volunteerWorkId, String userId) {
+    public Optional<UserVolunteerWork> findByVolunteerWorkIdAndEmail(Long volunteerWorkId, String email) {
         QUserVolunteerWork userVolunteerWork = QUserVolunteerWork.userVolunteerWork;
         QVolunteerWork volunteerWork = QVolunteerWork.volunteerWork;
         QUser user = QUser.user;
@@ -99,7 +99,7 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
                 .join(userVolunteerWork.user, user).fetchJoin()
                 .where(
                         userVolunteerWork.volunteerWork.id.eq(volunteerWorkId)
-                                .and(userVolunteerWork.user.userId.eq(userId))
+                                .and(userVolunteerWork.user.email.eq(email))
                 ).fetchOne());
     }
 
