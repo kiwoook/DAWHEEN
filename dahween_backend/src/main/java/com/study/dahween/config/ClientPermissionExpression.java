@@ -13,7 +13,7 @@ public class ClientPermissionExpression implements PermissionEvaluator {
     public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
         if (targetDomainObject instanceof Organization org) {
 
-            if (("DELETE".equals(permission) || "PUT".equals(permission)) && org.getUsers().stream().anyMatch(user -> user.getUserId().equals(authentication.getName()))) {
+            if (("DELETE".equals(permission) || "PUT".equals(permission)) && org.getUsers().stream().anyMatch(user -> user.getEmail().equals(authentication.getName()))) {
                 return true;
             }
         }

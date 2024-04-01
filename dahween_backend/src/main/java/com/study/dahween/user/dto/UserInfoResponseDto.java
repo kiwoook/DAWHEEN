@@ -1,7 +1,7 @@
 package com.study.dahween.user.dto;
 
 import com.study.dahween.common.dto.AddressDto;
-import com.study.dahween.oauth.entity.ProviderType;
+import com.study.dahween.auth.entity.ProviderType;
 import com.study.dahween.user.entity.User;
 import lombok.Data;
 
@@ -22,7 +22,9 @@ public class UserInfoResponseDto {
         this.name = user.getName();
         this.email = user.getEmail();
         this.phone = user.getPhone();
-        this.address = new AddressDto(user.getAddress());
+        if (user.getAddress() != null) {
+            this.address = new AddressDto(user.getAddress());
+        }
         this.providerType = user.getProviderType();
     }
 }

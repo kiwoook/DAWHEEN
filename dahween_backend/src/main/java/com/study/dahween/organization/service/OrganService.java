@@ -50,7 +50,7 @@ public class OrganService {
         List<User> userList = userRepository.findAllByOrganization(organization).orElseThrow(EntityNotFoundException::new);
 
         for (User user : userList) {
-            log.info("유저 아이디 : {}의 기관 정보를 삭제합니다.", user.getUserId());
+            log.info("유저 아이디 : {}의 기관 정보를 삭제합니다.", user.getEmail());
             user.associateOrganization(null);
         }
 
@@ -64,8 +64,8 @@ public class OrganService {
         organization.update(requestDto);
     }
 
-    public boolean verifyAffiliation(Long id, String userId) throws EntityNotFoundException {
-        User user = userRepository.findByUserId(userId).orElseThrow(EntityNotFoundException::new);
+    public boolean verifyAffiliation(Long id, String email) throws EntityNotFoundException {
+        User user = userRepository.findByEmail(email).orElseThrow(EntityNotFoundException::new);
         Organization organization = organRepository.findById(id).orElseThrow(EntityNotFoundException::new);
 
         return user.getOrganization().equals(organization);
@@ -92,19 +92,19 @@ public class OrganService {
     }
 
     @Transactional
-    public void grantOrganizationRole(String userId, Long organId) {
+    public void grantOrganizationRole(String email, Long organId) {
         Organization organization = organRepository.findById(organId).orElseThrow(EntityNotFoundException::new);
         if (Boolean.FALSE.equals(organization.getApproved())) {
             throw new IllegalStateException();
         }
-        User user = userRepository.findByUserId(userId).orElseThrow(EntityNotFoundException::new);
+        User user = userRepository.findByEmail(email).orElseThrow(EntityNotFoundException::new);
         organization.addUser(user);
         user.grantOrganization(organization);
     }
 
     @Transactional
-    public void revokeOrganizationRole(String userId, Long organId) {
-        User user = userRepository.findByUserId(userId).orElseThrow(EntityNotFoundException::new);
+    public void revokeOrganizationRole(String email, Long organId) {
+        User user = userRepository.findByEmail(email).orElseThrow(EntityNotFoundException::new);
         Organization organization = organRepository.findById(organId).orElseThrow(EntityNotFoundException::new);
 
         user.revokeOrganization();

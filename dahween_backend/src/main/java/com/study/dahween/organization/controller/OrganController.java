@@ -65,12 +65,10 @@ public class OrganController {
     @PutMapping("/{id}")
     public ResponseEntity<OrganInfoResponseDto> updateOrganization(@PathVariable("id") Long id, @RequestBody OrganRequestDto requestDto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userId = authentication.getName();
-        log.info("유저 아이디 : {}", userId);
-
+        String email = authentication.getName();
         try {
             if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ||
-                    organService.verifyAffiliation(id, userId)) {
+                    organService.verifyAffiliation(id, email)) {
                 organService.update(id, requestDto);
                 return ResponseEntity.ok().build();
             }
@@ -88,12 +86,11 @@ public class OrganController {
     @DeleteMapping("/{id}")
     public ResponseEntity<OrganInfoResponseDto> deleteOrganization(@PathVariable("id") Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userId = authentication.getName();
-        log.info("유저 아이디 : {}", userId);
+        String email = authentication.getName();
 
         try {
             if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ||
-                    organService.verifyAffiliation(id, userId)) {
+                    organService.verifyAffiliation(id, email)) {
                 organService.delete(id);
                 return ResponseEntity.ok().build();
             }
@@ -166,7 +163,7 @@ public class OrganController {
     @PostMapping("/grant")
     public ResponseEntity<OrganInfoResponseDto> grantRole(@RequestBody RoleRequestDto roleRequestDto) {
         try {
-            organService.grantOrganizationRole(roleRequestDto.getUserId(), roleRequestDto.getOrganizationId());
+            organService.grantOrganizationRole(roleRequestDto.getEmail(), roleRequestDto.getOrganizationId());
             return ResponseEntity.ok().build();
         } catch (EntityNotFoundException e) {
             return ResponseEntity.badRequest().build();
@@ -180,7 +177,7 @@ public class OrganController {
     @PostMapping("/revoke")
     public ResponseEntity<OrganInfoResponseDto> revokeRole(@RequestBody RoleRequestDto roleRequestDto) {
         try {
-            organService.revokeOrganizationRole(roleRequestDto.getUserId(), roleRequestDto.getOrganizationId());
+            organService.revokeOrganizationRole(roleRequestDto.getEmail(), roleRequestDto.getOrganizationId());
             return ResponseEntity.ok().build();
         } catch (EntityNotFoundException e) {
             return ResponseEntity.badRequest().build();
@@ -193,7 +190,7 @@ public class OrganController {
     @Data
     public static class RoleRequestDto {
         @NotNull
-        private String userId;
+        private String email;
         @NotNull
         private Long organizationId;
     }

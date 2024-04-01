@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface UserVolunteerRepositoryCustom {
 
-    boolean existsByVolunteerWorkAndUserAndStatus(Long volunteerWorkId, String userId, List<ApplyStatus> statuses);
+    boolean existsByVolunteerWorkAndUserAndStatus(Long volunteerWorkId, String email, List<ApplyStatus> statuses);
 
     Optional<List<UserVolunteerWork>> findAllByVolunteerWorkIdWithFetch(Long volunteerWorkId);
 
@@ -18,7 +18,7 @@ public interface UserVolunteerRepositoryCustom {
 
     Optional<List<User>> findUsersByVolunteerWorkId(Long volunteerWorkId);
 
-    Optional<UserVolunteerWork> findByVolunteerWorkIdAndUserId(Long volunteerWorkId, String userId);
+    Optional<UserVolunteerWork> findByVolunteerWorkIdAndEmail(Long volunteerWorkId, String email);
 
 
 

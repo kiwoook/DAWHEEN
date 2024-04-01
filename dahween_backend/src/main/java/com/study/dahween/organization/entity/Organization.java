@@ -41,8 +41,8 @@ public class Organization extends BaseTimeEntity {
     private String facilityType;
     @Column(name = "REPRESENT_NAME")
     private String representName;
-    @Embedded
-    @Column(nullable = false)
+
+    @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL)
     private Address address;
     @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "COORDINATE_ID")
