@@ -13,6 +13,10 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
+    boolean existsByEmailAndName(String email, String name);
+
+    boolean existsByEmail(String email);
+
     // 해당 기관과 연결되어 있는 유저를 반환합니다.
     Optional<List<User>> findAllByOrganization(Organization organization);
 

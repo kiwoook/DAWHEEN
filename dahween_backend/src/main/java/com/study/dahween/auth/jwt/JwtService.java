@@ -48,6 +48,12 @@ public class JwtService {
 
     }
 
+    public String createTmpToken(String email) {
+        Date now = new Date();
+        return Jwts.builder().setSubject(ACCESS_TOKEN_SUBJECT).setExpiration(new Date(now.getTime() + 60 * 5)).claim(EMAIL_CLAIM, email)
+                .signWith(key, SignatureAlgorithm.HS256).compact();
+    }
+
     public String createRefreshToken() {
         Date now = new Date();
         return Jwts.builder().setSubject(REFRESH_TOKEN_SUBJECT).setExpiration(new Date(now.getTime() + refreshTokenExpirationPeriod)).signWith(key, SignatureAlgorithm.HS256).compact();

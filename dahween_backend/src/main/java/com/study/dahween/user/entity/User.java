@@ -42,6 +42,8 @@ public class User extends BaseTimeEntity {
     @Size(max = 128)
     private String password;
 
+    private String birth;
+
     @Column()
     private String name;
 
@@ -70,13 +72,18 @@ public class User extends BaseTimeEntity {
     private Set<UserVolunteerWork> volunteerWorks = new HashSet<>();
 
     @Builder
-    public User(String socialId, String password, String name, String email, ProviderType providerType, RoleType roleType) {
+    public User(String socialId, String password, String name, String email, String birth, ProviderType providerType, RoleType roleType) {
         this.socialId = socialId;
-        this.password = passwordEncode(password);
+        this.password = encodePassword(password);
         this.name = name;
         this.email = email;
+        this.birth = birth;
         this.providerType = providerType;
         this.role = roleType;
+    }
+
+    public void changePassword(String password){
+        this.password = encodePassword(password);
     }
 
     public User updateSocialId(String socialId) {
@@ -93,7 +100,7 @@ public class User extends BaseTimeEntity {
         return this;
     }
 
-    public void verifyOAuth2User(){
+    public void verifyOAuth2User() {
         this.role = RoleType.MEMBER;
     }
 
@@ -125,7 +132,11 @@ public class User extends BaseTimeEntity {
         this.volunteerWorks.remove(userVolunteerWork);
     }
 
-    private String passwordEncode(String rawPassword) {
+    public boolean equalPassword(String password){
+        String encodePassword = encodePassword(password);
+        return this.password.equals(encodePassword);
+    }
+    private String encodePassword(String rawPassword) {
         if (rawPassword == null) {
             return PasswordUtil.generateRandomPassword();
         }
