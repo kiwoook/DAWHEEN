@@ -26,6 +26,8 @@ public class QUser extends EntityPathBase<User> {
 
     public final com.study.dahween.common.entity.QAddress address;
 
+    public final StringPath birth = createString("birth");
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdDate = _super.createdDate;
 

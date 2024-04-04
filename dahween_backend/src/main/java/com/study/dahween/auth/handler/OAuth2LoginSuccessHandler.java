@@ -14,6 +14,9 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Component
 @RequiredArgsConstructor
@@ -65,16 +68,16 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         response.sendRedirect(generateUrl(accessToken, refreshToken));
     }
 
-    private String generateUrl(final String accessToken, final String refreshToken) {
+    private String generateUrl(final String accessToken, final String refreshToken) throws UnsupportedEncodingException {
         StringBuilder sb = new StringBuilder();
         StringBuilder url = sb.append(frontendUrl)
                 .append("/oauth2-callback")
                 .append(QUERY_START_MARK)
                 .append(QUERY_PARAM_ACCESS_TOKEN_KEY)
-                .append(accessToken)
+                .append(URLEncoder.encode(accessToken, StandardCharsets.UTF_8))
                 .append(QUERY_AND_MARK)
                 .append(QUERY_PARAM_REFRESH_TOKEN_KEY)
-                .append(refreshToken);
+                .append(URLEncoder.encode(refreshToken, StandardCharsets.UTF_8));
         return url.toString();
     }
 }
