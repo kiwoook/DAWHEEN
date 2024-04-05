@@ -5,3 +5,4 @@ dahween_backend/src/main/resources/application.properties
 /dahween_backend/build/
 /dahween_backend/.idea/
 .idea/
+/.idea
