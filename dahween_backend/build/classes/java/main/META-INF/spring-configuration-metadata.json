@@ -2,67 +2,67 @@
   "groups": [
     {
       "name": "app",
-      "type": "com.study.dahween.config.AppProperties",
-      "sourceType": "com.study.dahween.config.AppProperties"
+      "type": "com.study.dawheen.config.AppProperties",
+      "sourceType": "com.study.dawheen.config.AppProperties"
     },
     {
       "name": "app.auth",
-      "type": "com.study.dahween.config.AppProperties$Auth",
-      "sourceType": "com.study.dahween.config.AppProperties",
-      "sourceMethod": "getAuth()"
+      "type": "com.study.dawheen.config.AppProperties$Auth",
+      "sourceType": "com.study.dawheen.config.AppProperties"
     },
     {
       "name": "app.oauth2",
-      "type": "com.study.dahween.config.AppProperties$OAuth2",
-      "sourceType": "com.study.dahween.config.AppProperties",
-      "sourceMethod": "getOauth2()"
+      "type": "com.study.dawheen.config.AppProperties$OAuth2",
+      "sourceType": "com.study.dawheen.config.AppProperties"
     },
     {
       "name": "cors",
-      "type": "com.study.dahween.config.CorsProperties",
-      "sourceType": "com.study.dahween.config.CorsProperties"
+      "type": "com.study.dawheen.config.CorsProperties",
+      "sourceType": "com.study.dawheen.config.CorsProperties"
     }
   ],
   "properties": [
     {
       "name": "app.auth.refresh-token-expiry",
       "type": "java.lang.Long",
-      "sourceType": "com.study.dahween.config.AppProperties$Auth"
+      "sourceType": "com.study.dawheen.config.AppProperties$Auth",
+      "defaultValue": 0
     },
     {
       "name": "app.auth.token-expiry",
       "type": "java.lang.Long",
-      "sourceType": "com.study.dahween.config.AppProperties$Auth"
+      "sourceType": "com.study.dawheen.config.AppProperties$Auth",
+      "defaultValue": 0
     },
     {
       "name": "app.auth.token-secret",
       "type": "java.lang.String",
-      "sourceType": "com.study.dahween.config.AppProperties$Auth"
+      "sourceType": "com.study.dawheen.config.AppProperties$Auth"
     },
     {
       "name": "app.oauth2.authorized-redirect-uris",
       "type": "java.util.List<java.lang.String>",
-      "sourceType": "com.study.dahween.config.AppProperties$OAuth2"
+      "sourceType": "com.study.dawheen.config.AppProperties$OAuth2"
     },
     {
       "name": "cors.allowed-headers",
       "type": "java.lang.String",
-      "sourceType": "com.study.dahween.config.CorsProperties"
+      "sourceType": "com.study.dawheen.config.CorsProperties"
     },
     {
       "name": "cors.allowed-methods",
       "type": "java.lang.String",
-      "sourceType": "com.study.dahween.config.CorsProperties"
+      "sourceType": "com.study.dawheen.config.CorsProperties"
     },
     {
       "name": "cors.allowed-origins",
       "type": "java.lang.String",
-      "sourceType": "com.study.dahween.config.CorsProperties"
+      "sourceType": "com.study.dawheen.config.CorsProperties"
     },
     {
       "name": "cors.max-age",
       "type": "java.lang.Long",
-      "sourceType": "com.study.dahween.config.CorsProperties"
+      "sourceType": "com.study.dawheen.config.CorsProperties"
     }
   ],
   "hints": []

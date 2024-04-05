@@ -21,8 +21,9 @@
         <module name="dahween.main" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
+    <bytecodeTargetLevel target="17">
       <module name="dahween.querydsl" target="17" />
+      <module name="dawheen" target="17" />
     </bytecodeTargetLevel>
   </component>
 </project>
