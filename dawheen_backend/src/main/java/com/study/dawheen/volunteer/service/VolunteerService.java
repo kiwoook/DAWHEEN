@@ -45,9 +45,11 @@ public class VolunteerService {
     }
 
     public List<VolunteerInfoResponseDto> getVolunteersWithinRadius(double latitude, double longitude, int radius){
-        return null;
+        return volunteerWorkRepository.getByRadiusAndBeforeEndDate(latitude, longitude, radius).orElseThrow(EntityNotFoundException::new);
     }
 
+
+    // TODO 봉사활동이 만들어졌다면 특정 기관을 구독한 유저에게 알림이 전송되어야함. KAFKA 활용?
     @Transactional
     public VolunteerInfoResponseDto create(String email, VolunteerCreateRequestDto createResponseDto) {
         User user = userRepository.findByEmail(email).orElseThrow(EntityNotFoundException::new);

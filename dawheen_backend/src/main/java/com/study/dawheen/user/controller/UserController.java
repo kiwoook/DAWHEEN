@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -50,7 +51,7 @@ public class UserController {
 
     @Operation(summary = "사용자 정보 변경", description = "사용자 정보 변경")
     @PutMapping("/me")
-    public ResponseEntity<UserInfoResponseDto> updateUser(@RequestBody UserUpdateRequestDto requestDto){
+    public ResponseEntity<UserInfoResponseDto> updateUser(@RequestBody @Valid UserUpdateRequestDto requestDto){
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         try{
             UserInfoResponseDto responseDto = userService.updateUser(email, requestDto);
@@ -63,7 +64,7 @@ public class UserController {
 
     @Operation(summary = "OAuth2 사용자 추가", description = "추가 정보를 입력받고 해당 OAuth2 유저를 사용자로 등록합니다.")
     @PostMapping("/oauth2")
-    public ResponseEntity<UserInfoResponseDto> verifyOAuth2Member(@RequestBody OAuth2UserCreateRequestDto requestDto) {
+    public ResponseEntity<UserInfoResponseDto> verifyOAuth2Member(@RequestBody @Valid OAuth2UserCreateRequestDto requestDto) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
         try {
@@ -99,7 +100,7 @@ public class UserController {
 
     @Operation(summary = "비밀번호 초기화 링크 이메일 전송", description = "사용자의 이메일로 비밀번호 초기화 링크를 전송합니다.")
     @PostMapping("/send-reset-email")
-    public ResponseEntity<UserInfoResponseDto> sendResetEmail(@RequestBody UserResetPasswordRequestDto requestDto) {
+    public ResponseEntity<UserInfoResponseDto> sendResetEmail(@RequestBody @Valid UserResetPasswordRequestDto requestDto) {
         try {
             userService.sendResetEmail(requestDto);
             return ResponseEntity.ok().build();

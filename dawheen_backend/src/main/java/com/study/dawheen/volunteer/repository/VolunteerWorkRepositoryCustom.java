@@ -1,5 +1,6 @@
 package com.study.dawheen.volunteer.repository;
 
+import com.study.dawheen.volunteer.dto.VolunteerInfoResponseDto;
 import com.study.dawheen.volunteer.entity.VolunteerWork;
 import com.study.dawheen.volunteer.entity.type.ApplyStatus;
 import com.study.dawheen.volunteer.entity.type.TargetAudience;
@@ -11,11 +12,11 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface VolunteerWorkRepositoryCustom {
-    Optional<List<VolunteerWork>> getByRadiusAndBeforeEndDate(double latitude, double longitude, int radius);
+    Optional<List<VolunteerInfoResponseDto>> getByRadiusAndBeforeEndDate(double latitude, double longitude, int radius);
 
 
     // 필터에 맞춰 VolunteerWork 반환
-    Optional<List<VolunteerWork>> getByFiltersAndDataRangeWithinRadius(
+    Optional<List<VolunteerInfoResponseDto>> getByFiltersAndDataRangeWithinRadius(
             double latitude, double longitude, int radius,
             Set<VolunteerType> volunteerTypes, Set<TargetAudience> targetAudiences,
             LocalDate startDate, LocalDate endDate

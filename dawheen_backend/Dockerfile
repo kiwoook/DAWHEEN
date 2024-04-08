@@ -1,6 +1,8 @@
 FROM openjdk:17-alpine AS builder
 LABEL authors="ki wook"
 
+COPY ./src/main/resources/application-docker.properties ./src/main/resources/application.properties
+
 COPY .. /tmp
 WORKDIR /tmp
 

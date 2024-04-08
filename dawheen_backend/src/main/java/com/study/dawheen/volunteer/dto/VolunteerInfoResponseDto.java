@@ -1,5 +1,6 @@
 package com.study.dawheen.volunteer.dto;
 
+import com.querydsl.core.annotations.QueryProjection;
 import com.study.dawheen.common.dto.CoordinateInfoResponseDto;
 import com.study.dawheen.organization.dto.OrganInfoResponseDto;
 import com.study.dawheen.volunteer.entity.VolunteerWork;
@@ -33,6 +34,7 @@ public class VolunteerInfoResponseDto {
     private LocalDateTime recruitStartDateTime;
     private LocalDateTime recruitEndDateTime;
     private CoordinateInfoResponseDto coordinateInfoResponseDto;
+
 
     public VolunteerInfoResponseDto(VolunteerWork volunteerWork) {
         this.createdDate = volunteerWork.getCreatedDate();

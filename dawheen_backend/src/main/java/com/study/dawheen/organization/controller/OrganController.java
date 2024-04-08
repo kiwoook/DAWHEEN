@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -62,7 +63,7 @@ public class OrganController {
     @Operation(summary = "기관 정보 업데이트")
     @PreAuthorize("hasRole('ROLE_ORGANIZATION') or hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<OrganInfoResponseDto> updateOrganization(@PathVariable("id") Long id, @RequestBody OrganRequestDto requestDto) {
+    public ResponseEntity<OrganInfoResponseDto> updateOrganization(@PathVariable("id") Long id, @RequestBody @Valid OrganRequestDto requestDto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         try {
@@ -109,7 +110,7 @@ public class OrganController {
 
     @Operation(summary = "기관 등록 신청")
     @PostMapping("/apply")
-    public ResponseEntity<OrganInfoResponseDto> applyOrganization(@RequestBody OrganRequestDto requestDto) {
+    public ResponseEntity<OrganInfoResponseDto> applyOrganization(@RequestBody @Valid OrganRequestDto requestDto) {
         try {
             OrganInfoResponseDto responseDto = organService.create(requestDto);
             return ResponseEntity.ok(responseDto);
@@ -174,7 +175,7 @@ public class OrganController {
     @Operation(summary = "사용자 기관 권한 삭제")
     @PreAuthorize("hasRole('ROLE_ORGANIZATION') or hasRole('ROLE_ADMIN')")
     @PostMapping("/revoke")
-    public ResponseEntity<OrganInfoResponseDto> revokeRole(@RequestBody RoleRequestDto roleRequestDto) {
+    public ResponseEntity<OrganInfoResponseDto> revokeRole(@RequestBody @Valid RoleRequestDto roleRequestDto) {
         try {
             organService.revokeOrganizationRole(roleRequestDto.getEmail(), roleRequestDto.getOrganizationId());
             return ResponseEntity.ok().build();
