@@ -1,13 +1,14 @@
 package com.study.dawheen.volunteer.repository.impl;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.study.dawheen.common.entity.QCoordinate;
+import com.study.dawheen.volunteer.dto.VolunteerInfoResponseDto;
 import com.study.dawheen.volunteer.entity.QUserVolunteerWork;
 import com.study.dawheen.volunteer.entity.QVolunteerWork;
-import com.study.dawheen.volunteer.entity.VolunteerWork;
 import com.study.dawheen.volunteer.entity.type.ApplyStatus;
 import com.study.dawheen.volunteer.entity.type.TargetAudience;
 import com.study.dawheen.volunteer.entity.type.VolunteerType;
@@ -34,26 +35,26 @@ public class VolunteerWorkRepositoryCustomImpl implements VolunteerWorkRepositor
     }
 
     @Override
-    public Optional<List<VolunteerWork>> getByRadiusAndBeforeEndDate(double latitude, double longitude, int radius) {
+    public Optional<List<VolunteerInfoResponseDto>> getByRadiusAndBeforeEndDate(double latitude, double longitude, int radius) {
 
 
         NumberTemplate<Double> haversineFormula = Expressions.numberTemplate(Double.class, "6371 * acos(cos(radians({0}))*cos(radians({1}))*cos(radians({2}) - radians({3})) + sin(radians({4}))*sin(radians({5})))", latitude, volunteerWork.coordinate.latitude, volunteerWork.coordinate.longitude, longitude, latitude, volunteerWork.coordinate.latitude);
 
         LocalDateTime now = LocalDateTime.now();
 
-        List<VolunteerWork> result = queryFactory.selectFrom(volunteerWork).join(volunteerWork.coordinate, coordinate).fetchJoin().where(haversineFormula.loe(radius).and(volunteerWork.recruitEndDateTime.after(now))).fetch();
+        List<VolunteerInfoResponseDto> result = queryFactory.select(Projections.bean(VolunteerInfoResponseDto.class, volunteerWork)).from(volunteerWork).join(volunteerWork.coordinate, coordinate).fetchJoin().where(haversineFormula.loe(radius).and(volunteerWork.recruitEndDateTime.after(now))).fetch();
 
         return Optional.ofNullable(result);
     }
 
     @Override
-    public Optional<List<VolunteerWork>> getByFiltersAndDataRangeWithinRadius(double latitude, double longitude, int radius, Set<VolunteerType> volunteerTypes, Set<TargetAudience> targetAudiences, LocalDate startDate, LocalDate endDate) {
+    public Optional<List<VolunteerInfoResponseDto>> getByFiltersAndDataRangeWithinRadius(double latitude, double longitude, int radius, Set<VolunteerType> volunteerTypes, Set<TargetAudience> targetAudiences, LocalDate startDate, LocalDate endDate) {
 
         NumberTemplate<Double> haversineFormula = Expressions.numberTemplate(Double.class, "6371 * acos(cos(radians({0}))*cos(radians({1}))*cos(radians({2}) - radians({3})) + sin(radians({4}))*sin(radians({5})))", latitude, volunteerWork.coordinate.latitude, volunteerWork.coordinate.longitude, longitude, latitude, volunteerWork.coordinate.latitude);
 
         LocalDateTime now = LocalDateTime.now();
 
-        List<VolunteerWork> result = queryFactory.selectFrom(volunteerWork).join(volunteerWork.coordinate, coordinate).fetchJoin().where(haversineFormula.loe(radius), volunteerWork.recruitEndDateTime.after(now), volunteerWork.serviceStartDate.between(startDate, endDate), volunteerWork.serviceEndDate.between(startDate, endDate), isContainVolunteerTypes(volunteerTypes), isContainTargetAudiences(targetAudiences)).fetch();
+        List<VolunteerInfoResponseDto> result = queryFactory.select(Projections.bean(VolunteerInfoResponseDto.class, volunteerWork)).from(volunteerWork).join(volunteerWork.coordinate, coordinate).fetchJoin().where(haversineFormula.loe(radius), volunteerWork.recruitEndDateTime.after(now), volunteerWork.serviceStartDate.between(startDate, endDate), volunteerWork.serviceEndDate.between(startDate, endDate), isContainVolunteerTypes(volunteerTypes), isContainTargetAudiences(targetAudiences)).fetch();
 
         return Optional.ofNullable(result);
     }

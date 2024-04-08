@@ -2,14 +2,17 @@ package com.study.dawheen.volunteer.controller;
 
 import com.study.dawheen.common.exception.AuthorizationFailedException;
 import com.study.dawheen.user.dto.UserInfoResponseDto;
+import com.study.dawheen.volunteer.dto.VolunteerCreateRequestDto;
 import com.study.dawheen.volunteer.dto.VolunteerInfoResponseDto;
 import com.study.dawheen.volunteer.dto.VolunteerUpdateResponseDto;
 import com.study.dawheen.volunteer.entity.type.ApplyStatus;
 import com.study.dawheen.volunteer.service.VolunteerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
+@Tag(name = "봉사활동", description = "봉사활동 관련 API")
 @RestController
 @Slf4j
 @RequestMapping("/api/v1/volunteer")
@@ -36,7 +40,25 @@ public class VolunteerController {
             @Parameter(name = "경도", required = true) @RequestParam double longitude,
             @Parameter(name = "반경", description = "단위 : m", required = true) @RequestParam int radius
     ) {
-        return null;
+        try{
+            List<VolunteerInfoResponseDto> responseDtos = volunteerService.getVolunteersWithinRadius(latitude, longitude, radius);
+            return ResponseEntity.ok(responseDtos);
+        }catch (EntityNotFoundException e){
+            return ResponseEntity.notFound().build();
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<VolunteerInfoResponseDto> createVolunteer(@RequestBody @Valid VolunteerCreateRequestDto requestDto){
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        try{
+            VolunteerInfoResponseDto responseDto = volunteerService.create(email, requestDto);
+            return ResponseEntity.ok(responseDto);
+        }catch (EntityNotFoundException e){
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/{id}")
@@ -230,6 +252,4 @@ public class VolunteerController {
             return ResponseEntity.badRequest().build();
         }
     }
-
-
 }
