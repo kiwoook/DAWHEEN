@@ -1,4 +1,4 @@
-package com.study.dawheen.mail.service;
+package com.study.dawheen.infra.mail;
 
 import com.study.dawheen.auth.jwt.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ public class MailService {
     private String frontendUrl;
 
     @Async
-    public void sendResetPassword(String email) throws Exception{
+    public void sendResetPassword(String email) {
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
 
         String tmpToken = jwtService.createTmpToken(email);

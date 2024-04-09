@@ -26,14 +26,6 @@ public class OrganService {
     private final UserVolunteerRepository userVolunteerRepository;
 
 
-    public OrganInfoResponseDto getOrgan(Long id) throws EntityNotFoundException {
-        Organization organization = organRepository.findById(id).orElseThrow(EntityNotFoundException::new);
-        return new OrganInfoResponseDto(organization);
-    }
-
-    public List<OrganInfoResponseDto> getPendingOrganList() throws EntityNotFoundException {
-        return organRepository.getAllByApproved(false).orElseThrow(EntityNotFoundException::new).stream().map(OrganInfoResponseDto::new).toList();
-    }
 
 
     @Transactional

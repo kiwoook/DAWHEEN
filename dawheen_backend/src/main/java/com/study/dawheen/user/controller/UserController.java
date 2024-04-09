@@ -1,7 +1,7 @@
 package com.study.dawheen.user.controller;
 
 import com.study.dawheen.auth.JwtResponseDto;
-import com.study.dawheen.mail.service.MailService;
+import com.study.dawheen.infra.mail.MailService;
 import com.study.dawheen.user.dto.OAuth2UserCreateRequestDto;
 import com.study.dawheen.user.dto.UserInfoResponseDto;
 import com.study.dawheen.user.dto.UserResetPasswordRequestDto;
