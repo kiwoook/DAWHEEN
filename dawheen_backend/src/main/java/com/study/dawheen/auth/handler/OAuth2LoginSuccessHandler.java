@@ -68,7 +68,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         response.sendRedirect(generateUrl(accessToken, refreshToken));
     }
 
-    private String generateUrl(final String accessToken, final String refreshToken) throws UnsupportedEncodingException {
+    private String generateUrl(final String accessToken, final String refreshToken) {
         StringBuilder sb = new StringBuilder();
         StringBuilder url = sb.append(frontendUrl)
                 .append("/oauth2-callback")
