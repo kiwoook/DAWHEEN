@@ -2,14 +2,19 @@ package com.study.dawheen.volunteer.controller;
 
 import com.study.dawheen.common.exception.AuthorizationFailedException;
 import com.study.dawheen.user.dto.UserInfoResponseDto;
+import com.study.dawheen.volunteer.dto.VolunteerCreateRequestDto;
 import com.study.dawheen.volunteer.dto.VolunteerInfoResponseDto;
 import com.study.dawheen.volunteer.dto.VolunteerUpdateResponseDto;
 import com.study.dawheen.volunteer.entity.type.ApplyStatus;
+import com.study.dawheen.volunteer.service.VolunteerQueryService;
 import com.study.dawheen.volunteer.service.VolunteerService;
+import com.study.dawheen.volunteer.service.VolunteerUserQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,16 +24,17 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.concurrent.Semaphore;
 
+@Tag(name = "봉사활동", description = "봉사활동 관련 API")
 @RestController
 @Slf4j
 @RequestMapping("/api/v1/volunteer")
 @RequiredArgsConstructor
 public class VolunteerController {
 
-    private final Semaphore semaphore;
     private final VolunteerService volunteerService;
+    private final VolunteerQueryService volunteerQueryService;
+    private final VolunteerUserQueryService volunteerUserQueryService;
 
     @GetMapping()
     public ResponseEntity<List<VolunteerInfoResponseDto>> getVolunteerListWithInRadius(
@@ -36,13 +42,31 @@ public class VolunteerController {
             @Parameter(name = "경도", required = true) @RequestParam double longitude,
             @Parameter(name = "반경", description = "단위 : m", required = true) @RequestParam int radius
     ) {
-        return null;
+        try {
+            List<VolunteerInfoResponseDto> responseDtos = volunteerQueryService.getVolunteersWithinRadius(latitude, longitude, radius);
+            return ResponseEntity.ok(responseDtos);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<VolunteerInfoResponseDto> createVolunteer(@RequestBody @Valid VolunteerCreateRequestDto requestDto) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        try {
+            VolunteerInfoResponseDto responseDto = volunteerService.create(email, requestDto);
+            return ResponseEntity.ok(responseDto);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<VolunteerInfoResponseDto> getVolunteerWorkInfo(@PathVariable Long id) {
         try {
-            VolunteerInfoResponseDto responseDto = volunteerService.getVolunteer(id);
+            VolunteerInfoResponseDto responseDto = volunteerQueryService.getVolunteer(id);
             return ResponseEntity.ok(responseDto);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.badRequest().build();
@@ -55,7 +79,7 @@ public class VolunteerController {
     @GetMapping("/organization/{organizationId}")
     public ResponseEntity<List<VolunteerInfoResponseDto>> getVolunteerListByOrganization(@PathVariable Long organizationId) {
         try {
-            List<VolunteerInfoResponseDto> responseDtos = volunteerService.getAllVolunteersByOrganization(organizationId);
+            List<VolunteerInfoResponseDto> responseDtos = volunteerQueryService.getAllVolunteersByOrganization(organizationId);
             return ResponseEntity.ok(responseDtos);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.badRequest().build();
@@ -67,7 +91,7 @@ public class VolunteerController {
     @GetMapping("/users/{id}")
     public ResponseEntity<List<UserInfoResponseDto>> getAllUsersByVolunteerWork(@PathVariable Long id) {
         try {
-            List<UserInfoResponseDto> responseDtos = volunteerService.getAllUsersByVolunteerWork(id);
+            List<UserInfoResponseDto> responseDtos = volunteerUserQueryService.getAllUsersByVolunteerWork(id);
             return ResponseEntity.ok(responseDtos);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.badRequest().build();
@@ -126,7 +150,7 @@ public class VolunteerController {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
         try {
-            List<UserInfoResponseDto> infoResponseDtos = volunteerService.getUserListByStatusForOrganization(id, email, status);
+            List<UserInfoResponseDto> infoResponseDtos = volunteerUserQueryService.getUserListByStatusForOrganization(id, email, status);
             return ResponseEntity.ok(infoResponseDtos);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.badRequest().build();
@@ -148,7 +172,7 @@ public class VolunteerController {
     @GetMapping("/pending/{status}/{id}/admin")
     public ResponseEntity<List<UserInfoResponseDto>> getUserListForAdmin(@PathVariable Long id, @PathVariable ApplyStatus status) {
         try {
-            List<UserInfoResponseDto> infoResponseDtos = volunteerService.getUserListByStatusForAdmin(id, status);
+            List<UserInfoResponseDto> infoResponseDtos = volunteerUserQueryService.getUserListByStatusForAdmin(id, status);
             return ResponseEntity.ok(infoResponseDtos);
         } catch (IllegalStateException | EntityNotFoundException e) {
             return ResponseEntity.badRequest().build();
@@ -230,6 +254,4 @@ public class VolunteerController {
             return ResponseEntity.badRequest().build();
         }
     }
-
-
 }

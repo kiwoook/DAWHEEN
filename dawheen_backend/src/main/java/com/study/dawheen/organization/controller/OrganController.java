@@ -2,11 +2,13 @@ package com.study.dawheen.organization.controller;
 
 import com.study.dawheen.organization.dto.OrganInfoResponseDto;
 import com.study.dawheen.organization.dto.OrganRequestDto;
+import com.study.dawheen.organization.service.OrganQueryService;
 import com.study.dawheen.organization.service.OrganService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -28,13 +30,15 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "기관", description = "기관 CRUD 및 관련 API")
 public class OrganController {
+
     private final OrganService organService;
+    private final OrganQueryService organQueryService;
 
     @Operation(summary = "기관 정보", description = "기관의 ID 값을 통해 기관 정보를 반환합니다.")
     @GetMapping("/{id}")
     public ResponseEntity<OrganInfoResponseDto> getOrganization(@PathVariable("id") Long id) {
         try {
-            OrganInfoResponseDto organ = organService.getOrgan(id);
+            OrganInfoResponseDto organ = organQueryService.getOrgan(id);
             return ResponseEntity.ok(organ);
         } catch (EntityNotFoundException e) {
             log.info("해당 ID가 존재하지 않습니다. id = {}", id);
@@ -62,7 +66,7 @@ public class OrganController {
     @Operation(summary = "기관 정보 업데이트")
     @PreAuthorize("hasRole('ROLE_ORGANIZATION') or hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<OrganInfoResponseDto> updateOrganization(@PathVariable("id") Long id, @RequestBody OrganRequestDto requestDto) {
+    public ResponseEntity<OrganInfoResponseDto> updateOrganization(@PathVariable("id") Long id, @RequestBody @Valid OrganRequestDto requestDto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         try {
@@ -109,7 +113,7 @@ public class OrganController {
 
     @Operation(summary = "기관 등록 신청")
     @PostMapping("/apply")
-    public ResponseEntity<OrganInfoResponseDto> applyOrganization(@RequestBody OrganRequestDto requestDto) {
+    public ResponseEntity<OrganInfoResponseDto> applyOrganization(@RequestBody @Valid OrganRequestDto requestDto) {
         try {
             OrganInfoResponseDto responseDto = organService.create(requestDto);
             return ResponseEntity.ok(responseDto);
@@ -123,7 +127,7 @@ public class OrganController {
     @GetMapping
     public ResponseEntity<List<OrganInfoResponseDto>> getPendingOrganizationList() {
         try {
-            return ResponseEntity.ok(organService.getPendingOrganList());
+            return ResponseEntity.ok(organQueryService.getPendingOrganList());
         } catch (EntityNotFoundException e) {
             return ResponseEntity.badRequest().build();
         }
@@ -174,7 +178,7 @@ public class OrganController {
     @Operation(summary = "사용자 기관 권한 삭제")
     @PreAuthorize("hasRole('ROLE_ORGANIZATION') or hasRole('ROLE_ADMIN')")
     @PostMapping("/revoke")
-    public ResponseEntity<OrganInfoResponseDto> revokeRole(@RequestBody RoleRequestDto roleRequestDto) {
+    public ResponseEntity<OrganInfoResponseDto> revokeRole(@RequestBody @Valid RoleRequestDto roleRequestDto) {
         try {
             organService.revokeOrganizationRole(roleRequestDto.getEmail(), roleRequestDto.getOrganizationId());
             return ResponseEntity.ok().build();
@@ -189,13 +193,13 @@ public class OrganController {
     // TODO 구독 기능 만들기
     @Operation(summary = "사용자 기관 구독", description = "사용자가 기관을 구독하여 봉사활동 생성 시 알림을 발송합니다.")
     @PostMapping("/subscribe")
-    public ResponseEntity<Object> subscribe(@RequestBody Long id){
+    public ResponseEntity<Object> subscribe(@RequestBody Long id) {
         return null;
     }
 
     @Operation(summary = "사용자 기관 구독 취소", description = "기관 구독을 취소합니다")
     @DeleteMapping("/subscribe")
-    public ResponseEntity<Object> cancelSubscribe(@RequestBody Long id){
+    public ResponseEntity<Object> cancelSubscribe(@RequestBody Long id) {
         return null;
     }
 

@@ -3,7 +3,7 @@ package com.study.dawheen.user.service;
 import com.study.dawheen.auth.JwtResponseDto;
 import com.study.dawheen.auth.jwt.JwtService;
 import com.study.dawheen.common.entity.Address;
-import com.study.dawheen.mail.service.MailService;
+import com.study.dawheen.infra.mail.MailService;
 import com.study.dawheen.user.dto.OAuth2UserCreateRequestDto;
 import com.study.dawheen.user.dto.UserInfoResponseDto;
 import com.study.dawheen.user.dto.UserResetPasswordRequestDto;
