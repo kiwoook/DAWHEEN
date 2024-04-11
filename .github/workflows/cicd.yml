@@ -1,4 +1,4 @@
-name: Docker CI / CD
+name: CI / CD
 
 on:
   push:
@@ -19,6 +19,17 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
+
+    - name: Gradle Caching
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+      
         
     - name: change application.yml
       run: COPY ./src/main/resources/application-docker.properties ./src/main/resources/application.properties
@@ -41,10 +52,10 @@ jobs:
     - name: Build with Gradle Wrapper
       run: ./gradlew build
       working-directory: dawheen_backend
-    
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
-      working-directory: dawheen_backend
+
+    - name: Make zip file
+      run: zip -r ./dawheen.zip ./dawheen_backend
+      shell: bash
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
