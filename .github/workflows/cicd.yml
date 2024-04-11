@@ -32,7 +32,7 @@ jobs:
       
         
     - name: change application.yml
-      run: COPY ./src/main/resources/application-docker.properties ./src/main/resources/application.properties
+      run: cp ./src/main/resources/application-docker.properties ./src/main/resources/application.properties
       shell: bash
       working-directory: dawheen_backend
 
