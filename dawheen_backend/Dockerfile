@@ -1,7 +1,7 @@
 FROM openjdk:17-alpine AS builder
 LABEL authors="ki wook"
 
-COPY .. /tmp
+COPY . /tmp
 WORKDIR /tmp
 
 RUN sed -i 's/\r$//' ./gradlew
