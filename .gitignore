@@ -1,8 +1,13 @@
 
-dahween_backend/src/main/resources/application.properties
-*.properties
+
 /.idea/
 /dahween_backend/build/
 /dahween_backend/.idea/
 .idea/
 /.idea
+dawheen_backend/build/resources/main/application-oauth.properties
+dawheen_backend/build/resources/main/application.properties
+dawheen_backend/build/resources/main/application-docker.properties
+dawheen_backend/src/main/resources/application-docker.properties
+dawheen_backend/src/main/resources/application-oauth.properties
+dawheen_backend/src/main/resources/application.properties
