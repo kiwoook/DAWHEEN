@@ -5,8 +5,11 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
+    container_name: dawheen_backend-blue
+    environment:
+      - LANG=ko_KR.UTF-8
     ports:
-      - "8080:8080"
+      - "8081:8080"
     networks:
       - spring-network
   zookeeper:
@@ -24,7 +27,7 @@ services:
     depends_on:
       - zookeeper
     ports:
-      - 29092:29092
+      - "29092:29092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
