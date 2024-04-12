@@ -14,7 +14,6 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -24,10 +23,6 @@ import java.nio.charset.StandardCharsets;
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private static final String AUTHORIZATION_CODE = "Bearer ";
-    private static final String QUERY_START_MARK = "?";
-    private static final String QUERY_AND_MARK = "&";
-    private static final String QUERY_PARAM_ACCESS_TOKEN_KEY = "accessToken=";
-    private static final String QUERY_PARAM_REFRESH_TOKEN_KEY = "refreshToken=";
     private final JwtService jwtService;
     private final UserRepository userRepository;
     @Value("${frontend.server.url}")
@@ -42,7 +37,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             String accessToken = jwtService.createAccessToken(oAuth2User.getEmail());
             response.addHeader(jwtService.getAccessHeader(), AUTHORIZATION_CODE + accessToken);
             response.sendRedirect(frontendUrl
-                    + "/oauth2/sign-up");
+                    + "/oauth2/sign-up?access_token=" + URLEncoder.encode(accessToken, StandardCharsets.UTF_8));
             return;
         }
         loginSuccess(response, oAuth2User);
@@ -50,7 +45,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     }
 
     // TODO : 소셜 로그인 시에도 무조건 토큰 생성하지 말고 JWT 인증 필터처럼 RefreshToken 유/무에 따라 다르게 처리해보기
-    private void loginSuccess(HttpServletResponse response, CustomOAuth2User oAuth2User) throws IOException {
+    private void loginSuccess(HttpServletResponse response, CustomOAuth2User oAuth2User) {
         String email = oAuth2User.getEmail();
         String accessToken = jwtService.createAccessToken(email);
         String refreshToken = jwtService.createRefreshToken();
@@ -64,20 +59,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken);
         jwtService.updateRefreshToken(oAuth2User.getEmail(), refreshToken);
-
-        response.sendRedirect(generateUrl(accessToken, refreshToken));
     }
 
-    private String generateUrl(final String accessToken, final String refreshToken) {
-        StringBuilder sb = new StringBuilder();
-        StringBuilder url = sb.append(frontendUrl)
-                .append("/oauth2-callback")
-                .append(QUERY_START_MARK)
-                .append(QUERY_PARAM_ACCESS_TOKEN_KEY)
-                .append(URLEncoder.encode(accessToken, StandardCharsets.UTF_8))
-                .append(QUERY_AND_MARK)
-                .append(QUERY_PARAM_REFRESH_TOKEN_KEY)
-                .append(URLEncoder.encode(refreshToken, StandardCharsets.UTF_8));
-        return url.toString();
-    }
 }

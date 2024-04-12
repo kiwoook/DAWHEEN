@@ -47,7 +47,6 @@ public class User extends BaseTimeEntity {
     @Column()
     private String name;
 
-
     @Column
     private String phone;
 
@@ -93,7 +92,9 @@ public class User extends BaseTimeEntity {
 
     public void update(String name, String email, String phone, Address address) {
         this.name = name;
-        this.email = email;
+        if (email != null){
+            this.email = email;
+        }
         this.phone = phone;
         this.address = address;
 

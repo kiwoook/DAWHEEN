@@ -2,6 +2,7 @@ package com.study.dawheen.user.service;
 
 import com.study.dawheen.auth.JwtResponseDto;
 import com.study.dawheen.auth.jwt.JwtService;
+import com.study.dawheen.common.dto.TokenResponseDto;
 import com.study.dawheen.common.entity.Address;
 import com.study.dawheen.infra.mail.MailService;
 import com.study.dawheen.user.dto.OAuth2UserCreateRequestDto;
@@ -28,7 +29,7 @@ public class UserService {
         return new UserInfoResponseDto(user);
     }
 
-    public UserInfoResponseDto updateUser(String email, UserUpdateRequestDto requestDto){
+    public UserInfoResponseDto updateUser(String email, UserUpdateRequestDto requestDto) {
         User user = userRepository.findByEmail(email).orElseThrow(EntityNotFoundException::new);
         user.update(requestDto.getName(), requestDto.getEmail(), requestDto.getPhone(), Address.toEntity(requestDto.getAddress()));
 
@@ -36,13 +37,21 @@ public class UserService {
     }
 
     @Transactional
-    public void verifyOAuth2Member(String email, OAuth2UserCreateRequestDto requestDto) {
+    public TokenResponseDto verifyOAuth2Member(String email, OAuth2UserCreateRequestDto requestDto) {
         User user = userRepository.findByEmail(email).orElseThrow(EntityNotFoundException::new);
+
         user.update(requestDto.getName(), null, requestDto.getPhone(), Address.toEntity(requestDto.getAddress()));
         user.verifyOAuth2User();
+
+        String accessToken = jwtService.createAccessToken(email);
+        String refreshToken = jwtService.createRefreshToken();
+        user.updateRefreshToken(refreshToken);
+
+        return new TokenResponseDto(accessToken, refreshToken);
     }
 
-    public boolean checkEmail(String email){
+    public boolean notExistEmail(String email) {
+        // True 시 이메일이 존재하지 않는 것
         return !userRepository.existsByEmail(email);
     }
 
@@ -58,15 +67,15 @@ public class UserService {
         user.changePassword(newPassword);
     }
 
-    public void sendResetEmail(UserResetPasswordRequestDto requestDto) throws Exception {
-        if (!userRepository.existsByEmailAndName(requestDto.getEmail(), requestDto.getName())){
+    public void sendResetEmail(UserResetPasswordRequestDto requestDto) {
+        if (!userRepository.existsByEmailAndName(requestDto.getEmail(), requestDto.getName())) {
             throw new IllegalStateException();
         }
-
         mailService.sendResetPassword(requestDto.getEmail());
     }
+
     @Transactional
-    public JwtResponseDto resetPassword(String email, String password){
+    public JwtResponseDto resetPassword(String email, String password) {
         User user = userRepository.findByEmail(email).orElseThrow(EntityNotFoundException::new);
 
         user.changePassword(password);

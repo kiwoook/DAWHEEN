@@ -1,7 +1,7 @@
 package com.study.dawheen.user.controller;
 
 import com.study.dawheen.auth.JwtResponseDto;
-import com.study.dawheen.infra.mail.MailService;
+import com.study.dawheen.common.dto.TokenResponseDto;
 import com.study.dawheen.user.dto.OAuth2UserCreateRequestDto;
 import com.study.dawheen.user.dto.UserInfoResponseDto;
 import com.study.dawheen.user.dto.UserResetPasswordRequestDto;
@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
-    private final MailService mailService;
 
     @Operation(summary = "사용자 정보 반환", description = "사용자의 유저 정보를 반환합니다.")
     @ApiResponses(value = {
@@ -41,45 +40,33 @@ public class UserController {
     public ResponseEntity<UserInfoResponseDto> getMyProfile() {
         // 유저 자신의 정보를 반환합니다.
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        try {
-            UserInfoResponseDto dto = userService.getUser(email);
-            return ResponseEntity.ok(dto);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        UserInfoResponseDto dto = userService.getUser(email);
+        return ResponseEntity.ok(dto);
     }
 
     @Operation(summary = "사용자 정보 변경", description = "사용자 정보 변경")
     @PutMapping("/me")
-    public ResponseEntity<UserInfoResponseDto> updateUser(@RequestBody @Valid UserUpdateRequestDto requestDto){
+    public ResponseEntity<UserInfoResponseDto> updateUser(@RequestBody @Valid UserUpdateRequestDto requestDto) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        try{
-            UserInfoResponseDto responseDto = userService.updateUser(email, requestDto);
-            return ResponseEntity.ok(responseDto);
-        }catch (EntityNotFoundException e){
-            return ResponseEntity.badRequest().build();
-        }
+        UserInfoResponseDto responseDto = userService.updateUser(email, requestDto);
+        return ResponseEntity.ok(responseDto);
     }
 
 
     @Operation(summary = "OAuth2 사용자 추가", description = "추가 정보를 입력받고 해당 OAuth2 유저를 사용자로 등록합니다.")
     @PostMapping("/oauth2")
-    public ResponseEntity<UserInfoResponseDto> verifyOAuth2Member(@RequestBody @Valid OAuth2UserCreateRequestDto requestDto) {
+    public ResponseEntity<TokenResponseDto> verifyOAuth2Member(@RequestBody @Valid OAuth2UserCreateRequestDto requestDto) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        try {
-            userService.verifyOAuth2Member(email, requestDto);
-            return ResponseEntity.ok().build();
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        TokenResponseDto responseDto = userService.verifyOAuth2Member(email, requestDto);
+        return ResponseEntity.ok(responseDto);
     }
 
     @Operation(summary = "이메일 확인", description = "존재하는 이메일인지 확인합니다.")
     @GetMapping()
     public ResponseEntity<UserInfoResponseDto> checkEmail(@RequestParam(name = "email") String email) {
 
-        if (userService.checkEmail(email)) {
+        if (userService.notExistEmail(email)) {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.status(HttpStatus.CONFLICT).build();
@@ -120,15 +107,10 @@ public class UserController {
     @PostMapping("/reset-password")
     public ResponseEntity<JwtResponseDto> resetPassword(@RequestBody String password) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        try {
-            JwtResponseDto responseDto = userService.resetPassword(email, password);
-            return ResponseEntity.ok(responseDto);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.badRequest().build();
-        }
+
+        JwtResponseDto responseDto = userService.resetPassword(email, password);
+        return ResponseEntity.ok(responseDto);
     }
-
-
 
 
 }

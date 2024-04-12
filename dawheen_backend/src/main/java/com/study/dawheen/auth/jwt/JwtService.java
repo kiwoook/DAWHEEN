@@ -10,6 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.Optional;
@@ -23,6 +26,10 @@ public class JwtService {
     private static final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
     private static final String EMAIL_CLAIM = "email";
     private static final String BEARER = "Bearer ";
+    private static final String QUERY_START_MARK = "?";
+    private static final String QUERY_AND_MARK = "&";
+    private static final String QUERY_PARAM_ACCESS_TOKEN_KEY = "accessToken=";
+    private static final String QUERY_PARAM_REFRESH_TOKEN_KEY = "refreshToken=";
     private final Key key;
     private final UserRepository userRepository;
     @Value("${jwt.secret}")
@@ -35,6 +42,8 @@ public class JwtService {
     private String accessHeader;
     @Value("${jwt.refresh-token.header}")
     private String refreshHeader;
+    @Value("${frontend.server.url}")
+    private String frontendUrl;
 
     public JwtService(UserRepository userRepository, String secretKey) {
         this.userRepository = userRepository;
@@ -68,13 +77,14 @@ public class JwtService {
     }
 
 
-    public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) {
-        response.setStatus(HttpServletResponse.SC_OK);
+    public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken){
+        try{
+            response.sendRedirect(generateUrl(accessToken, refreshToken));
+            log.info("Access Token, Refresh Token 리다이렉트 완료");
+        }catch (IOException e){
+            log.error("Error sending token : {}", e.getMessage());
+        }
 
-        setAccessTokenHeader(response, accessToken);
-        setRefreshTokenHeader(response, refreshToken);
-
-        log.info("Access Token, Refresh Token 헤더 설정 완료");
     }
 
 
@@ -148,6 +158,19 @@ public class JwtService {
             log.error("유효하지 않은 토큰입니다. {}", e.getMessage());
         }
         return false;
+    }
+
+    private String generateUrl(final String accessToken, final String refreshToken) {
+        StringBuilder sb = new StringBuilder();
+        StringBuilder url = sb.append(frontendUrl)
+                .append("/auth-callback")
+                .append(QUERY_START_MARK)
+                .append(QUERY_PARAM_ACCESS_TOKEN_KEY)
+                .append(URLEncoder.encode(accessToken, StandardCharsets.UTF_8))
+                .append(QUERY_AND_MARK)
+                .append(QUERY_PARAM_REFRESH_TOKEN_KEY)
+                .append(URLEncoder.encode(refreshToken, StandardCharsets.UTF_8));
+        return url.toString();
     }
 
 }

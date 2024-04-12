@@ -70,9 +70,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         if (NAVER.equals(registrationId)) {
             return ProviderType.NAVER;
         }
-
         return ProviderType.KAKAO;
-
     }
 
     /**
