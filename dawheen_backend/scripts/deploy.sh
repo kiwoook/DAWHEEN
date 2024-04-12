@@ -1,10 +1,7 @@
 #!/bin/bash
 
-sudo chmod 775 /home/ubuntu/action/deploy.log
-
-echo "> docker-compose 중지" >> /home/ubuntu/action/deploy.log
-
-cd /home/ubuntu/action/dawheen_backend/ || echo "> /home/ubuntu/action/dawheen_backend/ 디렉토리를 찾을 수 없습니다." >> /home/ubuntu/action/deploy.log
+# shellcheck disable=SC2164
+cd /home/ubuntu/action/dawheen_backend/
 
 EXIST_BLUE=$(sudo docker-compose -p dawheen_backend-blue -f docker-compose.blue.yml ps | grep Up)
 
@@ -33,5 +30,3 @@ if [ -n "$EXIST_AFTER" ]; then
     sudo docker-compose -p dawheen_backend-${BEFORE_COMPOSE_COLOR} -f docker-compose.${BEFORE_COMPOSE_COLOR}.yml down
     echo "$BEFORE_COMPOSE_COLOR down"
 fi
-
-echo "> docker-compose 작동 완료" >> /home/ubuntu/action/deploy.log
