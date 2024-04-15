@@ -6,6 +6,6 @@ import lombok.Getter;
 public enum ApplyStatus {
     PENDING,
     APPROVED,
-    REJECTED
-
+    REJECTED,
+    COMPLETED
 }

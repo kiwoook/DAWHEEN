@@ -9,6 +9,9 @@ import lombok.Data;
 
 @Data
 public class UserInfoResponseDto {
+
+    private Long userId;
+
     private String name;
 
     @Email
@@ -23,6 +26,7 @@ public class UserInfoResponseDto {
 
 
     public UserInfoResponseDto(User user) {
+        this.userId = user.getId();
         this.name = user.getName();
         this.email = user.getEmail();
         this.phone = user.getPhone();

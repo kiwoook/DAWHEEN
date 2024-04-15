@@ -25,7 +25,20 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
 
 
     @Override
-    public boolean existsByVolunteerWorkAndUserAndStatus(Long volunteerWorkId, String email, List<ApplyStatus> statuses) {
+    public boolean existsByVolunteerWorkAndUserIdAndStatus(Long volunteerWorkId, Long userId, List<ApplyStatus> statuses) {
+        QUserVolunteerWork userVolunteerWork = QUserVolunteerWork.userVolunteerWork;
+
+        // Exist 관련 조회는 First 로 한 다음에 Null Check 를 하는게 성능 개선에 도움이 된다.
+
+        return queryFactory.selectFrom(userVolunteerWork)
+                .where(userVolunteerWork.user.id.eq(userId)
+                        .and(userVolunteerWork.volunteerWork.id.eq(volunteerWorkId))
+                        .and(userVolunteerWork.status.in(statuses)))
+                .fetchFirst() != null;
+    }
+
+    @Override
+    public boolean existsByVolunteerWorkAndEmailAndStatus(Long volunteerWorkId, String email, List<ApplyStatus> statuses) {
         QUserVolunteerWork userVolunteerWork = QUserVolunteerWork.userVolunteerWork;
 
         // Exist 관련 조회는 First 로 한 다음에 Null Check 를 하는게 성능 개선에 도움이 된다.
@@ -36,6 +49,7 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
                         .and(userVolunteerWork.status.in(statuses)))
                 .fetchFirst() != null;
     }
+
 
     @Override
     public Optional<List<UserVolunteerWork>> findAllByVolunteerWorkIdWithFetch(Long volunteerWorkId) {
@@ -84,6 +98,22 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
 
 
     @Override
+    public Optional<UserVolunteerWork> findByVolunteerWorkIdAndUserId(Long volunteerWorkId, Long userId) {
+        QUserVolunteerWork userVolunteerWork = QUserVolunteerWork.userVolunteerWork;
+        QVolunteerWork volunteerWork = QVolunteerWork.volunteerWork;
+        QUser user = QUser.user;
+        return Optional.ofNullable(queryFactory
+                .selectFrom(userVolunteerWork)
+                .join(userVolunteerWork.volunteerWork, volunteerWork)
+                .join(userVolunteerWork.user, user).fetchJoin()
+                .where(
+                        userVolunteerWork.volunteerWork.id.eq(volunteerWorkId)
+                                .and(userVolunteerWork.user.id.eq(userId))
+                ).fetchOne());
+    }
+
+
+    @Override
     public Optional<UserVolunteerWork> findByVolunteerWorkIdAndEmail(Long volunteerWorkId, String email) {
         QUserVolunteerWork userVolunteerWork = QUserVolunteerWork.userVolunteerWork;
         QVolunteerWork volunteerWork = QVolunteerWork.volunteerWork;
@@ -97,8 +127,5 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
                                 .and(userVolunteerWork.user.email.eq(email))
                 ).fetchOne());
     }
-
-
-
 
 }

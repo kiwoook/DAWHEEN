@@ -3,7 +3,6 @@ package com.study.dawheen.volunteer.service;
 import com.study.dawheen.common.exception.AlreadyProcessedException;
 import com.study.dawheen.common.exception.AuthorizationFailedException;
 import com.study.dawheen.organization.entity.Organization;
-import com.study.dawheen.organization.repository.OrganRepository;
 import com.study.dawheen.user.entity.User;
 import com.study.dawheen.user.repository.UserRepository;
 import com.study.dawheen.volunteer.dto.VolunteerCreateRequestDto;
@@ -24,17 +23,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.Semaphore;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class VolunteerService {
 
+    private static final String AUTHORIZATION_ERR_MSG = "you are not allowed to approve method";
     private final VolunteerWorkRepository volunteerWorkRepository;
     private final UserVolunteerRepository userVolunteerRepository;
     private final UserRepository userRepository;
-
 
     // TODO 봉사활동이 만들어졌다면 특정 기관을 구독한 유저에게 알림이 전송되어야함. KAFKA 활용?
     @Transactional
@@ -80,7 +78,7 @@ public class VolunteerService {
     @Transactional
     public void apply(Long volunteerWorkId, String email) {
 
-        if (userVolunteerRepository.existsByVolunteerWorkAndUserAndStatus(volunteerWorkId, email, List.of(ApplyStatus.APPROVED, ApplyStatus.PENDING))) {
+        if (userVolunteerRepository.existsByVolunteerWorkAndEmailAndStatus(volunteerWorkId, email, List.of(ApplyStatus.APPROVED, ApplyStatus.PENDING))) {
             log.info("이미 신청한 아이디 email = {}, volunteerWorkId = {}", email, volunteerWorkId);
             throw new AlreadyProcessedException();
         }
@@ -100,15 +98,15 @@ public class VolunteerService {
 
 
     @Transactional
-    public void approve(Long volunteerWorkId, String email) throws IllegalAccessException {
+    public void approve(Long volunteerWorkId, Long userId) throws IllegalAccessException {
         // 승인권한은 해당 기관담당만 가능하도록 해야함.
-        UserVolunteerWork userVolunteerWork = userVolunteerRepository.findByVolunteerWorkIdAndEmail(volunteerWorkId, email).orElseThrow(EntityNotFoundException::new);
+        UserVolunteerWork userVolunteerWork = userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId).orElseThrow(EntityNotFoundException::new);
         VolunteerWork volunteerWork = userVolunteerWork.getVolunteerWork();
         String requestEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         Organization organization = userRepository.findByEmail(requestEmail).orElseThrow(EntityNotFoundException::new).getOrganization();
 
         if (!volunteerWork.getOrganization().equals(organization)) {
-            throw new AuthorizationFailedException("you are not allowed to approve method");
+            throw new AuthorizationFailedException(AUTHORIZATION_ERR_MSG);
         }
 
         if (volunteerWork.getAppliedParticipants().get() >= volunteerWork.getMaxParticipants()) {
@@ -122,6 +120,25 @@ public class VolunteerService {
     }
 
     @Transactional
+    public void completed(Long volunteerWorkId, Long userId) throws IllegalStateException {
+        UserVolunteerWork userVolunteerWork = userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId).orElseThrow(EntityNotFoundException::new);
+        if (userVolunteerWork.getStatus() != ApplyStatus.APPROVED) {
+            throw new IllegalStateException();
+        }
+        userVolunteerWork.updateStatus(ApplyStatus.COMPLETED);
+    }
+
+    @Transactional
+    public void cancelPending(Long volunteerWorkId, Long userId) {
+        UserVolunteerWork userVolunteerWork = userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId).orElseThrow(EntityNotFoundException::new);
+
+        if (userVolunteerWork.getStatus() != ApplyStatus.PENDING) {
+            throw new IllegalStateException();
+        }
+
+        userVolunteerWork.updateStatus(ApplyStatus.REJECTED);
+    }
+    @Transactional
     public void cancelPending(Long volunteerWorkId, String email) {
         UserVolunteerWork userVolunteerWork = userVolunteerRepository.findByVolunteerWorkIdAndEmail(volunteerWorkId, email).orElseThrow(EntityNotFoundException::new);
 
@@ -132,6 +149,22 @@ public class VolunteerService {
         userVolunteerWork.updateStatus(ApplyStatus.REJECTED);
     }
 
+
+    public void cancelApproved(Long volunteerWorkId, Long userId) {
+        UserVolunteerWork userVolunteerWork = userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId).orElseThrow(EntityNotFoundException::new);
+
+        if (userVolunteerWork.getStatus() != ApplyStatus.APPROVED) {
+            throw new IllegalStateException();
+        }
+
+        userVolunteerWork.updateStatus(ApplyStatus.REJECTED);
+
+        User user = userVolunteerWork.getUser();
+        VolunteerWork volunteerWork = userVolunteerWork.getVolunteerWork();
+
+        user.leaveVolunteerWork(userVolunteerWork);
+        volunteerWork.leaveUser(userVolunteerWork);
+    }
 
     public void cancelApproved(Long volunteerWorkId, String email) {
         UserVolunteerWork userVolunteerWork = userVolunteerRepository.findByVolunteerWorkIdAndEmail(volunteerWorkId, email).orElseThrow(EntityNotFoundException::new);
@@ -150,14 +183,14 @@ public class VolunteerService {
     }
 
     @Transactional
-    public void cancelPendingForOrganization(Long volunteerWorkId, String email) {
+    public void cancelPendingForOrganization(Long volunteerWorkId, Long userId) {
         String requestEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
         if (equalOrganizationByUserAndVolunteerWork(requestEmail, volunteerWorkId)) {
-            throw new AuthorizationFailedException("you are not allowed to approve method");
+            throw new AuthorizationFailedException(AUTHORIZATION_ERR_MSG);
         }
 
-        UserVolunteerWork userVolunteerWork = userVolunteerRepository.findByVolunteerWorkIdAndEmail(volunteerWorkId, email).orElseThrow(EntityNotFoundException::new);
+        UserVolunteerWork userVolunteerWork = userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId).orElseThrow(EntityNotFoundException::new);
 
         if (userVolunteerWork.getStatus() != ApplyStatus.PENDING) {
             throw new IllegalStateException();
@@ -167,14 +200,14 @@ public class VolunteerService {
     }
 
     @Transactional
-    public void cancelApprovedForOrganization(Long volunteerWorkId, String email) {
+    public void cancelApprovedForOrganization(Long volunteerWorkId, Long userId) {
         String requestEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
         if (equalOrganizationByUserAndVolunteerWork(requestEmail, volunteerWorkId)) {
-            throw new AuthorizationFailedException("you are not allowed to approve method");
+            throw new AuthorizationFailedException(AUTHORIZATION_ERR_MSG);
         }
 
-        cancelApproved(volunteerWorkId, email);
+        cancelApproved(volunteerWorkId, userId);
     }
 
     private boolean equalOrganizationByUserAndVolunteerWork(String email, Long volunteerWorkId) {
