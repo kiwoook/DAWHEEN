@@ -8,12 +8,14 @@
     {
       "name": "app.auth",
       "type": "com.study.dawheen.config.AppProperties$Auth",
-      "sourceType": "com.study.dawheen.config.AppProperties"
+      "sourceType": "com.study.dawheen.config.AppProperties",
+      "sourceMethod": "getAuth()"
     },
     {
       "name": "app.oauth2",
       "type": "com.study.dawheen.config.AppProperties$OAuth2",
-      "sourceType": "com.study.dawheen.config.AppProperties"
+      "sourceType": "com.study.dawheen.config.AppProperties",
+      "sourceMethod": "getOauth2()"
     },
     {
       "name": "cors",
@@ -25,14 +27,12 @@
     {
       "name": "app.auth.refresh-token-expiry",
       "type": "java.lang.Long",
-      "sourceType": "com.study.dawheen.config.AppProperties$Auth",
-      "defaultValue": 0
+      "sourceType": "com.study.dawheen.config.AppProperties$Auth"
     },
     {
       "name": "app.auth.token-expiry",
       "type": "java.lang.Long",
-      "sourceType": "com.study.dawheen.config.AppProperties$Auth",
-      "defaultValue": 0
+      "sourceType": "com.study.dawheen.config.AppProperties$Auth"
     },
     {
       "name": "app.auth.token-secret",
