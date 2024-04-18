@@ -10,16 +10,15 @@ import com.study.dawheen.volunteer.repository.UserVolunteerWorkRankingRepository
 import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public class UserVolunteerWorkRankingRepositoryCustomImpl implements UserVolunteerWorkRankingRepositoryCustom {
 
-    private final JPAQueryFactory queryFactory;
     private static final QUserVolunteerWork userVolunteerWork = QUserVolunteerWork.userVolunteerWork;
     private static final QUser user = QUser.user;
+    private final JPAQueryFactory queryFactory;
 
     public UserVolunteerWorkRankingRepositoryCustomImpl(EntityManager entityManager) {
         this.queryFactory = new JPAQueryFactory(entityManager);

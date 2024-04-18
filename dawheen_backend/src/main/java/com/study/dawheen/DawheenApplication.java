@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableConfigurationProperties({
         AppProperties.class,
@@ -15,6 +16,7 @@ import org.springframework.context.annotation.PropertySource;
 })
 @Import({JpaConfig.class})
 @PropertySource("classpath:application-oauth.properties")
+@EnableScheduling
 @SpringBootApplication
 public class DawheenApplication {
 

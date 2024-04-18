@@ -22,6 +22,8 @@ services:
       ZOOKEEPER_SYNC_LIMIT: 2
     ports:
       - "22182:2181"
+    networks:
+      - spring-network
   kafka:
     image: confluentinc/cp-kafka:7.6.0
     depends_on:
@@ -36,7 +38,14 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-
+    networks:
+      - spring-network
+  redis:
+    image: redis:6.0.20
+    ports:
+      - "6381:6380"
+    networks:
+      - spring-network
 networks:
   spring-network:
 
