@@ -30,8 +30,7 @@ public class UserVolunteerWorkRankingRepositoryCustomImpl implements UserVolunte
         LocalDateTime startDate = now.minusMonths(1);
         return queryFactory.select(Projections.constructor(UserInfoResponseDto.class, user))
                 .from(userVolunteerWork)
-                .join(user, userVolunteerWork.user)
-                .fetchJoin()
+                .join(userVolunteerWork.user, user)
                 .where(userVolunteerWork.status.eq(ApplyStatus.COMPLETED)
                         .and(userVolunteerWork.modifiedDate.between(startDate, LocalDateTime.now())))
                 .groupBy(userVolunteerWork.user)
@@ -46,8 +45,7 @@ public class UserVolunteerWorkRankingRepositoryCustomImpl implements UserVolunte
         LocalDateTime startDate = now.minusMonths(6);
         return queryFactory.select(Projections.constructor(UserInfoResponseDto.class, user))
                 .from(userVolunteerWork)
-                .join(user, userVolunteerWork.user)
-                .fetchJoin()
+                .join(userVolunteerWork.user, user)
                 .where(userVolunteerWork.status.eq(ApplyStatus.COMPLETED)
                         .and(userVolunteerWork.modifiedDate.between(startDate, LocalDateTime.now())))
                 .groupBy(userVolunteerWork.user)
@@ -62,8 +60,7 @@ public class UserVolunteerWorkRankingRepositoryCustomImpl implements UserVolunte
         LocalDateTime startDate = now.minusYears(1);
         return queryFactory.select(Projections.constructor(UserInfoResponseDto.class, user))
                 .from(userVolunteerWork)
-                .join(user, userVolunteerWork.user)
-                .fetchJoin()
+                .join(userVolunteerWork.user, user)
                 .where(userVolunteerWork.status.eq(ApplyStatus.COMPLETED)
                         .and(userVolunteerWork.modifiedDate.between(startDate, LocalDateTime.now())))
                 .groupBy(userVolunteerWork.user)

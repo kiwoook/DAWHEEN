@@ -35,7 +35,7 @@ public class UserVolunteerWork extends BaseTimeEntity {
     public UserVolunteerWork(User user, VolunteerWork volunteerWork) {
         this.user = user;
         this.volunteerWork = volunteerWork;
-        status = ApplyStatus.PENDING;
+        this.status = ApplyStatus.PENDING;
     }
 
     public void updateStatus(ApplyStatus status) {

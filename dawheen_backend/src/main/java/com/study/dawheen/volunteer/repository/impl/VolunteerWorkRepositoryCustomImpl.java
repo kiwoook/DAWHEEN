@@ -54,7 +54,17 @@ public class VolunteerWorkRepositoryCustomImpl implements VolunteerWorkRepositor
 
         LocalDateTime now = LocalDateTime.now();
 
-        List<VolunteerInfoResponseDto> result = queryFactory.select(Projections.bean(VolunteerInfoResponseDto.class, volunteerWork)).from(volunteerWork).join(volunteerWork.coordinate, coordinate).fetchJoin().where(haversineFormula.loe(radius), volunteerWork.recruitEndDateTime.after(now), volunteerWork.serviceStartDate.between(startDate, endDate), volunteerWork.serviceEndDate.between(startDate, endDate), isContainVolunteerTypes(volunteerTypes), isContainTargetAudiences(targetAudiences)).fetch();
+        List<VolunteerInfoResponseDto> result = queryFactory
+                .select(Projections.bean(VolunteerInfoResponseDto.class, volunteerWork))
+                .from(volunteerWork)
+                .join(volunteerWork.coordinate, coordinate)
+                .where(haversineFormula.loe(radius),
+                        volunteerWork.recruitEndDateTime.after(now),
+                        volunteerWork.serviceStartDate.between(startDate, endDate),
+                        volunteerWork.serviceEndDate.between(startDate, endDate),
+                        isContainVolunteerTypes(volunteerTypes),
+                        isContainTargetAudiences(targetAudiences))
+                .fetch();
 
         return Optional.ofNullable(result);
     }
