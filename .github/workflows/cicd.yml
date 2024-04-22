@@ -20,6 +20,17 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
+    - run: touch ./dawheen_backend/src/main/resources/application.properties
+    - run: echo "${{ secrets.APPLICATION }}" > ./dawheen_backend/src/main/resources/application.properties
+    - run: cat ./dawheen_backend/src/main/resources/application.properties
+    - run: touch ./dawheen_backend/src/main/resources/application-oauth.properties
+    - run: echo "${{ secrets.APPLICATION_OAUTH }}" > ./dawheen_backend/src/main/resources/application-oauth.properties
+    - run: cat ./dawheen_backend/src/main/resources/application-oauth.properties
+    - run: touch ./dawheen_backend/src/test/resources/application.properties
+    - run: echo "${{ secrets.APPLICATION_TEST }}" > ./dawheen_backend/src/test/resources/application.properties
+
+
+
     - name: Gradle Caching
       uses: actions/cache@v3
       with:
