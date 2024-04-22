@@ -10,4 +10,6 @@ dawheen_backend/build/resources/main/application-docker.properties
 dawheen_backend/src/main/resources/application-docker.properties
 dawheen_backend/src/main/resources/application-oauth.properties
 dawheen_backend/src/main/resources/application.properties
+dawheen_backend/src/test/resources/application.properties
+
 dawheen_backend/.env
