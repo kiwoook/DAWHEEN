@@ -5,9 +5,12 @@ import com.study.dawheen.auth.entity.ProviderType;
 import com.study.dawheen.user.entity.User;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserInfoResponseDto {
 
     private Long userId;

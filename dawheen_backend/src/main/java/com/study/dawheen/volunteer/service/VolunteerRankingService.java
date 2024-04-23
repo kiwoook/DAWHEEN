@@ -1,5 +1,6 @@
 package com.study.dawheen.volunteer.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.study.dawheen.user.dto.UserInfoResponseDto;
 import com.study.dawheen.volunteer.repository.UserVolunteerRepository;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -31,7 +33,7 @@ public class VolunteerRankingService {
     // @Scheduled(cron = "0 0 0 1 * ?") 매달 1일에만 가중치 계산
 
     @Scheduled(cron = "0 0 0 * * *")
-    public void fetchMonthlyRankingToRedis() {
+    public void fetchMonthlyRankingToRedis() throws JsonProcessingException {
         ValueOperations<String, Object> values = redisTemplate.opsForValue();
         List<UserInfoResponseDto> responseDtoList = userVolunteerRepository.getMonthlyVolunteerActivityRankings();
 
@@ -39,7 +41,7 @@ public class VolunteerRankingService {
             return;
         }
 
-        values.set(MONTHLY_RANKING, responseDtoList, 1, TimeUnit.DAYS);
+        values.set(MONTHLY_RANKING, objectMapper.writeValueAsString(responseDtoList), 1, TimeUnit.DAYS);
         log.info("월간 봉사활동 랭킹 실행 완료");
 
     }
@@ -73,7 +75,7 @@ public class VolunteerRankingService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserInfoResponseDto> getMonthlyRanking() throws IOException {
+    public List<UserInfoResponseDto> getMonthlyRanking() throws IOException, EntityNotFoundException {
         ValueOperations<String, Object> values = redisTemplate.opsForValue();
 
         if (values.get(MONTHLY_RANKING) == null) {
@@ -83,7 +85,7 @@ public class VolunteerRankingService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserInfoResponseDto> getSemiAnnualRanking() throws IOException {
+    public List<UserInfoResponseDto> getSemiAnnualRanking() throws IOException, EntityNotFoundException {
         ValueOperations<String, Object> values = redisTemplate.opsForValue();
 
         if (values.get(SEMI_ANNUAL_RANKING) == null) {
@@ -93,7 +95,7 @@ public class VolunteerRankingService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserInfoResponseDto> getAnnualRanking() throws IOException {
+    public List<UserInfoResponseDto> getAnnualRanking() throws IOException, EntityNotFoundException {
         ValueOperations<String, Object> values = redisTemplate.opsForValue();
 
         if (values.get(ANNUAL_RANKING) == null) {
@@ -105,7 +107,8 @@ public class VolunteerRankingService {
     }
 
     private List<UserInfoResponseDto> deserializeUserResponseDtoList(String jsonString) throws IOException {
-        return List.of(objectMapper.readValue(jsonString, UserInfoResponseDto[].class));
+        UserInfoResponseDto[] array = objectMapper.readValue(jsonString, UserInfoResponseDto[].class);
+        return Arrays.asList(array);
     }
 
 }
