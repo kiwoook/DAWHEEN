@@ -4,13 +4,16 @@ import com.study.dawheen.common.dto.AddressDto;
 import com.study.dawheen.common.dto.CoordinateInfoResponseDto;
 import com.study.dawheen.organization.entity.Organization;
 import jakarta.validation.constraints.Email;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * DTO for {@link com.study.dawheen.organization.entity.Organization}
  */
 
 @Data
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrganInfoResponseDto {
     private String name;
     private String facilityPhone;

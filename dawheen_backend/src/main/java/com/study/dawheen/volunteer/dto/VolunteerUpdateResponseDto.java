@@ -2,7 +2,9 @@ package com.study.dawheen.volunteer.dto;
 
 import com.study.dawheen.volunteer.entity.type.TargetAudience;
 import com.study.dawheen.volunteer.entity.type.VolunteerType;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -14,6 +16,7 @@ import java.util.Set;
  * DTO for {@link com.study.dawheen.volunteer.entity.VolunteerWork}
  */
 @Data
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class VolunteerUpdateResponseDto {
     private String title;
     private String content;

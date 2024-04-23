@@ -1,12 +1,13 @@
 package com.study.dawheen.volunteer.dto;
 
-import com.querydsl.core.annotations.QueryProjection;
 import com.study.dawheen.common.dto.CoordinateInfoResponseDto;
 import com.study.dawheen.organization.dto.OrganInfoResponseDto;
 import com.study.dawheen.volunteer.entity.VolunteerWork;
 import com.study.dawheen.volunteer.entity.type.TargetAudience;
 import com.study.dawheen.volunteer.entity.type.VolunteerType;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -16,6 +17,7 @@ import java.util.Set;
 
 
 @Data
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class VolunteerInfoResponseDto {
     int appliedParticipants;
     int maxParticipants;
