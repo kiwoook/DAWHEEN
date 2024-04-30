@@ -18,8 +18,9 @@ public class Notification {
 
     private String content;
 
-    @ManyToOne
-    @JoinColumn(name = "RECEIVER_EMAIL", referencedColumnName = "EMAIL")
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "RECEIVER_EMAIL", referencedColumnName = "EMAIL", nullable = false)
     private User receiver;
 
     @Column(nullable = false)
@@ -30,5 +31,9 @@ public class Notification {
         this.content = content;
         this.receiver = receiver;
         this.isRead = false;
+    }
+
+    public void hadRead(){
+        this.isRead = true;
     }
 }

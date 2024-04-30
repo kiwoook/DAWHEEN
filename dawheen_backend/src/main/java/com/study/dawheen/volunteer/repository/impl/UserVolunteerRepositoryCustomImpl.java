@@ -12,6 +12,7 @@ import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Repository
@@ -56,7 +57,7 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
         QUserVolunteerWork userVolunteerWork = QUserVolunteerWork.userVolunteerWork;
         QUser user = QUser.user;
 
-        return Optional.ofNullable(
+        return Optional.of(
                 queryFactory
                         .selectFrom(userVolunteerWork)
                         .join(userVolunteerWork.user, user).fetchJoin()
@@ -86,7 +87,7 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
     public Optional<List<User>> findUsersByVolunteerWorkId(Long volunteerWorkId) {
         QUserVolunteerWork userVolunteerWork = QUserVolunteerWork.userVolunteerWork;
         QUser user = QUser.user;
-        return Optional.ofNullable(queryFactory
+        return Optional.of(queryFactory
                 .select(userVolunteerWork.user)
                 .distinct()
                 .from(userVolunteerWork)
@@ -102,14 +103,15 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
         QUserVolunteerWork userVolunteerWork = QUserVolunteerWork.userVolunteerWork;
         QVolunteerWork volunteerWork = QVolunteerWork.volunteerWork;
         QUser user = QUser.user;
-        return Optional.ofNullable(queryFactory
-                .selectFrom(userVolunteerWork)
-                .join(userVolunteerWork.volunteerWork, volunteerWork)
-                .join(userVolunteerWork.user, user).fetchJoin()
-                .where(
-                        userVolunteerWork.volunteerWork.id.eq(volunteerWorkId)
-                                .and(userVolunteerWork.user.id.eq(userId))
-                ).fetchOne());
+        return Optional.of(Objects.requireNonNull(
+                queryFactory
+                        .selectFrom(userVolunteerWork)
+                        .join(userVolunteerWork.volunteerWork, volunteerWork)
+                        .join(userVolunteerWork.user, user).fetchJoin()
+                        .where(
+                                userVolunteerWork.volunteerWork.id.eq(volunteerWorkId)
+                                        .and(userVolunteerWork.user.id.eq(userId))
+                        ).fetchOne()));
     }
 
 
@@ -118,14 +120,15 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
         QUserVolunteerWork userVolunteerWork = QUserVolunteerWork.userVolunteerWork;
         QVolunteerWork volunteerWork = QVolunteerWork.volunteerWork;
         QUser user = QUser.user;
-        return Optional.ofNullable(queryFactory
-                .selectFrom(userVolunteerWork)
-                .join(userVolunteerWork.volunteerWork, volunteerWork)
-                .join(userVolunteerWork.user, user).fetchJoin()
-                .where(
-                        userVolunteerWork.volunteerWork.id.eq(volunteerWorkId)
-                                .and(userVolunteerWork.user.email.eq(email))
-                ).fetchOne());
+        return Optional.of(Objects.requireNonNull(
+                queryFactory
+                        .selectFrom(userVolunteerWork)
+                        .join(userVolunteerWork.volunteerWork, volunteerWork)
+                        .join(userVolunteerWork.user, user).fetchJoin()
+                        .where(
+                                userVolunteerWork.volunteerWork.id.eq(volunteerWorkId)
+                                        .and(userVolunteerWork.user.email.eq(email))
+                        ).fetchOne()));
     }
 
 }

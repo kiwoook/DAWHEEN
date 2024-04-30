@@ -13,12 +13,14 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class NotificationResponseDto {
+    Long id;
     String content;
     UserDto receiver;
     Boolean isRead;
 
 
     public NotificationResponseDto(Notification notification) {
+        this.id = notification.getId();
         this.content = notification.getContent();
         this.receiver = new UserDto(notification.getReceiver());
         this.isRead = notification.getIsRead();

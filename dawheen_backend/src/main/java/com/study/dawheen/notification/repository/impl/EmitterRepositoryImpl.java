@@ -3,6 +3,7 @@ package com.study.dawheen.notification.repository.impl;
 import com.study.dawheen.notification.repository.EmitterRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Repository;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.HashMap;
@@ -10,10 +11,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+@Repository
 @RequiredArgsConstructor
 public class EmitterRepositoryImpl implements EmitterRepository {
 
-    private final RedisTemplate<String, SseEmitter> emitterRedisTemplate;
+    private final RedisTemplate<String, Object> emitterRedisTemplate;
     private final RedisTemplate<String, Object> cacheRedisTemplate;
 
 
@@ -35,7 +37,7 @@ public class EmitterRepositoryImpl implements EmitterRepository {
 
         assert keys != null;
         for (String key : keys) {
-            SseEmitter emitter = emitterRedisTemplate.opsForValue().get(key);
+            SseEmitter emitter = (SseEmitter) emitterRedisTemplate.opsForValue().get(key);
             userEmitters.put(key, emitter);
         }
         return userEmitters;

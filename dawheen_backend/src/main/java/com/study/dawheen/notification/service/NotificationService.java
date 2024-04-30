@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -24,13 +25,15 @@ public class NotificationService {
     private final EmitterRepository emitterRepository;
     private final UserRepository userRepository;
 
+
     public SseEmitter subscribe(String email, String lastEventId) {
         String emitterId = makeTimeIncludeId(email);
         SseEmitter emitter = emitterRepository.save(emitterId, new SseEmitter(DEFAULT_TIMEOUT));
         emitter.onCompletion(() -> emitterRepository.deleteById(emitterId));
         emitter.onTimeout(() -> emitterRepository.deleteById(emitterId));
 
-        String eventId = makeTimeIncludeId(lastEventId);
+        // 503 에러를 방지하기 위한 더미 데이터
+        String eventId = makeTimeIncludeId(email);
         sendNotification(emitter, eventId, emitterId, "EventStream Created. [userEmail=" + email + "]");
 
         if (hasLostData(lastEventId)) {
@@ -40,7 +43,7 @@ public class NotificationService {
         return emitter;
     }
 
-    public void send(String email, String content){
+    public void send(String email, String content) {
         User receiver = userRepository.findByEmail(email).orElseThrow(EntityNotFoundException::new);
 
         Notification notification = Notification.builder()
@@ -52,13 +55,26 @@ public class NotificationService {
 
         String eventId = makeTimeIncludeId(email);
         Map<String, SseEmitter> emitters = emitterRepository.findAllEmitterStartWithByMemberId(email);
+
         emitters.forEach(
-                (key, emitter) ->{
+                (key, emitter) -> {
                     emitterRepository.saveEventCache(key, notification);
                     sendNotification(emitter, eventId, key, new NotificationResponseDto(notification));
                 }
         );
+    }
 
+    public List<NotificationResponseDto> history(String email) throws EntityNotFoundException {
+        return notificationRepository.findAllByReceiver(email).orElseThrow(EntityNotFoundException::new);
+
+    }
+
+    public NotificationResponseDto read(Long id, String email) {
+        Notification notification = notificationRepository.findByIdAndReceiverEmail(id, email).orElseThrow(EntityNotFoundException::new);
+
+        notification.hadRead();
+
+        return new NotificationResponseDto(notificationRepository.save(notification));
     }
 
     private String makeTimeIncludeId(String email) {
@@ -67,10 +83,11 @@ public class NotificationService {
 
     private void sendNotification(SseEmitter emitter, String eventId, String emitterId, Object data) {
         try {
-            emitter.send(SseEmitter.event()
-                    .id(eventId)
-                    .name("sse")
-                    .data(data)
+            emitter.send(
+                    SseEmitter.event()
+                            .id(eventId)
+                            .name("sse")
+                            .data(data)
             );
         } catch (IOException exception) {
             emitterRepository.deleteById(emitterId);
@@ -82,7 +99,7 @@ public class NotificationService {
     }
 
     private void sendLostData(String lastEventId, String userEmail, String emitterId, SseEmitter emitter) {
-        Map<String, Object> eventCaches = emitterRepository.findAllEventCacheStartWithByMemberId(String.valueOf(userEmail));
+        Map<String, Object> eventCaches = emitterRepository.findAllEventCacheStartWithByMemberId(userEmail);
         eventCaches.entrySet().stream()
                 .filter(entry -> lastEventId.compareTo(entry.getKey()) < 0)
                 .forEach(entry -> sendNotification(emitter, entry.getKey(), emitterId, entry.getValue()));

@@ -13,3 +13,4 @@ dawheen_backend/src/main/resources/application.properties
 dawheen_backend/src/test/resources/application.properties
 
 dawheen_backend/.env
+dawheen_backend/docker-compose.yml

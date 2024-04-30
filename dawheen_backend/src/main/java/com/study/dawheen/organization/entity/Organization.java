@@ -23,10 +23,14 @@ import java.util.Objects;
 @Entity
 public class Organization extends BaseTimeEntity {
 
-    @OneToMany(mappedBy = "organization", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+
+    // 기관과 관련된 유저들
+    @OneToMany(mappedBy = "organization", fetch = FetchType.LAZY)
     List<User> users = new ArrayList<>();
-    @OneToMany(mappedBy = "organization", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+
+    @OneToMany(mappedBy = "organization", fetch = FetchType.LAZY)
     List<VolunteerWork> workList = new ArrayList<>();
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
@@ -109,6 +113,5 @@ public class Organization extends BaseTimeEntity {
     public void revokeUser(User user) {
         this.users.remove(user);
     }
-
 
 }

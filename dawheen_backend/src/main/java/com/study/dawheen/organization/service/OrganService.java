@@ -26,8 +26,6 @@ public class OrganService {
     private final UserVolunteerRepository userVolunteerRepository;
 
 
-
-
     @Transactional
     public OrganInfoResponseDto create(OrganRequestDto requestDto) {
         Organization organization = Organization.toEntity(requestDto);

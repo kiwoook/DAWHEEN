@@ -194,12 +194,16 @@ public class OrganController {
     @Operation(summary = "사용자 기관 구독", description = "사용자가 기관을 구독하여 봉사활동 생성 시 알림을 발송합니다.")
     @PostMapping("/subscribe")
     public ResponseEntity<Object> subscribe(@RequestBody Long id) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
         return null;
     }
 
     @Operation(summary = "사용자 기관 구독 취소", description = "기관 구독을 취소합니다")
     @DeleteMapping("/subscribe")
     public ResponseEntity<Object> cancelSubscribe(@RequestBody Long id) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
         return null;
     }
 

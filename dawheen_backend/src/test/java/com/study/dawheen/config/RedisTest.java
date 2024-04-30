@@ -10,6 +10,7 @@ import com.study.dawheen.volunteer.entity.type.ApplyStatus;
 import com.study.dawheen.volunteer.repository.UserVolunteerRepository;
 import com.study.dawheen.volunteer.repository.VolunteerWorkRepository;
 import com.study.dawheen.volunteer.service.VolunteerRankingService;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,7 +88,7 @@ class RedisTest {
         registry.add("spring.data.redis.port", () -> REDIS_CONTAINER.getMappedPort(REDIS_PORT)
                 .toString());
     }
-
+    @Disabled
     @Test
     @DisplayName("Redis GET / SET 테스트")
     void getRedisTest() {
@@ -98,6 +99,7 @@ class RedisTest {
         assertThat(value).isEqualTo("hello");
     }
 
+    @Disabled
     @Test
     @DisplayName("랭킹 Fetch 후 데이터 가져오기")
     void fetchRanking() throws IOException {

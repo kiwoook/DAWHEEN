@@ -39,7 +39,7 @@ public class OrganRepositoryCustomImpl implements OrganRepositoryCustom {
                 .where(haversineFormula.loe(radius))
                 .fetch();
 
-        return Optional.ofNullable(result);
+        return Optional.of(result);
 
 
     }

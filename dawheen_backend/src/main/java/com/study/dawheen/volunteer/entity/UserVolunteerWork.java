@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "USER_VOLUNTEERWORK", uniqueConstraints = @UniqueConstraint(columnNames = {"VOLUNTEER_WORK_ID", "USER_ID"}), indexes = @Index(name = "idx_status", columnList = "status" ))
+@Table(name = "USER_VOLUNTEERWORK", uniqueConstraints = @UniqueConstraint(columnNames = {"VOLUNTEER_WORK_ID", "USER_ID"}), indexes = @Index(name = "idx_status", columnList = "status"))
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserVolunteerWork extends BaseTimeEntity {
 
