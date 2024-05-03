@@ -4,6 +4,7 @@ import com.study.dawheen.organization.dto.OrganInfoResponseDto;
 import com.study.dawheen.organization.dto.OrganRequestDto;
 import com.study.dawheen.organization.service.OrganQueryService;
 import com.study.dawheen.organization.service.OrganService;
+import com.study.dawheen.organization.service.OrganSubscribeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,6 +34,7 @@ public class OrganController {
 
     private final OrganService organService;
     private final OrganQueryService organQueryService;
+    private final OrganSubscribeService organSubscribeService;
 
     @Operation(summary = "기관 정보", description = "기관의 ID 값을 통해 기관 정보를 반환합니다.")
     @GetMapping("/{id}")
@@ -190,13 +192,13 @@ public class OrganController {
     }
 
 
-    // TODO 구독 기능 만들기
     @Operation(summary = "사용자 기관 구독", description = "사용자가 기관을 구독하여 봉사활동 생성 시 알림을 발송합니다.")
     @PostMapping("/subscribe")
     public ResponseEntity<Object> subscribe(@RequestBody Long id) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        return null;
+        organSubscribeService.subscribe(email, id);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "사용자 기관 구독 취소", description = "기관 구독을 취소합니다")
@@ -204,7 +206,8 @@ public class OrganController {
     public ResponseEntity<Object> cancelSubscribe(@RequestBody Long id) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        return null;
+        organSubscribeService.cancel(email, id);
+        return ResponseEntity.ok().build();
     }
 
 

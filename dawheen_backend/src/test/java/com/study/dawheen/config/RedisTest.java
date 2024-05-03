@@ -88,51 +88,51 @@ class RedisTest {
         registry.add("spring.data.redis.port", () -> REDIS_CONTAINER.getMappedPort(REDIS_PORT)
                 .toString());
     }
-    @Disabled
-    @Test
-    @DisplayName("Redis GET / SET 테스트")
-    void getRedisTest() {
-        ValueOperations<String, Object> values = redisTemplate.opsForValue();
-
-        values.set("ranking", "hello", 1, TimeUnit.DAYS);
-        String value = (String) values.get("ranking");
-        assertThat(value).isEqualTo("hello");
-    }
-
-    @Disabled
-    @Test
-    @DisplayName("랭킹 Fetch 후 데이터 가져오기")
-    void fetchRanking() throws IOException {
-        // given
-        User[] users = {user1, user2, user3, user4, user5};
-        int max_value = 1;
-
-        for (User user : users) {
-            for (int i = 0; i < max_value; i++) {
-                VolunteerWork volunteerWork = VolunteerWork.builder()
-                        .build();
-                volunteerWorkRepository.save(volunteerWork);
-                userRepository.save(user);
-                UserVolunteerWork mockUserVolunteerWork = new UserVolunteerWork(user, volunteerWork);
-                mockUserVolunteerWork.updateStatus(ApplyStatus.COMPLETED);
-                userVolunteerRepository.save(mockUserVolunteerWork);
-            }
-            max_value += 1;
-        }
-
-        List<UserInfoResponseDto> expectedResponseDtoList = new ArrayList<>();
-        expectedResponseDtoList.add(new UserInfoResponseDto(user5));
-        expectedResponseDtoList.add(new UserInfoResponseDto(user4));
-        expectedResponseDtoList.add(new UserInfoResponseDto(user3));
-        expectedResponseDtoList.add(new UserInfoResponseDto(user2));
-        expectedResponseDtoList.add(new UserInfoResponseDto(user1));
-
-
-        volunteerRankingService.fetchMonthlyRankingToRedis();
-        List<UserInfoResponseDto> actualResponseDtoList = volunteerRankingService.getMonthlyRanking();
-
-        //then
-        assertThat(actualResponseDtoList)
-                .isEqualTo(expectedResponseDtoList);
-    }
+//    @Disabled
+//    @Test
+//    @DisplayName("Redis GET / SET 테스트")
+//    void getRedisTest() {
+//        ValueOperations<String, Object> values = redisTemplate.opsForValue();
+//
+//        values.set("ranking", "hello", 1, TimeUnit.DAYS);
+//        String value = (String) values.get("ranking");
+//        assertThat(value).isEqualTo("hello");
+//    }
+//
+//    @Disabled
+//    @Test
+//    @DisplayName("랭킹 Fetch 후 데이터 가져오기")
+//    void fetchRanking() throws IOException {
+//        // given
+//        User[] users = {user1, user2, user3, user4, user5};
+//        int max_value = 1;
+//
+//        for (User user : users) {
+//            for (int i = 0; i < max_value; i++) {
+//                VolunteerWork volunteerWork = VolunteerWork.builder()
+//                        .build();
+//                volunteerWorkRepository.save(volunteerWork);
+//                userRepository.save(user);
+//                UserVolunteerWork mockUserVolunteerWork = new UserVolunteerWork(user, volunteerWork);
+//                mockUserVolunteerWork.updateStatus(ApplyStatus.COMPLETED);
+//                userVolunteerRepository.save(mockUserVolunteerWork);
+//            }
+//            max_value += 1;
+//        }
+//
+//        List<UserInfoResponseDto> expectedResponseDtoList = new ArrayList<>();
+//        expectedResponseDtoList.add(new UserInfoResponseDto(user5));
+//        expectedResponseDtoList.add(new UserInfoResponseDto(user4));
+//        expectedResponseDtoList.add(new UserInfoResponseDto(user3));
+//        expectedResponseDtoList.add(new UserInfoResponseDto(user2));
+//        expectedResponseDtoList.add(new UserInfoResponseDto(user1));
+//
+//
+//        volunteerRankingService.fetchMonthlyRankingToRedis();
+//        List<UserInfoResponseDto> actualResponseDtoList = volunteerRankingService.getMonthlyRanking();
+//
+//        //then
+//        assertThat(actualResponseDtoList)
+//                .isEqualTo(expectedResponseDtoList);
+//    }
 }

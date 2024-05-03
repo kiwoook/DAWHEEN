@@ -9,19 +9,21 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
 public class EmitterRepositoryImpl implements EmitterRepository {
-
+    private final Map<String, SseEmitter> sseEmitterMap = new ConcurrentHashMap<>();
     private final RedisTemplate<String, Object> emitterRedisTemplate;
     private final RedisTemplate<String, Object> cacheRedisTemplate;
 
 
     @Override
     public SseEmitter save(String emitterId, SseEmitter sseEmitter) {
-        emitterRedisTemplate.opsForValue().set(emitterId, sseEmitter, 1, TimeUnit.HOURS);
+        sseEmitterMap.put(emitterId, sseEmitter);
         return sseEmitter;
     }
 
@@ -32,15 +34,9 @@ public class EmitterRepositoryImpl implements EmitterRepository {
 
     @Override
     public Map<String, SseEmitter> findAllEmitterStartWithByMemberId(String memberId) {
-        Set<String> keys = emitterRedisTemplate.keys(memberId + "*");
-        Map<String, SseEmitter> userEmitters = new HashMap<>();
-
-        assert keys != null;
-        for (String key : keys) {
-            SseEmitter emitter = (SseEmitter) emitterRedisTemplate.opsForValue().get(key);
-            userEmitters.put(key, emitter);
-        }
-        return userEmitters;
+        return sseEmitterMap.entrySet().stream()
+                .filter(entry -> entry.getKey().startsWith(memberId))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @Override
@@ -64,14 +60,13 @@ public class EmitterRepositoryImpl implements EmitterRepository {
 
     @Override
     public void deleteAllEmitterStartWithId(String memberId) {
-        Set<String> keys = emitterRedisTemplate.keys(memberId + "*");
-
-        assert keys != null;
-        for (String key : keys) {
-            emitterRedisTemplate.delete(key);
-        }
-
-
+        sseEmitterMap.forEach(
+                (key, emitter) -> {
+                    if (key.startsWith(memberId)) {
+                        sseEmitterMap.remove(key);
+                    }
+                }
+        );
     }
 
     @Override

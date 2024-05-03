@@ -23,8 +23,6 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
-    // TODO 코드 노션에 정리하고 KAFKA 사용 방법
-
     @Operation(summary = "SSE 연결")
     @GetMapping(value = "/connect", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter subscribe(
