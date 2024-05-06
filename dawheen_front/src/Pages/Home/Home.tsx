@@ -1,6 +1,6 @@
 import React from "react";
 import { HomeBodyContents, HomeContents, HomeWrapper, NavigateMenu } from "./CSS/Home";
-import Logo from "../../Images/fontLogo.png";
+import Logo from "./Images/fontLogo.png"
 import Background1 from "./Images/Background.jpg"
 import { BtnGroup } from "../../Components/CSS/ComponentStyle";
 
