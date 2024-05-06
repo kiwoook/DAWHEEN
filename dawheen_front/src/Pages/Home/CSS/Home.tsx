@@ -47,7 +47,7 @@ export const NavigateMenu = styled.div`
 export const HomeBodyContents = styled.div<{backgroundImage : any}>`
     background-image: url(${props => props.backgroundImage});
     width: 100vw;
-    height: calc(100vh - 78px);
+    height: 100%;
     background-repeat: no-repeat;
     display: flex;
     flex-direction: column;
