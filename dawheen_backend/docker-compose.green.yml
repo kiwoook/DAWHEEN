@@ -12,6 +12,8 @@ services:
       - "8081:8080"
     networks:
       - spring-network
+    volumes:
+      - file-upload:/dawheen/uploads/
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.0
     environment:
@@ -51,3 +53,4 @@ networks:
 
 volumes:
   mysql-data:
+  file-upload:

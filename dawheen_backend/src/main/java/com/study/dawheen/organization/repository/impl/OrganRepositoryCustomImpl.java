@@ -8,6 +8,7 @@ import com.study.dawheen.organization.entity.Organization;
 import com.study.dawheen.organization.entity.QOrganization;
 import com.study.dawheen.organization.repository.OrganRepositoryCustom;
 import jakarta.persistence.EntityManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

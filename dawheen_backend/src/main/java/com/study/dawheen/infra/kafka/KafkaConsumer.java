@@ -13,7 +13,7 @@ public class KafkaConsumer {
     private final NotificationService notificationService;
 
     @KafkaListener(topics = "${spring.kafka.topic.notification}", groupId = "${spring.kafka.consumer.group-id}")
-    public void notifySend(ConsumerRecord<String, Object> consumerRecord) {
+    public void sendNotify(ConsumerRecord<String, Object> consumerRecord) {
         String receiverEmail = consumerRecord.key();
         String content = consumerRecord.value().toString();
         notificationService.send(receiverEmail, content);
