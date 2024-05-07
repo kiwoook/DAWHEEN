@@ -41,6 +41,7 @@ export const NavigateMenu = styled.div`
   }
   & .login{
         color: #333;
+        cursor: pointer;
     }
 `;
 

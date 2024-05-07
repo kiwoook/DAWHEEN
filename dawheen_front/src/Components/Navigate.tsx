@@ -2,7 +2,11 @@ import React from 'react';
 import { NavigateMenu } from '../Pages/Home/CSS/Home';
 import Logo from "../Images/fontLogo.png";
 
-const Navigate: React.FC = () => {
+interface NavigateProps {
+  setLoginModal: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const Navigate: React.FC<NavigateProps> = ({setLoginModal}) => {
   return (
     <NavigateMenu>
       <ul>
@@ -14,8 +18,9 @@ const Navigate: React.FC = () => {
           <li className='menu'>고객센터</li>
       </ul>
      <div>
-         <span className='login'>로그인</span>
+         <span className='login' onClick={() => setLoginModal(true)}>로그인</span>
      </div>
+     
  </NavigateMenu>
   );
 }

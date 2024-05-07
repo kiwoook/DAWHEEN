@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { HomeBodyContents, HomeContents, HomeWrapper, NavigateMenu } from "./CSS/Home";
-import Background1 from "./Images/Background.jpg"
+import Background1 from "../../Images/Background.jpg"
 import { BtnGroup } from "../../Components/CSS/ComponentStyle";
-import Navigate from "../../Components/Navigate";
 
 const Home: React.FC = () => {
 
