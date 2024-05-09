@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavigateMenu } from '../Pages/Home/CSS/Home';
+import { NavigateMenu } from '../Pages/Home/CSS/HomeStyle';
 import Logo from "../Images/fontLogo.png";
 
 interface NavigateProps {
