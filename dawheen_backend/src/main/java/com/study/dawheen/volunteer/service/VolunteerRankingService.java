@@ -32,7 +32,7 @@ public class VolunteerRankingService {
 
     // @Scheduled(cron = "0 0 0 1 * ?") 매달 1일에만 가중치 계산
 
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 0 0 1 * ?")
     public void fetchMonthlyRankingToRedis() throws JsonProcessingException {
         ValueOperations<String, Object> values = redisTemplate.opsForValue();
         List<UserInfoResponseDto> responseDtoList = userVolunteerRepository.getMonthlyVolunteerActivityRankings();
@@ -46,7 +46,7 @@ public class VolunteerRankingService {
 
     }
 
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 0 0 1 * ?")
     public void fetchSemiAnnualRankingToRedis() {
         ValueOperations<String, Object> values = redisTemplate.opsForValue();
         List<UserInfoResponseDto> responseDtoList = userVolunteerRepository.getSemiAnnualVolunteerActivityRankings();
@@ -61,7 +61,7 @@ public class VolunteerRankingService {
 
     }
 
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 0 0 1 * ?")
     public void fetchAnnualRankingToRedis() {
         ValueOperations<String, Object> values = redisTemplate.opsForValue();
         List<UserInfoResponseDto> responseDtoList = userVolunteerRepository.getYearlyVolunteerActivityRankings();

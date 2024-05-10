@@ -2,7 +2,9 @@ package com.study.dawheen.volunteer.service;
 
 import com.study.dawheen.common.exception.AlreadyProcessedException;
 import com.study.dawheen.common.exception.AuthorizationFailedException;
+import com.study.dawheen.infra.file.service.FileService;
 import com.study.dawheen.organization.entity.Organization;
+import com.study.dawheen.organization.service.OrganSubscribeService;
 import com.study.dawheen.user.entity.User;
 import com.study.dawheen.user.repository.UserRepository;
 import com.study.dawheen.volunteer.dto.VolunteerCreateRequestDto;
@@ -20,7 +22,9 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -32,18 +36,29 @@ public class VolunteerService {
     private static final String AUTHORIZATION_ERR_MSG = "you are not allowed to approve method";
     private final VolunteerWorkRepository volunteerWorkRepository;
     private final UserVolunteerRepository userVolunteerRepository;
+    private final OrganSubscribeService organSubscribeService;
+    private final FileService fileService;
     private final UserRepository userRepository;
 
-    // TODO 봉사활동이 만들어졌다면 특정 기관을 구독한 유저에게 알림이 전송되어야함. KAFKA 활용?
     @Transactional
-    public VolunteerInfoResponseDto create(String email, VolunteerCreateRequestDto createResponseDto) {
+    public VolunteerInfoResponseDto create(String email, VolunteerCreateRequestDto createResponseDto, MultipartFile file, List<MultipartFile> files) throws IOException {
         User user = userRepository.findByEmail(email).orElseThrow(EntityNotFoundException::new);
         VolunteerWork volunteerWork = VolunteerWork.toEntity(createResponseDto);
+
+        // 이미지 저장
+        fileService.saveImgFileByVolunteerWork(file, volunteerWork);
+
+        for (MultipartFile multipartFile : files) {
+            fileService.saveImgFileByVolunteerWork(multipartFile, volunteerWork);
+        }
+
         Organization organization = user.getOrganization();
 
         if (organization != null) {
             volunteerWork.updateOrganization(organization);
+            organSubscribeService.sendNotify(organization.getId());
         }
+
         VolunteerWork savedVolunteerWork = volunteerWorkRepository.save(volunteerWork);
 
         return new VolunteerInfoResponseDto(savedVolunteerWork);
@@ -138,6 +153,7 @@ public class VolunteerService {
 
         userVolunteerWork.updateStatus(ApplyStatus.REJECTED);
     }
+
     @Transactional
     public void cancelPending(Long volunteerWorkId, String email) {
         UserVolunteerWork userVolunteerWork = userVolunteerRepository.findByVolunteerWorkIdAndEmail(volunteerWorkId, email).orElseThrow(EntityNotFoundException::new);

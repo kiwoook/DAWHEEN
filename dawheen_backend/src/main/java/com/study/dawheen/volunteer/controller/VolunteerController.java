@@ -16,7 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Tag(name = "봉사활동", description = "봉사활동 관련 API")
@@ -47,12 +49,16 @@ public class VolunteerController {
     }
 
     @PostMapping
-    public ResponseEntity<VolunteerInfoResponseDto> createVolunteer(@RequestBody @Valid VolunteerCreateRequestDto requestDto) {
+    public ResponseEntity<VolunteerInfoResponseDto> createVolunteer(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("files") List<MultipartFile> files,
+            @RequestBody @Valid VolunteerCreateRequestDto requestDto
+    ) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         try {
-            VolunteerInfoResponseDto responseDto = volunteerService.create(email, requestDto);
+            VolunteerInfoResponseDto responseDto = volunteerService.create(email, requestDto, file, files);
             return ResponseEntity.ok(responseDto);
-        } catch (EntityNotFoundException e) {
+        } catch (IOException e) {
             return ResponseEntity.badRequest().build();
         }
     }
