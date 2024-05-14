@@ -7,8 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Getter
-@RequiredArgsConstructor
-public class ApiResponse<T> {
+public record ApiResponse<T>(ApiResponseHeader header, Map<String, T> body) {
 
     private static final int SUCCESS = 200;
     private static final int NOT_FOUND = 404;
@@ -19,9 +18,6 @@ public class ApiResponse<T> {
     private static final String INVALID_ACCESS_TOKEN = "Invalid access token.";
     private static final String INVALID_REFRESH_TOKEN = "Invalid refresh token.";
     private static final String NOT_EXPIRED_TOKEN_YET = "Not expired token yet.";
-
-    private final ApiResponseHeader header;
-    private final Map<String, T> body;
 
     public static <T> ApiResponse<T> success(String name, T body) {
         Map<String, T> map = new HashMap<>();

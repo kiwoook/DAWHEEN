@@ -27,14 +27,14 @@ public class VolunteerQueryService {
 
     @Transactional(readOnly = true)
     public List<VolunteerInfoResponseDto> getVolunteersWithinRadius(double latitude, double longitude, int radius) {
-        return volunteerWorkRepository.getByRadiusAndBeforeEndDate(latitude, longitude, radius).orElseThrow(EntityNotFoundException::new);
+        return volunteerWorkRepository.getByRadiusAndBeforeEndDate(latitude, longitude, radius);
     }
 
     @Transactional(readOnly = true)
     public List<VolunteerInfoResponseDto> getAllVolunteersByOrganization(Long organizationId) {
         Organization organization = organRepository.findById(organizationId).orElseThrow(EntityNotFoundException::new);
 
-        List<VolunteerWork> volunteerWorks = volunteerWorkRepository.getAllByOrganization(organization).orElseThrow(EntityNotFoundException::new);
+        List<VolunteerWork> volunteerWorks = volunteerWorkRepository.getAllByOrganization(organization);
 
         return volunteerWorks.stream().map(VolunteerInfoResponseDto::new).toList();
 

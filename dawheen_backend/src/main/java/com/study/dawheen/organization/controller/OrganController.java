@@ -39,17 +39,10 @@ public class OrganController {
     @Operation(summary = "기관 정보", description = "기관의 ID 값을 통해 기관 정보를 반환합니다.")
     @GetMapping("/{id}")
     public ResponseEntity<OrganInfoResponseDto> getOrganization(@PathVariable("id") Long id) {
-        try {
-            OrganInfoResponseDto organ = organQueryService.getOrgan(id);
-            return ResponseEntity.ok(organ);
-        } catch (EntityNotFoundException e) {
-            log.info("해당 ID가 존재하지 않습니다. id = {}", id);
-            return ResponseEntity.badRequest().build();
-        }
+        OrganInfoResponseDto organ = organQueryService.getOrgan(id);
+        return ResponseEntity.ok(organ);
     }
 
-
-    // 주변 위치한 기관 찾기
     @Operation(summary = "기관 찾기", description = "위도와 경도 그리고 범위(m)를 사용해 주변에 존재하는 기관들을 반환합니다.")
     @GetMapping("/find")
     public ResponseEntity<List<OrganInfoResponseDto>> getOrganizationInfoWithinRadius(
@@ -57,12 +50,8 @@ public class OrganController {
             @Parameter(name = "경도", required = true) @RequestParam double longitude,
             @Parameter(name = "반경", description = "단위 : m", required = true) @RequestParam int radius) {
 
-        try {
-            List<OrganInfoResponseDto> organInfoResponseDtos = organService.findOrganizationsWithinRadius(latitude, longitude, radius);
-            return ResponseEntity.ok(organInfoResponseDtos);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        List<OrganInfoResponseDto> organInfoResponseDtos = organService.findOrganizationsWithinRadius(latitude, longitude, radius);
+        return ResponseEntity.ok(organInfoResponseDtos);
     }
 
     @Operation(summary = "기관 정보 업데이트")
@@ -110,8 +99,6 @@ public class OrganController {
     // TODO 해당 기관의 후기 모음
 
     // TODO 기관 평점
-
-    // TODO 특정 유저에게 해당 기관 권한 부여
 
     @Operation(summary = "기관 등록 신청")
     @PostMapping("/apply")

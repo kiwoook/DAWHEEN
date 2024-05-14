@@ -23,11 +23,7 @@ public class AdminUserController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/{email}")
     public ResponseEntity<UserInfoResponseDto> getUserProfile(@PathVariable String email) {
-        try {
-            UserInfoResponseDto dto = userService.getUser(email);
-            return ResponseEntity.ok(dto);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        UserInfoResponseDto dto = userService.getUser(email);
+        return ResponseEntity.ok(dto);
     }
 }

@@ -2,12 +2,15 @@ package com.study.dawheen.common.dto;
 
 import com.study.dawheen.common.entity.Address;
 import jakarta.validation.constraints.Size;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * DTO for {@link com.study.dawheen.common.entity.Address}
  */
 @Data
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AddressDto {
 
     private String roadAddress;

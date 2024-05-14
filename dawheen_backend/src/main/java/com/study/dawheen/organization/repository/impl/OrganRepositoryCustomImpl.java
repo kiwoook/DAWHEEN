@@ -8,7 +8,6 @@ import com.study.dawheen.organization.entity.Organization;
 import com.study.dawheen.organization.entity.QOrganization;
 import com.study.dawheen.organization.repository.OrganRepositoryCustom;
 import jakarta.persistence.EntityManager;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -37,7 +36,10 @@ public class OrganRepositoryCustomImpl implements OrganRepositoryCustom {
                 .selectFrom(organization)
                 .join(organization.coordinate, coordinate)
                 .fetchJoin()
-                .where(haversineFormula.loe(radius))
+                .where(haversineFormula.loe(radius)
+                        .and(
+                                organization.approved.eq(Boolean.TRUE)
+                        ))
                 .fetch();
 
         return Optional.of(result);

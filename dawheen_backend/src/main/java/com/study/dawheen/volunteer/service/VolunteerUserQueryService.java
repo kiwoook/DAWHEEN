@@ -59,7 +59,7 @@ public class VolunteerUserQueryService {
     }
 
     public List<UserInfoResponseDto> getAllUsersByVolunteerWork(Long volunteerWorkId) {
-        return userVolunteerRepository.findUsersByVolunteerWorkId(volunteerWorkId).orElseThrow(EntityNotFoundException::new)
+        return userVolunteerRepository.findUsersByVolunteerWorkId(volunteerWorkId)
                 .stream()
                 .map(UserInfoResponseDto::new)
                 .toList();

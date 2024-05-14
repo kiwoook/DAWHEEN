@@ -10,6 +10,6 @@ public interface UserVolunteerRepository extends JpaRepository<UserVolunteerWork
         UserVolunteerRepositoryCustom,
         UserVolunteerWorkRankingRepositoryCustom {
 
-    Optional<List<UserVolunteerWork>> findAllByVolunteerWorkId(Long volunteerWorkId);
+    List<UserVolunteerWork> findAllByVolunteerWorkId(Long volunteerWorkId);
 
 }

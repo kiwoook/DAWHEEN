@@ -35,26 +35,23 @@ public class VolunteerWorkRepositoryCustomImpl implements VolunteerWorkRepositor
     }
 
     @Override
-    public Optional<List<VolunteerInfoResponseDto>> getByRadiusAndBeforeEndDate(double latitude, double longitude, int radius) {
-
+    public List<VolunteerInfoResponseDto> getByRadiusAndBeforeEndDate(double latitude, double longitude, int radius) {
 
         NumberTemplate<Double> haversineFormula = Expressions.numberTemplate(Double.class, "6371 * acos(cos(radians({0}))*cos(radians({1}))*cos(radians({2}) - radians({3})) + sin(radians({4}))*sin(radians({5})))", latitude, volunteerWork.coordinate.latitude, volunteerWork.coordinate.longitude, longitude, latitude, volunteerWork.coordinate.latitude);
 
         LocalDateTime now = LocalDateTime.now();
 
-        List<VolunteerInfoResponseDto> result = queryFactory.select(Projections.bean(VolunteerInfoResponseDto.class, volunteerWork)).from(volunteerWork).join(volunteerWork.coordinate, coordinate).fetchJoin().where(haversineFormula.loe(radius).and(volunteerWork.recruitEndDateTime.after(now))).fetch();
-
-        return Optional.ofNullable(result);
+        return queryFactory.select(Projections.bean(VolunteerInfoResponseDto.class, volunteerWork)).from(volunteerWork).join(volunteerWork.coordinate, coordinate).fetchJoin().where(haversineFormula.loe(radius).and(volunteerWork.recruitEndDateTime.after(now))).fetch();
     }
 
     @Override
-    public Optional<List<VolunteerInfoResponseDto>> getByFiltersAndDataRangeWithinRadius(double latitude, double longitude, int radius, Set<VolunteerType> volunteerTypes, Set<TargetAudience> targetAudiences, LocalDate startDate, LocalDate endDate) {
+    public List<VolunteerInfoResponseDto> getByFiltersAndDataRangeWithinRadius(double latitude, double longitude, int radius, Set<VolunteerType> volunteerTypes, Set<TargetAudience> targetAudiences, LocalDate startDate, LocalDate endDate) {
 
         NumberTemplate<Double> haversineFormula = Expressions.numberTemplate(Double.class, "6371 * acos(cos(radians({0}))*cos(radians({1}))*cos(radians({2}) - radians({3})) + sin(radians({4}))*sin(radians({5})))", latitude, volunteerWork.coordinate.latitude, volunteerWork.coordinate.longitude, longitude, latitude, volunteerWork.coordinate.latitude);
 
         LocalDateTime now = LocalDateTime.now();
 
-        List<VolunteerInfoResponseDto> result = queryFactory
+        return queryFactory
                 .select(Projections.bean(VolunteerInfoResponseDto.class, volunteerWork))
                 .from(volunteerWork)
                 .join(volunteerWork.coordinate, coordinate)
@@ -65,8 +62,6 @@ public class VolunteerWorkRepositoryCustomImpl implements VolunteerWorkRepositor
                         isContainVolunteerTypes(volunteerTypes),
                         isContainTargetAudiences(targetAudiences))
                 .fetch();
-
-        return Optional.ofNullable(result);
     }
 
     private BooleanBuilder isContainVolunteerTypes(Set<VolunteerType> volunteerTypes) {

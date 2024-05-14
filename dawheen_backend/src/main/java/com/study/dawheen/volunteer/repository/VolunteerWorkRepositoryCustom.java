@@ -12,11 +12,11 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface VolunteerWorkRepositoryCustom {
-    Optional<List<VolunteerInfoResponseDto>> getByRadiusAndBeforeEndDate(double latitude, double longitude, int radius);
+    List<VolunteerInfoResponseDto> getByRadiusAndBeforeEndDate(double latitude, double longitude, int radius);
 
 
     // 필터에 맞춰 VolunteerWork 반환
-    Optional<List<VolunteerInfoResponseDto>> getByFiltersAndDataRangeWithinRadius(
+    List<VolunteerInfoResponseDto> getByFiltersAndDataRangeWithinRadius(
             double latitude, double longitude, int radius,
             Set<VolunteerType> volunteerTypes, Set<TargetAudience> targetAudiences,
             LocalDate startDate, LocalDate endDate

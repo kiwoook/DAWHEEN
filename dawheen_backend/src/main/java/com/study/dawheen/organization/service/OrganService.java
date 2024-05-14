@@ -1,5 +1,6 @@
 package com.study.dawheen.organization.service;
 
+import com.study.dawheen.common.dto.CoordinateDto;
 import com.study.dawheen.organization.dto.OrganInfoResponseDto;
 import com.study.dawheen.organization.dto.OrganRequestDto;
 import com.study.dawheen.organization.entity.Organization;
@@ -51,7 +52,13 @@ public class OrganService {
     @Transactional
     public void update(Long id, OrganRequestDto requestDto) throws EntityNotFoundException {
         Organization organization = organRepository.findById(id).orElseThrow(EntityNotFoundException::new);
-        organization.update(requestDto);
+        organization.update(requestDto.getName(), requestDto.getFacilityType(), requestDto.getEmail(), requestDto.getFacilityPhone(), requestDto.getRepresentName(), requestDto.getAddress());
+    }
+
+    @Transactional
+    public void updateCoordinate(Long id, CoordinateDto coordinateDto){
+        Organization organization = organRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        organization.updateCoordinate(coordinateDto.getLatitude(), coordinateDto.getLongitude());
     }
 
     public boolean verifyAffiliation(Long id, String email) throws EntityNotFoundException {

@@ -66,7 +66,7 @@ public class VolunteerService {
 
     @Transactional
     public void delete(Long volunteerWorkId) throws EmptyResultDataAccessException, EntityNotFoundException {
-        List<UserVolunteerWork> userVolunteerWorks = userVolunteerRepository.findAllByVolunteerWorkIdWithFetch(volunteerWorkId).orElseThrow(EntityNotFoundException::new);
+        List<UserVolunteerWork> userVolunteerWorks = userVolunteerRepository.findAllByVolunteerWorkIdWithFetch(volunteerWorkId);
 
         for (UserVolunteerWork userVolunteerWork : userVolunteerWorks) {
             User user = userVolunteerWork.getUser();

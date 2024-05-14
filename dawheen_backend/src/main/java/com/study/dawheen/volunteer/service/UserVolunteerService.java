@@ -1,6 +1,7 @@
 package com.study.dawheen.volunteer.service;
 
 import com.study.dawheen.user.entity.User;
+import com.study.dawheen.volunteer.dto.VolunteerInfoResponseDto;
 import com.study.dawheen.volunteer.entity.UserVolunteerWork;
 import com.study.dawheen.volunteer.entity.VolunteerWork;
 import com.study.dawheen.volunteer.entity.type.ApplyStatus;
@@ -9,6 +10,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,5 +34,11 @@ public class UserVolunteerService {
         }
 
         userVolunteerRepository.delete(userVolunteerWork);
+    }
+
+
+    public Page<VolunteerInfoResponseDto> getParticipateVolunteerWorkByUser(String email, Pageable pageable){
+        return userVolunteerRepository.findVolunteerWorkByEmailAndStatus(email, ApplyStatus.COMPLETED, pageable);
+
     }
 }

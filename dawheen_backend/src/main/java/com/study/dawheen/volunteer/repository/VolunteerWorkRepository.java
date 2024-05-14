@@ -9,6 +9,6 @@ import java.util.Optional;
 
 public interface VolunteerWorkRepository extends JpaRepository<VolunteerWork, Long>, VolunteerWorkRepositoryCustom {
 
-    Optional<List<VolunteerWork>> getAllByOrganization(Organization organization);
+    List<VolunteerWork> getAllByOrganization(Organization organization);
 
 }

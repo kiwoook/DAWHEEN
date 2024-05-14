@@ -16,12 +16,12 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -38,7 +38,6 @@ public class FileService {
 
     public void saveImgFileByVolunteerWork(MultipartFile file, VolunteerWork volunteerWork) throws IOException {
         String originalFileName = file.getOriginalFilename();
-        log.info("파일명 = {}", originalFileName);
 
         if (file.isEmpty() || originalFileName == null) {
             throw new IllegalArgumentException();
@@ -57,7 +56,7 @@ public class FileService {
         objectMetadata.setContentLength(file.getSize());
         objectMetadata.setContentType(file.getContentType());
 
-        try(InputStream inputStream = file.getInputStream()){
+        try (InputStream inputStream = file.getInputStream()) {
             amazonS3Client.putObject(new PutObjectRequest(s3Bucket, savedName, inputStream, objectMetadata).withCannedAcl(CannedAccessControlList.PublicRead));
         }
 
@@ -73,7 +72,7 @@ public class FileService {
         fileRepository.save(fileEntity);
     }
 
-    public void deleteImgFile(String fileName){
+    public void deleteImgFile(String fileName) {
         amazonS3Client.deleteObject(s3Bucket, fileName);
     }
 

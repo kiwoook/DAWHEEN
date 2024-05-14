@@ -1,6 +1,7 @@
 package com.study.dawheen.organization.entity;
 
 
+import com.study.dawheen.common.dto.AddressDto;
 import com.study.dawheen.common.dto.CoordinateDto;
 import com.study.dawheen.common.entity.Address;
 import com.study.dawheen.common.entity.BaseTimeEntity;
@@ -23,7 +24,6 @@ import java.util.Objects;
 @Entity
 public class Organization extends BaseTimeEntity {
 
-
     // 기관과 관련된 유저들
     @OneToMany(mappedBy = "organization", fetch = FetchType.LAZY)
     List<User> users = new ArrayList<>();
@@ -38,20 +38,26 @@ public class Organization extends BaseTimeEntity {
 
     @Column(nullable = false)
     private String name;
+
     @Column(name = "FACILITY", nullable = false)
     private String facilityPhone;
+
     @Column(nullable = false)
     private String email;
+
     @Column(name = "FACILITY_TYPE", nullable = false)
     private String facilityType;
+
     @Column(name = "REPRESENT_NAME")
     private String representName;
 
     @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL)
     private Address address;
+
     @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "COORDINATE_ID")
     private Coordinate coordinate;
+
     private Boolean approved;
 
     @Builder
@@ -89,17 +95,17 @@ public class Organization extends BaseTimeEntity {
         return Objects.hash(getUsers(), getWorkList(), getId(), getName(), getFacilityPhone(), getEmail(), getFacilityType(), getRepresentName(), getAddress(), getCoordinate(), getApproved());
     }
 
-    public void update(OrganRequestDto requestDto) {
-        this.name = requestDto.getName();
-        this.facilityType = requestDto.getFacilityType();
-        this.email = requestDto.getEmail();
-        this.facilityPhone = requestDto.getFacilityPhone();
-        this.representName = requestDto.getRepresentName();
-        this.address = Address.toEntity(requestDto.getAddress());
+    public void update(String name, String facilityType, String email, String facilityPhone, String representName, AddressDto addressDto) {
+        this.name = name;
+        this.facilityType = facilityType;
+        this.email = email;
+        this.facilityPhone = facilityPhone;
+        this.representName = representName;
+        this.address = Address.toEntity(addressDto);
     }
 
-    public void updateCoordinate(CoordinateDto coordinateDto) {
-        this.coordinate = new Coordinate(coordinateDto.getLatitude(), coordinateDto.getLongitude());
+    public void updateCoordinate(Double latitude, Double longitude) {
+        this.coordinate = new Coordinate(latitude, longitude);
     }
 
     public void approved() {
