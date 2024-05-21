@@ -1,14 +1,12 @@
 package com.study.dawheen.volunteer.repository;
 
 import com.study.dawheen.volunteer.dto.VolunteerInfoResponseDto;
-import com.study.dawheen.volunteer.entity.VolunteerWork;
 import com.study.dawheen.volunteer.entity.type.ApplyStatus;
 import com.study.dawheen.volunteer.entity.type.TargetAudience;
 import com.study.dawheen.volunteer.entity.type.VolunteerType;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 public interface VolunteerWorkRepositoryCustom {

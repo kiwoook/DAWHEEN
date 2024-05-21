@@ -1,5 +1,6 @@
 package com.study.dawheen.auth.jwt;
 
+import com.study.dawheen.user.repository.RefreshTokenRepository;
 import com.study.dawheen.user.repository.UserRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -16,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Getter
@@ -32,6 +34,7 @@ public class JwtService {
     private static final String QUERY_PARAM_REFRESH_TOKEN_KEY = "refreshToken=";
     private final Key key;
     private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     @Value("${jwt.secret}")
     private String secretKey;
     @Value("${jwt.token.expiry}")
@@ -45,9 +48,10 @@ public class JwtService {
     @Value("${frontend.server.url}")
     private String frontendUrl;
 
-    public JwtService(UserRepository userRepository, String secretKey) {
+    public JwtService(UserRepository userRepository, String secretKey, RefreshTokenRepository refreshTokenRepository) {
         this.userRepository = userRepository;
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
+        this.refreshTokenRepository = refreshTokenRepository;
     }
 
     public String createAccessToken(String email) {
@@ -59,13 +63,16 @@ public class JwtService {
 
     public String createTmpToken(String email) {
         Date now = new Date();
+
         return Jwts.builder().setSubject(ACCESS_TOKEN_SUBJECT).setExpiration(new Date(now.getTime() + 60 * 5)).claim(EMAIL_CLAIM, email)
                 .signWith(key, SignatureAlgorithm.HS256).compact();
     }
 
     public String createRefreshToken() {
         Date now = new Date();
-        return Jwts.builder().setSubject(REFRESH_TOKEN_SUBJECT).setExpiration(new Date(now.getTime() + refreshTokenExpirationPeriod)).signWith(key, SignatureAlgorithm.HS256).compact();
+        String uniqueID = UUID.randomUUID().toString();
+
+        return Jwts.builder().setId(uniqueID).setSubject(REFRESH_TOKEN_SUBJECT).setExpiration(new Date(now.getTime() + refreshTokenExpirationPeriod)).signWith(key, SignatureAlgorithm.HS256).compact();
     }
 
 
@@ -77,11 +84,11 @@ public class JwtService {
     }
 
 
-    public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken){
-        try{
+    public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) {
+        try {
             response.sendRedirect(generateUrl(accessToken, refreshToken));
             log.info("Access Token, Refresh Token 리다이렉트 완료");
-        }catch (IOException e){
+        } catch (IOException e) {
             log.error("Error sending token : {}", e.getMessage());
         }
 
@@ -115,29 +122,9 @@ public class JwtService {
         }
     }
 
-    /**
-     * AccessToken 헤더 설정
-     */
-    public void setAccessTokenHeader(HttpServletResponse response, String accessToken) {
-        response.setHeader(accessHeader, accessToken);
-    }
 
-    /**
-     * RefreshToken 헤더 설정
-     */
-    public void setRefreshTokenHeader(HttpServletResponse response, String refreshToken) {
-        response.setHeader(refreshHeader, refreshToken);
-    }
-
-    /**
-     * RefreshToken DB 저장(업데이트)
-     */
-    public void updateRefreshToken(String email, String refreshToken) {
-        userRepository.findByEmail(email)
-                .ifPresentOrElse(
-                        user -> user.updateRefreshToken(refreshToken),
-                        IllegalStateException::new
-                );
+    public void saveRefreshToken(String refreshToken, String email) {
+        refreshTokenRepository.save(refreshToken, email);
     }
 
     public boolean isTokenValid(String token) {
@@ -148,14 +135,27 @@ public class JwtService {
             log.info("Invalid JWT signature.");
         } catch (MalformedJwtException e) {
             log.info("Invalid JWT token.");
-        } catch (ExpiredJwtException e) {
-            log.info("Expired JWT token.");
         } catch (UnsupportedJwtException e) {
             log.info("Unsupported JWT token.");
         } catch (IllegalArgumentException e) {
             log.info("JWT token compact of handler are invalid.");
+        } catch (ExpiredJwtException e) {
+            log.info("Expired JWT token.");
         } catch (Exception e) {
             log.error("유효하지 않은 토큰입니다. {}", e.getMessage());
+        }
+        return false;
+    }
+
+
+    public boolean isTokenExpired(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return false; // 토큰이 만료되지 않음
+        } catch (ExpiredJwtException e) {
+            return true; // 토큰이 만료됨
+        } catch (Exception e) {
+            log.info("isTokenExpired error: {}", e.getMessage());
         }
         return false;
     }

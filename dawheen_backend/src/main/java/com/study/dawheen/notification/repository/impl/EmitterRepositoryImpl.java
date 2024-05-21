@@ -17,8 +17,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EmitterRepositoryImpl implements EmitterRepository {
     private final Map<String, SseEmitter> sseEmitterMap = new ConcurrentHashMap<>();
-    private final RedisTemplate<String, Object> emitterRedisTemplate;
-    private final RedisTemplate<String, Object> cacheRedisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private static final String EMITTER_CODE = "EMITTER:";
+    private static final String CACHE_CODE = "CACHE_CODE:";
 
 
     @Override
@@ -29,24 +30,24 @@ public class EmitterRepositoryImpl implements EmitterRepository {
 
     @Override
     public void saveEventCache(String eventCacheId, Object event) {
-        cacheRedisTemplate.opsForValue().set(eventCacheId, event, 7, TimeUnit.DAYS);
+        redisTemplate.opsForValue().set(EMITTER_CODE+eventCacheId, event, 7, TimeUnit.DAYS);
     }
 
     @Override
     public Map<String, SseEmitter> findAllEmitterStartWithByMemberId(String memberId) {
         return sseEmitterMap.entrySet().stream()
-                .filter(entry -> entry.getKey().startsWith(memberId))
+                .filter(entry -> entry.getKey().startsWith(EMITTER_CODE+memberId))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @Override
     public Map<String, Object> findAllEventCacheStartWithByMemberId(String memberId) {
-        Set<String> keys = cacheRedisTemplate.keys(memberId + "*");
+        Set<String> keys = redisTemplate.keys(CACHE_CODE+memberId + "*");
         Map<String, Object> valueMap = new HashMap<>();
 
         assert keys != null;
         for (String key : keys) {
-            Object value = cacheRedisTemplate.opsForValue().get(key);
+            Object value = redisTemplate.opsForValue().get(CACHE_CODE+key);
             valueMap.put(key, value);
         }
 
@@ -55,7 +56,7 @@ public class EmitterRepositoryImpl implements EmitterRepository {
 
     @Override
     public void deleteById(String id) {
-        emitterRedisTemplate.delete(id);
+        redisTemplate.delete(EMITTER_CODE+id);
     }
 
     @Override
@@ -71,11 +72,11 @@ public class EmitterRepositoryImpl implements EmitterRepository {
 
     @Override
     public void deleteAllEventCacheStartWithId(String memberId) {
-        Set<String> keys = cacheRedisTemplate.keys(memberId + "*");
+        Set<String> keys = redisTemplate.keys(CACHE_CODE+memberId + "*");
 
         assert keys != null;
         for (String key : keys) {
-            cacheRedisTemplate.delete(key);
+            redisTemplate.delete(CACHE_CODE+key);
         }
 
     }

@@ -1,6 +1,7 @@
 package com.study.dawheen.volunteer.repository;
 
 import com.study.dawheen.user.dto.UserInfoResponseDto;
+import com.study.dawheen.user.entity.RoleType;
 import com.study.dawheen.user.entity.User;
 import com.study.dawheen.user.repository.UserRepository;
 import com.study.dawheen.volunteer.entity.UserVolunteerWork;
@@ -36,30 +37,35 @@ class VolunteerRankingRepositoryTest {
             .name("user1")
             .email("user1@gmail.com")
             .password("password")
+            .roleType(RoleType.MEMBER)
             .build();
 
     User user2 = User.builder()
             .name("user2")
             .email("user2@gmail.com")
             .password("password")
+            .roleType(RoleType.MEMBER)
             .build();
 
     User user3 = User.builder()
             .name("user3")
             .email("user3@gmail.com")
             .password("password")
+            .roleType(RoleType.MEMBER)
             .build();
 
     User user4 = User.builder()
             .name("user4")
             .email("user4@gmail.com")
             .password("password")
+            .roleType(RoleType.MEMBER)
             .build();
 
     User user5 = User.builder()
             .name("user5")
             .email("user5@gmail.com")
             .password("password")
+            .roleType(RoleType.MEMBER)
             .build();
 
     User[] users = {user1, user2, user3, user4, user5};
@@ -114,6 +120,8 @@ class VolunteerRankingRepositoryTest {
                 .name("user6")
                 .email("user6@gmail.com")
                 .password("password")
+                .roleType(RoleType.MEMBER)
+
                 .build();
         userRepository.save(user6);
 

@@ -7,6 +7,7 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 
 @Getter
 public class CustomOAuth2User extends DefaultOAuth2User {
@@ -30,5 +31,17 @@ public class CustomOAuth2User extends DefaultOAuth2User {
         this.role = roleType;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        CustomOAuth2User that = (CustomOAuth2User) o;
+        return Objects.equals(getEmail(), that.getEmail()) && getRole() == that.getRole();
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getEmail(), getRole());
+    }
 }

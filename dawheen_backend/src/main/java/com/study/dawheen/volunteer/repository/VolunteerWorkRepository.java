@@ -5,7 +5,6 @@ import com.study.dawheen.volunteer.entity.VolunteerWork;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface VolunteerWorkRepository extends JpaRepository<VolunteerWork, Long>, VolunteerWorkRepositoryCustom {
 

@@ -20,8 +20,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // 해당 기관과 연결되어 있는 유저를 반환합니다.
     Optional<List<User>> findAllByOrganization(Organization organization);
 
-    Optional<User> findByRefreshToken(String refreshToken);
-
     Optional<User> findBySocialIdAndProviderType(String socialId, ProviderType providerType);
 
 

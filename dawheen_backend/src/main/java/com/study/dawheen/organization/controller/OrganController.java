@@ -5,6 +5,7 @@ import com.study.dawheen.organization.dto.OrganRequestDto;
 import com.study.dawheen.organization.service.OrganQueryService;
 import com.study.dawheen.organization.service.OrganService;
 import com.study.dawheen.organization.service.OrganSubscribeService;
+import com.study.dawheen.user.entity.RoleType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -55,13 +56,13 @@ public class OrganController {
     }
 
     @Operation(summary = "기관 정보 업데이트")
-    @PreAuthorize("hasRole('ROLE_ORGANIZATION') or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION') or hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<OrganInfoResponseDto> updateOrganization(@PathVariable("id") Long id, @RequestBody @Valid OrganRequestDto requestDto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         try {
-            if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ||
+            if (authentication.getAuthorities().contains(new SimpleGrantedAuthority(RoleType.ADMIN.getCode())) ||
                     organService.verifyAffiliation(id, email)) {
                 organService.update(id, requestDto);
                 return ResponseEntity.ok().build();
@@ -76,14 +77,14 @@ public class OrganController {
 
 
     @Operation(summary = "기관 정보 삭제")
-    @PreAuthorize("hasRole('ROLE_ORGANIZATION') or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION') or hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<OrganInfoResponseDto> deleteOrganization(@PathVariable("id") Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
         try {
-            if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ||
+            if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ADMIN")) ||
                     organService.verifyAffiliation(id, email)) {
                 organService.delete(id);
                 return ResponseEntity.ok().build();
@@ -112,7 +113,7 @@ public class OrganController {
     }
 
     @Operation(summary = "기관 신청 대기 명단", description = "신청 대기 중인 기관들을 확인합니다.")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<OrganInfoResponseDto>> getPendingOrganizationList() {
         try {
@@ -123,7 +124,7 @@ public class OrganController {
     }
 
     @Operation(summary = "대기 기관 수락", description = "대기중인 해당 기관을 수락합니다. ")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/enroll/{id}")
     public ResponseEntity<OrganInfoResponseDto> enrollOrganization(@PathVariable Long id) {
         try {
@@ -137,7 +138,7 @@ public class OrganController {
     }
 
     @Operation(summary = "대기 기관 거절", description = "대기중인 해당 기관을 거절합니다. ")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/denied/{id}")
     public ResponseEntity<OrganInfoResponseDto> deniedOrganization(@PathVariable Long id) {
         try {
@@ -151,7 +152,7 @@ public class OrganController {
     }
 
     @Operation(summary = "사용자 기관 권한 부여")
-    @PreAuthorize("hasRole('ROLE_ORGANIZATION') or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION') or hasRole('ADMIN')")
     @PostMapping("/grant")
     public ResponseEntity<OrganInfoResponseDto> grantRole(@RequestBody RoleRequestDto roleRequestDto) {
         try {
@@ -165,7 +166,7 @@ public class OrganController {
     }
 
     @Operation(summary = "사용자 기관 권한 삭제")
-    @PreAuthorize("hasRole('ROLE_ORGANIZATION') or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION') or hasRole('ADMIN')")
     @PostMapping("/revoke")
     public ResponseEntity<OrganInfoResponseDto> revokeRole(@RequestBody @Valid RoleRequestDto roleRequestDto) {
         try {

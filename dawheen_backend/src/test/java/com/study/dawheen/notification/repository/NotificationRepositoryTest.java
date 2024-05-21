@@ -1,6 +1,7 @@
 package com.study.dawheen.notification.repository;
 
 import com.study.dawheen.notification.entity.Notification;
+import com.study.dawheen.user.entity.RoleType;
 import com.study.dawheen.user.entity.User;
 import com.study.dawheen.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -33,6 +34,7 @@ class NotificationRepositoryTest {
             .name("user1")
             .email("user1@gmail.com")
             .password("password")
+            .roleType(RoleType.MEMBER)
             .build();
 
     @BeforeEach

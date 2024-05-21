@@ -2,7 +2,7 @@ package com.study.dawheen.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.study.dawheen.auth.filter.CustomJsonUsernamePasswordAuthenticationFilter;
-import com.study.dawheen.auth.filter.JwtAuthenticationProcessingFilter;
+import com.study.dawheen.auth.filter.JwtAuthenticationProcessingFilterV2;
 import com.study.dawheen.auth.handler.LoginFailureHandler;
 import com.study.dawheen.auth.handler.LoginSuccessHandler;
 import com.study.dawheen.auth.handler.OAuth2LoginFailureHandler;
@@ -10,6 +10,7 @@ import com.study.dawheen.auth.handler.OAuth2LoginSuccessHandler;
 import com.study.dawheen.auth.jwt.JwtService;
 import com.study.dawheen.auth.service.CustomOAuth2UserService;
 import com.study.dawheen.auth.service.LoginService;
+import com.study.dawheen.user.repository.RefreshTokenRepository;
 import com.study.dawheen.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -45,6 +46,7 @@ public class SecurityConfig {
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -103,7 +105,7 @@ public class SecurityConfig {
 
     @Bean
     public LoginSuccessHandler loginSuccessHandler() {
-        return new LoginSuccessHandler(jwtService, userRepository);
+        return new LoginSuccessHandler(jwtService);
     }
 
     @Bean
@@ -122,8 +124,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter() {
-        return new JwtAuthenticationProcessingFilter(jwtService, userRepository);
+    public JwtAuthenticationProcessingFilterV2 jwtAuthenticationProcessingFilter() {
+        return new JwtAuthenticationProcessingFilterV2(userRepository, jwtService, refreshTokenRepository);
     }
 
 

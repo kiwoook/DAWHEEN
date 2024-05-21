@@ -2,10 +2,7 @@ package com.study.dawheen.user.controller;
 
 import com.study.dawheen.auth.JwtResponseDto;
 import com.study.dawheen.common.dto.TokenResponseDto;
-import com.study.dawheen.user.dto.OAuth2UserCreateRequestDto;
-import com.study.dawheen.user.dto.UserInfoResponseDto;
-import com.study.dawheen.user.dto.UserResetPasswordRequestDto;
-import com.study.dawheen.user.dto.UserUpdateRequestDto;
+import com.study.dawheen.user.dto.*;
 import com.study.dawheen.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -53,12 +50,19 @@ public class UserController {
     }
 
 
-    @Operation(summary = "OAuth2 사용자 추가", description = "추가 정보를 입력받고 해당 OAuth2 유저를 사용자로 등록합니다.")
+    @Operation(summary = "OAuth2 사용자 등록", description = "추가 정보를 입력받고 해당 OAuth2 유저를 사용자로 등록합니다.")
     @PostMapping("/oauth2")
     public ResponseEntity<TokenResponseDto> verifyOAuth2Member(@RequestBody @Valid OAuth2UserCreateRequestDto requestDto) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
         TokenResponseDto responseDto = userService.verifyOAuth2Member(email, requestDto);
+        return ResponseEntity.ok(responseDto);
+    }
+
+    @Operation(summary = "일반 사용자 등록")
+    @PostMapping("/sign-up")
+    public ResponseEntity<TokenResponseDto> createUser(@RequestBody @Valid UserCreateRequestDto requestDto) {
+        TokenResponseDto responseDto = userService.createUser(requestDto);
         return ResponseEntity.ok(responseDto);
     }
 

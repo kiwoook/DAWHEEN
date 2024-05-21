@@ -45,7 +45,7 @@ public class VolunteerUserController {
     }
 
     @Operation(summary = "봉사활동 유저 삭제", description = "봉사활동에서 유저를 삭제합니다. ")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteUserVolunteer(@PathVariable Long id) {
         try {
@@ -59,7 +59,7 @@ public class VolunteerUserController {
     }
 
     @Operation(summary = "등록 대기 명단 확인", description = "status 에 따라 등록 상태 명단을 확인합니다.")
-    @PreAuthorize("hasRole('ROLE_ORGANIZATION')")
+    @PreAuthorize("hasRole('ORGANIZATION')")
     @GetMapping("/pending/{status}/{id}/organization")
     public ResponseEntity<List<UserInfoResponseDto>> getUserListForOrganization(
             @PathVariable Long id,
@@ -79,7 +79,7 @@ public class VolunteerUserController {
     }
 
     @Operation(summary = "어드민 대기 명단 확인", description = "어드민이 특정 ID의 등록 상태 대기명단을 확인합니다.")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/pending/{status}/{id}/admin")
     public ResponseEntity<List<UserInfoResponseDto>> getUserListForAdmin(@PathVariable Long id, @PathVariable ApplyStatus status) {
         try {
@@ -134,7 +134,7 @@ public class VolunteerUserController {
     }
 
     @Operation(summary = "봉사활동 유저 취소", description = "기관 역할을 가진 사용자가 취소")
-    @PreAuthorize("hasRole('ROLE_ORGANIZATION')")
+    @PreAuthorize("hasRole('ORGANIZATION')")
     @PostMapping("/{id}/cancel/{userId}/organization")
     public ResponseEntity<UserInfoResponseDto> cancelForOrganization(
             @Parameter(description = "volunteerWorkId에 대한 정보", required = true) @PathVariable Long id,
@@ -156,7 +156,7 @@ public class VolunteerUserController {
     }
 
     @Operation(summary = "봉사활동 유저 추방", description = "어드민 역할을 가진 사용자가 추방")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/cancel/{userId}/admin")
     public ResponseEntity<UserInfoResponseDto> cancelForAdmin(
             @Parameter(description = "volunteerWorkId에 대한 정보", required = true) @PathVariable Long id,

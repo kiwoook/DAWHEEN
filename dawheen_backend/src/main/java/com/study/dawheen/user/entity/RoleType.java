@@ -8,10 +8,10 @@ import java.util.Arrays;
 @Getter
 @RequiredArgsConstructor
 public enum RoleType {
-    ADMIN("ROLE_ADMIN"),
-    ORGANIZATION("ROLE_ORGANIZATION"),
-    MEMBER("ROLE_MEMBER"),
-    GUEST("ROLE_GUEST");
+    ADMIN("ADMIN"),
+    ORGANIZATION("ORGANIZATION"),
+    MEMBER("MEMBER"),
+    GUEST("GUEST");
 
     private final String code;
 

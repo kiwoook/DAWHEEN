@@ -29,7 +29,7 @@ public class FileController {
     }
 
     @PostMapping("/upload/test")
-    public ResponseEntity<?> uploadTest(@RequestParam(value = "file", required = false) MultipartFile file,
+    public ResponseEntity<Object> uploadTest(@RequestParam(value = "file", required = false) MultipartFile file,
                                         @RequestParam(value = "files", required = false) List<MultipartFile> files) throws IOException {
         fileService.saveImgFileByVolunteerWork(file, null);
 
@@ -37,8 +37,8 @@ public class FileController {
     }
 
     @DeleteMapping()
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<?> deleteFile(@RequestBody String fileName) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Object> deleteFile(@RequestBody String fileName) {
         fileService.deleteImgFile(fileName);
 
         return ResponseEntity.ok().build();

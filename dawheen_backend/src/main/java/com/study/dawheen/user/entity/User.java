@@ -19,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Getter
@@ -45,7 +46,8 @@ public class User extends BaseTimeEntity {
 
     private String birth;
 
-    @Column()
+    @NotNull
+    @Column
     private String name;
 
     @Column
@@ -54,11 +56,10 @@ public class User extends BaseTimeEntity {
     @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL)
     private Address address;
 
+    @NotNull
     @Column
     @Enumerated(EnumType.STRING)
     private RoleType role;
-
-    private String refreshToken;
 
     @Column(name = "PROVIDER_TYPE", length = 20)
     @Enumerated(EnumType.STRING)
@@ -82,7 +83,7 @@ public class User extends BaseTimeEntity {
         this.role = roleType;
     }
 
-    public void changePassword(String password){
+    public void changePassword(String password) {
         this.password = encodePassword(password);
     }
 
@@ -93,7 +94,7 @@ public class User extends BaseTimeEntity {
 
     public void update(String name, String email, String phone, Address address) {
         this.name = name;
-        if (email != null){
+        if (email != null) {
             this.email = email;
         }
         this.phone = phone;
@@ -133,10 +134,11 @@ public class User extends BaseTimeEntity {
         this.volunteerWorks.remove(userVolunteerWork);
     }
 
-    public boolean equalPassword(String password){
+    public boolean equalPassword(String password) {
         String encodePassword = encodePassword(password);
         return this.password.equals(encodePassword);
     }
+
     private String encodePassword(String rawPassword) {
         if (rawPassword == null) {
             return PasswordUtil.generateRandomPassword();
@@ -145,9 +147,16 @@ public class User extends BaseTimeEntity {
         return passwordEncoder.encode(rawPassword);
     }
 
-    public void updateRefreshToken(String updateRefreshToken) {
-        this.refreshToken = updateRefreshToken;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(getId(), user.getId()) && Objects.equals(getEmail(), user.getEmail()) && Objects.equals(getSocialId(), user.getSocialId()) && Objects.equals(getPassword(), user.getPassword()) && Objects.equals(getBirth(), user.getBirth()) && Objects.equals(getName(), user.getName()) && Objects.equals(getPhone(), user.getPhone()) && Objects.equals(getAddress(), user.getAddress()) && getRole() == user.getRole() && getProviderType() == user.getProviderType() && Objects.equals(getOrganization(), user.getOrganization()) && Objects.equals(getVolunteerWorks(), user.getVolunteerWorks());
     }
 
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getEmail(), getSocialId(), getPassword(), getBirth(), getName(), getPhone(), getAddress(), getRole(), getProviderType(), getOrganization(), getVolunteerWorks());
+    }
 }
