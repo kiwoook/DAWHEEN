@@ -7,12 +7,12 @@ EXIST_BLUE=$(sudo docker-compose -p dawheen_backend-blue -f docker-compose.blue.
 
 if [ -z "$EXIST_BLUE" ]; then
     echo "blue up"
-    sudo docker-compose -p dawheen_backend-blue -f docker-compose.blue.yml up -d
+    sudo docker-compose -p dawheen_backend-blue -f docker-compose.blue.yml up --build -d
     BEFORE_COMPOSE_COLOR="green"
     AFTER_COMPOSE_COLOR="blue"
 else
     echo "green up"
-    sudo docker-compose -p dawheen_backend-green -f docker-compose.green.yml up -d
+    sudo docker-compose -p dawheen_backend-green -f docker-compose.green.yml up --build -d
     BEFORE_COMPOSE_COLOR="blue"
     AFTER_COMPOSE_COLOR="green"
 fi
