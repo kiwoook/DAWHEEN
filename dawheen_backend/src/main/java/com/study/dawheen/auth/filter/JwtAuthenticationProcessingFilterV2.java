@@ -30,7 +30,7 @@ public class JwtAuthenticationProcessingFilterV2 extends OncePerRequestFilter {
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final RefreshTokenRepository refreshTokenRepository;
-    private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
+    private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
 
     @Override
@@ -53,7 +53,6 @@ public class JwtAuthenticationProcessingFilterV2 extends OncePerRequestFilter {
         String accessToken = jwtService.extractAccessToken(request).orElse(null);
         // 유효한 토큰인지 확인한 다음 만료된 토큰이라면
         // 리프레쉬 토큰을 체킹한다.
-
 
         if (accessToken != null && jwtService.isTokenExpired(accessToken)) {
             checkRefreshToken(request, response);
@@ -81,7 +80,7 @@ public class JwtAuthenticationProcessingFilterV2 extends OncePerRequestFilter {
         log.info("반환된 이메일 키 확인 : {}", email);
         if (email != null) {
             String reIssuedRefreshToken = reIssueRefreshToken(refreshToken, email);
-            jwtService.sendAccessAndRefreshToken(response, jwtService.createAccessToken(email), reIssuedRefreshToken);
+            jwtService.sendJwtToHeaders(response, jwtService.createAccessToken(email), reIssuedRefreshToken);
             return;
         }
 

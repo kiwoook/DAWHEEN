@@ -53,7 +53,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         response.addHeader(jwtService.getRefreshHeader(), AUTHORIZATION_CODE + refreshToken);
 
         jwtService.saveRefreshToken(refreshToken, email);
-        jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken);
+        jwtService.sendJwtWithRedirect(response, accessToken, refreshToken);
     }
 
 }

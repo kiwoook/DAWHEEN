@@ -1,5 +1,6 @@
 package com.study.dawheen.volunteer.entity;
 
+import com.study.dawheen.chat.entity.ChatRoom;
 import com.study.dawheen.common.dto.CoordinateDto;
 import com.study.dawheen.common.entity.BaseTimeEntity;
 import com.study.dawheen.common.entity.Coordinate;
@@ -31,7 +32,7 @@ public class VolunteerWork extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @Column(name = "ID", nullable = false)
     private Long id;
 
     @ManyToOne
@@ -91,6 +92,10 @@ public class VolunteerWork extends BaseTimeEntity {
     @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "COORDINATE_ID")
     private Coordinate coordinate;
+
+    @OneToOne
+    @JoinColumn(name = "CHATROOM_ID")
+    private ChatRoom chatRoom;
 
     @Builder
     public VolunteerWork(Organization organization, String title, String content, LocalDate serviceStartDate, LocalDate serviceEndDate, LocalTime serviceStartTime, LocalTime serviceEndTime, Set<DayOfWeek> serviceDays, Set<TargetAudience> targetAudiences, Set<VolunteerType> volunteerTypes, LocalDateTime recruitStartDateTime, LocalDateTime recruitEndDateTime, int maxParticipants) {

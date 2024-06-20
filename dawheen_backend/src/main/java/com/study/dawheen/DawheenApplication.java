@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableConfigurationProperties({
@@ -17,6 +18,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Import({JpaConfig.class})
 @PropertySource("classpath:application-oauth.properties")
 @EnableScheduling
+@EnableMongoRepositories
 @SpringBootApplication
 public class DawheenApplication {
 

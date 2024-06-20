@@ -83,17 +83,19 @@ public class JwtService {
         log.info("재발급된 Access Token : {}", accessToken);
     }
 
+    public void sendJwtToHeaders(HttpServletResponse response, String accessToken, String refreshToken) {
+        response.setHeader(accessHeader, BEARER + accessToken);
+        response.setHeader(refreshHeader, BEARER + refreshToken);
+    }
 
-    public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) {
+    public void sendJwtWithRedirect(HttpServletResponse response, String accessToken, String refreshToken) {
         try {
             response.sendRedirect(generateUrl(accessToken, refreshToken));
             log.info("Access Token, Refresh Token 리다이렉트 완료");
         } catch (IOException e) {
             log.error("Error sending token : {}", e.getMessage());
         }
-
     }
-
 
     public Optional<String> extractRefreshToken(HttpServletRequest request) {
         return Optional.ofNullable(request.getHeader(refreshHeader))
@@ -108,7 +110,6 @@ public class JwtService {
                 .map(refreshToken -> refreshToken.replace(BEARER, ""));
     }
 
-
     public Optional<String> extractEmail(String accessToken) {
         try {
             Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken)
@@ -121,7 +122,6 @@ public class JwtService {
             return Optional.empty();
         }
     }
-
 
     public void saveRefreshToken(String refreshToken, String email) {
         refreshTokenRepository.save(refreshToken, email);
