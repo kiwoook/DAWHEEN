@@ -6,7 +6,9 @@ import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -16,6 +18,8 @@ import java.util.Set;
 
 
 @Data
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+
 public class VolunteerCreateRequestDto {
     @NotBlank
     String title;
@@ -42,5 +46,18 @@ public class VolunteerCreateRequestDto {
     @NotNull
     Set<VolunteerType> volunteerTypes;
 
-
+    public VolunteerCreateRequestDto(String title, String content, LocalDate serviceStartDate, LocalDate serviceEndDate, LocalTime serviceStartTime, LocalTime serviceEndTime, Set<DayOfWeek> serviceDays, LocalDateTime recruitStartDateTime, LocalDateTime recruitEndDateTime, int maxParticipants, Set<TargetAudience> targetAudiences, Set<VolunteerType> volunteerTypes) {
+        this.title = title;
+        this.content = content;
+        this.serviceStartDate = serviceStartDate;
+        this.serviceEndDate = serviceEndDate;
+        this.serviceStartTime = serviceStartTime;
+        this.serviceEndTime = serviceEndTime;
+        this.serviceDays = serviceDays;
+        this.recruitStartDateTime = recruitStartDateTime;
+        this.recruitEndDateTime = recruitEndDateTime;
+        this.maxParticipants = maxParticipants;
+        this.targetAudiences = targetAudiences;
+        this.volunteerTypes = volunteerTypes;
+    }
 }

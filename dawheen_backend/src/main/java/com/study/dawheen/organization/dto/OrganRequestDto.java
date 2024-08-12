@@ -1,6 +1,7 @@
 package com.study.dawheen.organization.dto;
 
 import com.study.dawheen.common.dto.AddressDto;
+import com.study.dawheen.common.dto.CoordinateDto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -31,4 +32,7 @@ public class OrganRequestDto {
 
     @NotNull
     private AddressDto address;
+
+    @NotNull
+    private CoordinateDto coordinate;
 }

@@ -6,7 +6,7 @@ import com.study.dawheen.common.entity.BaseTimeEntity;
 import com.study.dawheen.common.entity.Coordinate;
 import com.study.dawheen.organization.entity.Organization;
 import com.study.dawheen.volunteer.dto.VolunteerCreateRequestDto;
-import com.study.dawheen.volunteer.dto.VolunteerUpdateResponseDto;
+import com.study.dawheen.volunteer.dto.VolunteerUpdateRequestDto;
 import com.study.dawheen.volunteer.entity.type.TargetAudience;
 import com.study.dawheen.volunteer.entity.type.VolunteerType;
 import jakarta.persistence.*;
@@ -93,7 +93,7 @@ public class VolunteerWork extends BaseTimeEntity {
     @JoinColumn(name = "COORDINATE_ID")
     private Coordinate coordinate;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "CHATROOM_ID")
     private ChatRoom chatRoom;
 
@@ -113,7 +113,7 @@ public class VolunteerWork extends BaseTimeEntity {
         this.recruitEndDateTime = recruitEndDateTime;
         this.maxParticipants = maxParticipants;
         this.appliedParticipants = new AtomicInteger(0);
-
+        this.chatRoom = new ChatRoom(title);
     }
 
     public static VolunteerWork toEntity(VolunteerCreateRequestDto requestDto) {
@@ -133,20 +133,20 @@ public class VolunteerWork extends BaseTimeEntity {
                 .build();
     }
 
-    public void update(VolunteerUpdateResponseDto volunteerUpdateResponseDto) {
-        this.title = volunteerUpdateResponseDto.getTitle();
-        this.content = volunteerUpdateResponseDto.getContent();
-        this.serviceDays = volunteerUpdateResponseDto.getServiceDays();
-        this.serviceStartTime = volunteerUpdateResponseDto.getServiceStartTime();
-        this.serviceEndTime = volunteerUpdateResponseDto.getServiceEndTime();
-        this.serviceStartDate = volunteerUpdateResponseDto.getServiceStartDate();
-        this.serviceEndDate = volunteerUpdateResponseDto.getServiceEndDate();
-        this.recruitStartDateTime = volunteerUpdateResponseDto.getRecruitStartDateTime();
-        this.recruitEndDateTime = volunteerUpdateResponseDto.getRecruitEndDateTime();
-        this.maxParticipants = volunteerUpdateResponseDto.getMaxParticipants();
-        this.volunteerTypes = volunteerUpdateResponseDto.getVolunteerTypes();
-        this.targetAudiences = volunteerUpdateResponseDto.getTargetAudiences();
-        this.coordinate = new Coordinate(volunteerUpdateResponseDto.getLatitude(), volunteerUpdateResponseDto.getLongitude());
+    public void update(VolunteerUpdateRequestDto volunteerUpdateRequestDto) {
+        this.title = volunteerUpdateRequestDto.getTitle();
+        this.content = volunteerUpdateRequestDto.getContent();
+        this.serviceDays = volunteerUpdateRequestDto.getServiceDays();
+        this.serviceStartTime = volunteerUpdateRequestDto.getServiceStartTime();
+        this.serviceEndTime = volunteerUpdateRequestDto.getServiceEndTime();
+        this.serviceStartDate = volunteerUpdateRequestDto.getServiceStartDate();
+        this.serviceEndDate = volunteerUpdateRequestDto.getServiceEndDate();
+        this.recruitStartDateTime = volunteerUpdateRequestDto.getRecruitStartDateTime();
+        this.recruitEndDateTime = volunteerUpdateRequestDto.getRecruitEndDateTime();
+        this.maxParticipants = volunteerUpdateRequestDto.getMaxParticipants();
+        this.volunteerTypes = volunteerUpdateRequestDto.getVolunteerTypes();
+        this.targetAudiences = volunteerUpdateRequestDto.getTargetAudiences();
+        this.coordinate = new Coordinate(volunteerUpdateRequestDto.getLatitude(), volunteerUpdateRequestDto.getLongitude());
     }
 
     public void updateCoordinate(CoordinateDto coordinateDto) {

@@ -17,7 +17,7 @@ import java.util.Set;
  */
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class VolunteerUpdateResponseDto {
+public class VolunteerUpdateRequestDto {
     private String title;
     private String content;
     private LocalDate serviceStartDate;

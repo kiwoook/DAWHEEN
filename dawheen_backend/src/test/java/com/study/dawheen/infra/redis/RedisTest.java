@@ -1,33 +1,18 @@
-package com.study.dawheen.config;
+package com.study.dawheen.infra.redis;
 
 
-import com.study.dawheen.user.dto.UserInfoResponseDto;
 import com.study.dawheen.user.entity.User;
 import com.study.dawheen.user.repository.UserRepository;
-import com.study.dawheen.volunteer.entity.UserVolunteerWork;
-import com.study.dawheen.volunteer.entity.VolunteerWork;
-import com.study.dawheen.volunteer.entity.type.ApplyStatus;
 import com.study.dawheen.volunteer.repository.UserVolunteerRepository;
 import com.study.dawheen.volunteer.repository.VolunteerWorkRepository;
 import com.study.dawheen.volunteer.service.VolunteerRankingService;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
 @SpringBootTest

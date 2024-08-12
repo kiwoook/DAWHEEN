@@ -9,7 +9,7 @@ import com.study.dawheen.user.entity.User;
 import com.study.dawheen.user.repository.UserRepository;
 import com.study.dawheen.volunteer.dto.VolunteerCreateRequestDto;
 import com.study.dawheen.volunteer.dto.VolunteerInfoResponseDto;
-import com.study.dawheen.volunteer.dto.VolunteerUpdateResponseDto;
+import com.study.dawheen.volunteer.dto.VolunteerUpdateRequestDto;
 import com.study.dawheen.volunteer.entity.UserVolunteerWork;
 import com.study.dawheen.volunteer.entity.VolunteerWork;
 import com.study.dawheen.volunteer.entity.type.ApplyStatus;
@@ -18,6 +18,7 @@ import com.study.dawheen.volunteer.repository.VolunteerWorkRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,9 @@ public class VolunteerService {
     private final VolunteerWorkRepository volunteerWorkRepository;
     private final UserVolunteerRepository userVolunteerRepository;
     private final OrganSubscribeService organSubscribeService;
+
     private final FileService fileService;
+
     private final UserRepository userRepository;
 
     @Transactional
@@ -46,10 +49,14 @@ public class VolunteerService {
         VolunteerWork volunteerWork = VolunteerWork.toEntity(createResponseDto);
 
         // 이미지 저장
-        fileService.saveImgFileByVolunteerWork(file, volunteerWork);
+        if (file != null) {
+            fileService.saveImgFileByVolunteerWork(file, volunteerWork);
+        }
 
-        for (MultipartFile multipartFile : files) {
-            fileService.saveImgFileByVolunteerWork(multipartFile, volunteerWork);
+        if (!files.isEmpty()) {
+            for (MultipartFile multipartFile : files) {
+                fileService.saveImgFileByVolunteerWork(multipartFile, volunteerWork);
+            }
         }
 
         Organization organization = user.getOrganization();
@@ -79,7 +86,7 @@ public class VolunteerService {
 
 
     @Transactional
-    public VolunteerInfoResponseDto update(Long volunteerWorkId, VolunteerUpdateResponseDto updateResponseDto) {
+    public VolunteerInfoResponseDto update(Long volunteerWorkId, VolunteerUpdateRequestDto updateResponseDto) {
         VolunteerWork volunteerWork = volunteerWorkRepository.findById(volunteerWorkId).orElseThrow(EntityNotFoundException::new);
         volunteerWork.update(updateResponseDto);
 

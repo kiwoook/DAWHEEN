@@ -2,7 +2,7 @@ package com.study.dawheen.volunteer.controller;
 
 import com.study.dawheen.volunteer.dto.VolunteerCreateRequestDto;
 import com.study.dawheen.volunteer.dto.VolunteerInfoResponseDto;
-import com.study.dawheen.volunteer.dto.VolunteerUpdateResponseDto;
+import com.study.dawheen.volunteer.dto.VolunteerUpdateRequestDto;
 import com.study.dawheen.volunteer.service.VolunteerQueryService;
 import com.study.dawheen.volunteer.service.VolunteerService;
 import com.study.dawheen.volunteer.service.VolunteerUserQueryService;
@@ -102,7 +102,7 @@ public class VolunteerController {
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<VolunteerInfoResponseDto> updateVolunteerWork(@PathVariable("id") Long id, @RequestBody VolunteerUpdateResponseDto updateResponseDto) {
+    public ResponseEntity<VolunteerInfoResponseDto> updateVolunteerWork(@PathVariable("id") Long id, @RequestBody VolunteerUpdateRequestDto updateResponseDto) {
         try {
             VolunteerInfoResponseDto responseDto = volunteerService.update(id, updateResponseDto);
             return ResponseEntity.ok(responseDto);

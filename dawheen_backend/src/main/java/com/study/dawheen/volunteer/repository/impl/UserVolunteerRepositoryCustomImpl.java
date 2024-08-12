@@ -14,6 +14,7 @@ import com.study.dawheen.volunteer.entity.VolunteerWork;
 import com.study.dawheen.volunteer.entity.type.ApplyStatus;
 import com.study.dawheen.volunteer.repository.UserVolunteerRepositoryCustom;
 import jakarta.persistence.EntityManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
@@ -32,6 +33,7 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
     private static final QVolunteerWork volunteerWork = QVolunteerWork.volunteerWork;
     private static final QUser user = QUser.user;
 
+    @Autowired
     public UserVolunteerRepositoryCustomImpl(EntityManager entityManager) {
         this.queryFactory = new JPAQueryFactory(entityManager);
     }

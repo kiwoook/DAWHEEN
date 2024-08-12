@@ -2,7 +2,6 @@ package com.study.dawheen.user.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.study.dawheen.auth.entity.ProviderType;
-import com.study.dawheen.auth.utils.PasswordUtil;
 import com.study.dawheen.common.entity.Address;
 import com.study.dawheen.common.entity.BaseTimeEntity;
 import com.study.dawheen.organization.entity.Organization;
@@ -15,8 +14,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -41,8 +38,8 @@ public class User extends BaseTimeEntity {
     @JsonIgnore
     @Column(name = "PASSWORD", length = 128)
     @NotNull
-    @Size(max = 128)
-    private String password;
+    @Size(min = 60, max = 60)
+    private String password; // BCryptPasswordEncoder 사용 시 60자의 길이를 가지고 있음
 
     private String birth;
 
@@ -75,7 +72,7 @@ public class User extends BaseTimeEntity {
     @Builder
     public User(String socialId, String password, String name, String email, String birth, ProviderType providerType, RoleType roleType) {
         this.socialId = socialId;
-        this.password = encodePassword(password);
+        this.password = password;
         this.name = name;
         this.email = email;
         this.birth = birth;
@@ -83,8 +80,9 @@ public class User extends BaseTimeEntity {
         this.role = roleType;
     }
 
+
     public void changePassword(String password) {
-        this.password = encodePassword(password);
+        this.password = password;
     }
 
     public User updateSocialId(String socialId) {
@@ -132,19 +130,6 @@ public class User extends BaseTimeEntity {
 
     public void leaveVolunteerWork(UserVolunteerWork userVolunteerWork) {
         this.volunteerWorks.remove(userVolunteerWork);
-    }
-
-    public boolean equalPassword(String password) {
-        String encodePassword = encodePassword(password);
-        return this.password.equals(encodePassword);
-    }
-
-    private String encodePassword(String rawPassword) {
-        if (rawPassword == null) {
-            return PasswordUtil.generateRandomPassword();
-        }
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        return passwordEncoder.encode(rawPassword);
     }
 
     @Override

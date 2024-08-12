@@ -61,7 +61,7 @@ public class Organization extends BaseTimeEntity {
     private Boolean approved;
 
     @Builder
-    public Organization(String name, String facilityPhone, String email, String facilityType, String representName, Address address) {
+    public Organization(String name, String facilityPhone, String email, String facilityType, String representName, Address address, Coordinate coordinate) {
         this.name = name;
         this.facilityPhone = facilityPhone;
         this.email = email;
@@ -69,6 +69,7 @@ public class Organization extends BaseTimeEntity {
         this.representName = representName;
         this.address = address;
         this.approved = false;
+        this.coordinate = coordinate;
     }
 
     public static Organization toEntity(OrganRequestDto requestDto) {
@@ -114,7 +115,6 @@ public class Organization extends BaseTimeEntity {
 
     public void addUser(User user) {
         this.users.add(user);
-        user.grantOrganization(this);
     }
 
     public void revokeUser(User user) {

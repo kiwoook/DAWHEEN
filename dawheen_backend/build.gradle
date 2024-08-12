@@ -45,6 +45,7 @@ dependencies {
 
     // H2
     runtimeOnly 'com.h2database:h2'
+    testRuntimeOnly 'com.h2database:h2'
 
     // QueryDSL
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
@@ -81,6 +82,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation 'org.mongodb:mongodb-driver-sync:5.1.0'
     implementation 'org.mongodb:mongodb-driver-core:5.1.0'
+
+
+
 
 }
 

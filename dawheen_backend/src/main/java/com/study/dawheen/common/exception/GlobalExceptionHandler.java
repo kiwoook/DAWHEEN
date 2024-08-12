@@ -58,7 +58,6 @@ public class GlobalExceptionHandler {
     /*
         파라미터로 인해 엔티티 존재하지 않는 에러
      */
-
     @ExceptionHandler(EntityNotFoundException.class)
     protected ResponseEntity<ErrorResponse> handleEntityNotFoundException(EntityNotFoundException e) {
         log.error("EntityNotFoundExceptionError : {}", e.getMessage());

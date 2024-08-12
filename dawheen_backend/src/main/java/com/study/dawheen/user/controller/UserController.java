@@ -1,6 +1,5 @@
 package com.study.dawheen.user.controller;
 
-import com.study.dawheen.auth.JwtResponseDto;
 import com.study.dawheen.common.dto.TokenResponseDto;
 import com.study.dawheen.user.dto.*;
 import com.study.dawheen.user.service.UserService;
@@ -10,8 +9,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -78,15 +78,18 @@ public class UserController {
 
     @Operation(summary = "비밀번호 변경", description = "사용자의 이전 비밀번호를 확인하고 비밀번호를 변경합니다.")
     @PutMapping("/password")
-    public ResponseEntity<UserInfoResponseDto> changePassword(@RequestBody String oldPassword, String newPassword) {
+    public ResponseEntity<UserInfoResponseDto> changePassword(@RequestBody @Valid UserPasswordChangeRequestDto requestDto) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info("email = {}", email);
+        log.info("Received Request DTO: {}", requestDto);
 
         try {
-            userService.changePassword(email, oldPassword, newPassword);
+            userService.changePassword(email, requestDto.getOldPassword(), requestDto.getNewPassword());
             return ResponseEntity.ok().build();
-        } catch (EntityNotFoundException | IllegalStateException e) {
+        } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().build();
         }
+
     }
 
     @Operation(summary = "비밀번호 초기화 링크 이메일 전송", description = "사용자의 이메일로 비밀번호 초기화 링크를 전송합니다.")
@@ -105,16 +108,22 @@ public class UserController {
 
     @Operation(summary = "비밀번호 리셋", description = "사용자의 비밀번호를 초기화합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "유저 정보 반환", content = @Content(schema = @Schema(implementation = JwtResponseDto.class))),
+            @ApiResponse(responseCode = "200", description = "유저 정보 반환", content = @Content(schema = @Schema(implementation = TokenResponseDto.class))),
             @ApiResponse(responseCode = "400", description = "유저가 로그인하지 않았거나 정보가 없을 시 반환")
     })
     @PostMapping("/reset-password")
-    public ResponseEntity<JwtResponseDto> resetPassword(@RequestBody String password) {
+    public ResponseEntity<TokenResponseDto> resetPassword(@RequestBody @Valid UserPasswordRequestDto requestDto) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        JwtResponseDto responseDto = userService.resetPassword(email, password);
+        TokenResponseDto responseDto = userService.resetPassword(email, requestDto.getPassword());
         return ResponseEntity.ok(responseDto);
     }
 
+
+    @Data
+    public static class UserPasswordRequestDto {
+        @NotEmpty
+        private String password;
+    }
 
 }
