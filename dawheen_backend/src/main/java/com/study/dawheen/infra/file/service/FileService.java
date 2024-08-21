@@ -36,7 +36,7 @@ public class FileService {
     @Value("${cloud.aws.s3.bucket}")
     private String s3Bucket;
 
-    public void saveImgFileByVolunteerWork(MultipartFile file, VolunteerWork volunteerWork) throws IOException {
+    public void saveImgFileByVolunteerWork(MultipartFile file, VolunteerWork volunteerWork) throws IOException, IllegalArgumentException {
         String originalFileName = file.getOriginalFilename();
 
         if (file.isEmpty() || originalFileName == null) {

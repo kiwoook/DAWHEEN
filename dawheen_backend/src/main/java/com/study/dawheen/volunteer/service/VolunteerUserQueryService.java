@@ -44,7 +44,7 @@ public class VolunteerUserQueryService {
         }
 
         // Status 에 따라 UserList가 반환이 다름
-        return userVolunteerRepository.findUsersByVolunteerWorkIdAndStatus(volunteerWorkId, status)
+        return userVolunteerRepository.findUsersByVolunteerWorkIdAndStatus(volunteerWorkId, status).orElseThrow(EntityNotFoundException::new)
                 .stream()
                 .map(UserInfoResponseDto::new)
                 .toList();
@@ -52,7 +52,7 @@ public class VolunteerUserQueryService {
 
     public List<UserInfoResponseDto> getUserListByStatusForAdmin(Long volunteerWorkId, ApplyStatus status) {
         return userVolunteerRepository.findUsersByVolunteerWorkIdAndStatus(volunteerWorkId, status)
-
+                .orElseThrow(EntityNotFoundException::new)
                 .stream()
                 .map(UserInfoResponseDto::new)
                 .toList();
@@ -60,6 +60,7 @@ public class VolunteerUserQueryService {
 
     public List<UserInfoResponseDto> getAllUsersByVolunteerWork(Long volunteerWorkId) {
         return userVolunteerRepository.findUsersByVolunteerWorkId(volunteerWorkId)
+                .orElseThrow(EntityNotFoundException::new)
                 .stream()
                 .map(UserInfoResponseDto::new)
                 .toList();

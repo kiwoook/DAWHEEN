@@ -18,8 +18,6 @@ import com.study.dawheen.volunteer.repository.VolunteerWorkRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,8 +42,9 @@ public class VolunteerService {
     private final UserRepository userRepository;
 
     @Transactional
-    public VolunteerInfoResponseDto create(String email, VolunteerCreateRequestDto createResponseDto, MultipartFile file, List<MultipartFile> files) throws IOException {
-        User user = userRepository.findByEmail(email).orElseThrow(EntityNotFoundException::new);
+    public VolunteerInfoResponseDto create(String email, VolunteerCreateRequestDto createResponseDto, MultipartFile file, List<MultipartFile> files) throws IOException, IllegalArgumentException {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
         VolunteerWork volunteerWork = VolunteerWork.toEntity(createResponseDto);
 
         // 이미지 저장
@@ -53,7 +52,7 @@ public class VolunteerService {
             fileService.saveImgFileByVolunteerWork(file, volunteerWork);
         }
 
-        if (!files.isEmpty()) {
+        if (files != null && !files.isEmpty()) {
             for (MultipartFile multipartFile : files) {
                 fileService.saveImgFileByVolunteerWork(multipartFile, volunteerWork);
             }
@@ -66,24 +65,24 @@ public class VolunteerService {
             organSubscribeService.sendNotify(organization.getId());
         }
 
-        VolunteerWork savedVolunteerWork = volunteerWorkRepository.save(volunteerWork);
-
-        return new VolunteerInfoResponseDto(savedVolunteerWork);
+        return new VolunteerInfoResponseDto(volunteerWorkRepository.save(volunteerWork));
     }
 
+
     @Transactional
-    public void delete(Long volunteerWorkId) throws EmptyResultDataAccessException, EntityNotFoundException {
-        List<UserVolunteerWork> userVolunteerWorks = userVolunteerRepository.findAllByVolunteerWorkIdWithFetch(volunteerWorkId);
+    public void delete(Long volunteerWorkId) throws EntityNotFoundException {
+        List<UserVolunteerWork> userVolunteerWorks = userVolunteerRepository.findAllByVolunteerWorkIdWithFetch(volunteerWorkId).orElseThrow(EntityNotFoundException::new);
 
         for (UserVolunteerWork userVolunteerWork : userVolunteerWorks) {
             User user = userVolunteerWork.getUser();
             user.leaveVolunteerWork(userVolunteerWork);
         }
 
-        VolunteerWork volunteerWork = volunteerWorkRepository.findById(volunteerWorkId).orElseThrow(EntityNotFoundException::new);
+//      volunteerWorkRepository.deleteById(volunteerWorkId) 에서 volunteerWorkId가 없으면 에러를 반환하지 않는다.
+        VolunteerWork volunteerWork = volunteerWorkRepository.findById(volunteerWorkId)
+                .orElseThrow(EntityNotFoundException::new);
         volunteerWorkRepository.delete(volunteerWork);
     }
-
 
     @Transactional
     public VolunteerInfoResponseDto update(Long volunteerWorkId, VolunteerUpdateRequestDto updateResponseDto) {
@@ -95,8 +94,6 @@ public class VolunteerService {
 
     // 대기중인 유저를 확인해 신청할지 안할지 정할 수 있음.
     // 소속된 기관의 유저 리스트 반환
-
-
     @Transactional
     public void apply(Long volunteerWorkId, String email) {
 
@@ -187,8 +184,11 @@ public class VolunteerService {
 
         user.leaveVolunteerWork(userVolunteerWork);
         volunteerWork.leaveUser(userVolunteerWork);
+
+        volunteerWork.decreaseParticipants();
     }
 
+    @Transactional
     public void cancelApproved(Long volunteerWorkId, String email) {
         UserVolunteerWork userVolunteerWork = userVolunteerRepository.findByVolunteerWorkIdAndEmail(volunteerWorkId, email).orElseThrow(EntityNotFoundException::new);
 

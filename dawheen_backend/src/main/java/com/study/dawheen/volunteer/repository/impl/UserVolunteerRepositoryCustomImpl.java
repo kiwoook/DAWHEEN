@@ -27,11 +27,10 @@ import java.util.Optional;
 @Repository
 public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositoryCustom {
 
-    private final JPAQueryFactory queryFactory;
-
     private static final QUserVolunteerWork userVolunteerWork = QUserVolunteerWork.userVolunteerWork;
     private static final QVolunteerWork volunteerWork = QVolunteerWork.volunteerWork;
     private static final QUser user = QUser.user;
+    private final JPAQueryFactory queryFactory;
 
     @Autowired
     public UserVolunteerRepositoryCustomImpl(EntityManager entityManager) {
@@ -65,42 +64,49 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
 
 
     @Override
-    public List<UserVolunteerWork> findAllByVolunteerWorkIdWithFetch(Long volunteerWorkId) {
+    public Optional<List<UserVolunteerWork>> findAllByVolunteerWorkIdWithFetch(Long volunteerWorkId) {
 
-        return queryFactory
-                .selectFrom(userVolunteerWork)
-                .join(userVolunteerWork.user, user).fetchJoin()
-                .where(
-                        userVolunteerWork.volunteerWork.id.eq(volunteerWorkId)
-                ).fetch();
+        return Optional.of(
+                queryFactory
+                        .selectFrom(userVolunteerWork)
+                        .join(userVolunteerWork.user, user).fetchJoin()
+                        .where(
+                                userVolunteerWork.volunteerWork.id.eq(volunteerWorkId)
+                        ).fetch()
+        );
 
     }
 
     @Override
-    public List<User> findUsersByVolunteerWorkIdAndStatus(Long volunteerWorkId, ApplyStatus status) {
+    public Optional<List<User>> findUsersByVolunteerWorkIdAndStatus(Long volunteerWorkId, ApplyStatus status) {
 
-        return queryFactory
-                .select(userVolunteerWork.user)
-                .distinct()
-                .from(userVolunteerWork)
-                .join(userVolunteerWork.user, user).fetchJoin()
-                .where(
-                        userVolunteerWork.volunteerWork.id.eq(volunteerWorkId)
-                                .and(userVolunteerWork.status.eq(status))
-                )
-                .fetch();
+        return Optional.of(
+                queryFactory
+                        .select(userVolunteerWork.user)
+                        .distinct()
+                        .from(userVolunteerWork)
+                        .join(userVolunteerWork.user, user).fetchJoin()
+                        .where(
+                                userVolunteerWork.volunteerWork.id.eq(volunteerWorkId)
+                                        .and(userVolunteerWork.status.eq(status))
+                        )
+                        .fetch()
+        );
     }
 
     @Override
-    public List<User> findUsersByVolunteerWorkId(Long volunteerWorkId) {
+    public Optional<List<User>> findUsersByVolunteerWorkId(Long volunteerWorkId) {
 
-        return queryFactory
-                .select(userVolunteerWork.user)
-                .distinct()
-                .from(userVolunteerWork)
-                .join(userVolunteerWork.user, user).fetchJoin()
-                .where(userVolunteerWork.volunteerWork.id.eq(volunteerWorkId))
-                .fetch();
+        return Optional.of(
+                queryFactory
+                        .select(userVolunteerWork.user)
+                        .distinct()
+                        .from(userVolunteerWork)
+                        .join(userVolunteerWork.user, user).fetchJoin()
+                        .where(userVolunteerWork.volunteerWork.id.eq(volunteerWorkId))
+                        .fetch()
+
+        );
     }
 
 

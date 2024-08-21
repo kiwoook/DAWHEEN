@@ -8,6 +8,8 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Optional;
+
 /**
  * DTO for {@link com.study.dawheen.organization.entity.Organization}
  */
@@ -31,7 +33,11 @@ public class OrganInfoResponseDto {
         this.email = organization.getEmail();
         this.facilityType = organization.getFacilityType();
         this.representName = organization.getRepresentName();
-        this.address = new AddressDto(organization.getAddress());
-        this.coordinateInfoResponseDto = new CoordinateInfoResponseDto(organization.getCoordinate());
+        this.address = Optional.ofNullable(organization.getAddress())
+                .map(AddressDto::new)
+                .orElse(null);
+        this.coordinateInfoResponseDto = Optional.ofNullable(organization.getCoordinate())
+                .map(CoordinateInfoResponseDto::new)
+                .orElse(null);
     }
 }

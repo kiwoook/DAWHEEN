@@ -9,10 +9,10 @@ import com.study.dawheen.volunteer.service.VolunteerUserQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -41,8 +41,6 @@ public class VolunteerController {
         try {
             List<VolunteerInfoResponseDto> responseDtos = volunteerQueryService.getVolunteersWithinRadius(latitude, longitude, radius);
             return ResponseEntity.ok(responseDtos);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
@@ -58,6 +56,8 @@ public class VolunteerController {
         try {
             VolunteerInfoResponseDto responseDto = volunteerService.create(email, requestDto, file, files);
             return ResponseEntity.ok(responseDto);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).build();
         } catch (IOException e) {
             return ResponseEntity.badRequest().build();
         }
@@ -68,8 +68,6 @@ public class VolunteerController {
         try {
             VolunteerInfoResponseDto responseDto = volunteerQueryService.getVolunteer(id);
             return ResponseEntity.ok(responseDto);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.badRequest().build();
         } catch (RuntimeException e) {
             return ResponseEntity.internalServerError().build();
         }
@@ -81,8 +79,6 @@ public class VolunteerController {
         try {
             List<VolunteerInfoResponseDto> responseDtos = volunteerQueryService.getAllVolunteersByOrganization(organizationId);
             return ResponseEntity.ok(responseDtos);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.badRequest().build();
         } catch (RuntimeException e) {
             return ResponseEntity.internalServerError().build();
         }
@@ -93,8 +89,6 @@ public class VolunteerController {
         try {
             volunteerService.delete(id);
             return ResponseEntity.ok().build();
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.badRequest().build();
         } catch (RuntimeException e) {
             return ResponseEntity.internalServerError().build();
         }
@@ -102,12 +96,10 @@ public class VolunteerController {
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<VolunteerInfoResponseDto> updateVolunteerWork(@PathVariable("id") Long id, @RequestBody VolunteerUpdateRequestDto updateResponseDto) {
+    public ResponseEntity<VolunteerInfoResponseDto> updateVolunteerWork(@PathVariable("id") Long id, @RequestBody @Valid VolunteerUpdateRequestDto updateResponseDto) {
         try {
             VolunteerInfoResponseDto responseDto = volunteerService.update(id, updateResponseDto);
             return ResponseEntity.ok(responseDto);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.badRequest().build();
         } catch (RuntimeException e) {
             return ResponseEntity.internalServerError().build();
         }

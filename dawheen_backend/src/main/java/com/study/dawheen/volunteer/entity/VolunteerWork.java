@@ -10,6 +10,7 @@ import com.study.dawheen.volunteer.dto.VolunteerUpdateRequestDto;
 import com.study.dawheen.volunteer.entity.type.TargetAudience;
 import com.study.dawheen.volunteer.entity.type.VolunteerType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -41,14 +42,17 @@ public class VolunteerWork extends BaseTimeEntity {
     @OneToMany(mappedBy = "volunteerWork")
     private Set<UserVolunteerWork> users = new HashSet<>();
 
+    @NotNull
     private String title;
 
     @Lob
     private String content;
 
+    @NotNull
     @Column(name = "SERVICE_START_DATE")
     private LocalDate serviceStartDate;
 
+    @NotNull
     @Column(name = "SERVICE_END_DATE")
     private LocalDate serviceEndDate;
 
@@ -86,6 +90,7 @@ public class VolunteerWork extends BaseTimeEntity {
 
     @Column(name = "APPLIED_PARTICIPANTS")
     private AtomicInteger appliedParticipants;
+
     @Column(name = "MAX_PARTICIPANTS")
     private Integer maxParticipants;
 
@@ -157,15 +162,20 @@ public class VolunteerWork extends BaseTimeEntity {
         this.organization = organization;
     }
 
-    public int increaseParticipants() {
-        return appliedParticipants.incrementAndGet();
+    public void increaseParticipants() throws IllegalStateException {
+        if (appliedParticipants.get() == this.maxParticipants) {
+            throw new IllegalStateException();
+        }
+
+        appliedParticipants.incrementAndGet();
     }
 
-    public int decreaseParticipants() throws IllegalStateException {
+    public void decreaseParticipants() throws IllegalStateException {
         if (appliedParticipants.get() <= 0) {
             throw new IllegalStateException();
         }
-        return appliedParticipants.decrementAndGet();
+
+        appliedParticipants.decrementAndGet();
     }
 
     public void attendUser(UserVolunteerWork userVolunteerWork) {

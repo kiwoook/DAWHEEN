@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+
+    <!-- Console Appender -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <layout class="ch.qos.logback.classic.PatternLayout">
-            <Pattern>%d{HH:mm} %-5level %logger{36} - %msg%n</Pattern>
-        </layout>
+        <encoder>
+            <pattern>%d{HH:mm} %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
     </appender>
 
-    <logger name="org.hibernate.type" level="trace" />
+    <!-- Logger for org.hibernate.type with INFO level -->
+    <logger name="org.hibernate.type" level="info" />
 
+    <!-- Root Logger with INFO level -->
     <root level="info">
         <appender-ref ref="STDOUT" />
     </root>
+
 </configuration>

@@ -49,7 +49,7 @@ public class VolunteerUserController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteUserVolunteer(@PathVariable Long id) {
         try {
-            userVolunteerService.deleteUserVolunteerWork(id);
+            userVolunteerService.deleteApprovedUserVolunteerWork(id);
             return ResponseEntity.ok().build();
         } catch (EntityNotFoundException e) {
             return ResponseEntity.badRequest().build();
@@ -123,12 +123,12 @@ public class VolunteerUserController {
 
     @Operation(summary = "봉사활동 유저 완료 처리", description = "봉사활동을 approved 된 유저를 completed 처리합니다.")
     @PostMapping("/{id}/complete/{userId}")
-    public ResponseEntity<UserInfoResponseDto> complete(@PathVariable Long id, @PathVariable Long userId){
+    public ResponseEntity<UserInfoResponseDto> complete(@PathVariable Long id, @PathVariable Long userId) {
 
-        try{
+        try {
             volunteerService.completed(id, userId);
             return ResponseEntity.ok().build();
-        }catch (EntityNotFoundException | IllegalStateException e){
+        } catch (EntityNotFoundException | IllegalStateException e) {
             return ResponseEntity.badRequest().build();
         }
     }
@@ -184,10 +184,10 @@ public class VolunteerUserController {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
             if (status == ApplyStatus.APPROVED) {
-                volunteerService.cancelApproved(id,email);
+                volunteerService.cancelApproved(id, email);
             }
             if (status == ApplyStatus.PENDING) {
-                volunteerService.cancelPending(id,email);
+                volunteerService.cancelPending(id, email);
             }
             return ResponseEntity.ok().build();
         } catch (AuthorizationFailedException e) {

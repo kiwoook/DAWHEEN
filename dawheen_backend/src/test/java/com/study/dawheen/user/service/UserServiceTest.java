@@ -57,8 +57,12 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         // Mock the encode method
-        when(passwordEncoder.encode(Mockito.anyString())).thenAnswer(invocation -> "encoded_" + invocation.getArgument(0));
-
+        when(passwordEncoder.encode(Mockito.anyString()))
+                .thenAnswer(invocation -> {
+                    String rawPassword = invocation.getArgument(0);
+                    String encodedPassword = "encoded_" + rawPassword;
+                    return String.format("%1$-" + 60 + "s", encodedPassword).replace(' ', 'x');
+                });
         userCreateRequestDto = new UserCreateRequestDto("user1@gmail.com", "1234", "user");
         // Use the mocked encoder for user creation
         user = User.builder()

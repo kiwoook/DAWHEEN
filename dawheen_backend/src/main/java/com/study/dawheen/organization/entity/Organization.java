@@ -2,7 +2,6 @@ package com.study.dawheen.organization.entity;
 
 
 import com.study.dawheen.common.dto.AddressDto;
-import com.study.dawheen.common.dto.CoordinateDto;
 import com.study.dawheen.common.entity.Address;
 import com.study.dawheen.common.entity.BaseTimeEntity;
 import com.study.dawheen.common.entity.Coordinate;
@@ -88,12 +87,12 @@ public class Organization extends BaseTimeEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Organization that = (Organization) o;
-        return Objects.equals(getUsers(), that.getUsers()) && Objects.equals(getWorkList(), that.getWorkList()) && Objects.equals(getId(), that.getId()) && Objects.equals(getName(), that.getName()) && Objects.equals(getFacilityPhone(), that.getFacilityPhone()) && Objects.equals(getEmail(), that.getEmail()) && Objects.equals(getFacilityType(), that.getFacilityType()) && Objects.equals(getRepresentName(), that.getRepresentName()) && Objects.equals(getAddress(), that.getAddress()) && Objects.equals(getCoordinate(), that.getCoordinate()) && Objects.equals(getApproved(), that.getApproved());
+        return Objects.equals(getId(), that.getId()) && Objects.equals(getName(), that.getName()) && Objects.equals(getFacilityPhone(), that.getFacilityPhone()) && Objects.equals(getEmail(), that.getEmail()) && Objects.equals(getFacilityType(), that.getFacilityType()) && Objects.equals(getRepresentName(), that.getRepresentName()) && Objects.equals(getAddress(), that.getAddress()) && Objects.equals(getCoordinate(), that.getCoordinate()) && Objects.equals(getApproved(), that.getApproved());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getUsers(), getWorkList(), getId(), getName(), getFacilityPhone(), getEmail(), getFacilityType(), getRepresentName(), getAddress(), getCoordinate(), getApproved());
+        return Objects.hash(getId(), getName(), getFacilityPhone(), getEmail(), getFacilityType(), getRepresentName(), getAddress(), getCoordinate(), getApproved());
     }
 
     public void update(String name, String facilityType, String email, String facilityPhone, String representName, AddressDto addressDto) {

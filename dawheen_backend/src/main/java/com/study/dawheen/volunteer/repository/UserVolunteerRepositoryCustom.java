@@ -16,11 +16,11 @@ public interface UserVolunteerRepositoryCustom {
 
     boolean existsByVolunteerWorkAndEmailAndStatus(Long volunteerWorkId, String email, List<ApplyStatus> statuses);
 
-    List<UserVolunteerWork> findAllByVolunteerWorkIdWithFetch(Long volunteerWorkId);
+    Optional<List<UserVolunteerWork>> findAllByVolunteerWorkIdWithFetch(Long volunteerWorkId);
 
-    List<User> findUsersByVolunteerWorkIdAndStatus(Long volunteerWorkId, ApplyStatus status);
+    Optional<List<User>> findUsersByVolunteerWorkIdAndStatus(Long volunteerWorkId, ApplyStatus status);
 
-    List<User> findUsersByVolunteerWorkId(Long volunteerWorkId);
+    Optional<List<User>> findUsersByVolunteerWorkId(Long volunteerWorkId);
 
     Optional<UserVolunteerWork> findByVolunteerWorkIdAndUserId(Long volunteerWorkId, Long userId);
 

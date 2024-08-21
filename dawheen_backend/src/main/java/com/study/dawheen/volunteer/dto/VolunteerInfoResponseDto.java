@@ -13,6 +13,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Optional;
 import java.util.Set;
 
 
@@ -41,7 +42,6 @@ public class VolunteerInfoResponseDto {
     public VolunteerInfoResponseDto(VolunteerWork volunteerWork) {
         this.createdDate = volunteerWork.getCreatedDate();
         this.modifiedDate = volunteerWork.getModifiedDate();
-        this.organInfoResponseDto = new OrganInfoResponseDto(volunteerWork.getOrganization());
         this.title = volunteerWork.getTitle();
         this.content = volunteerWork.getContent();
         this.serviceStartDate = volunteerWork.getServiceStartDate();
@@ -55,6 +55,12 @@ public class VolunteerInfoResponseDto {
         this.recruitEndDateTime = volunteerWork.getRecruitEndDateTime();
         this.appliedParticipants = volunteerWork.getAppliedParticipants().get();
         this.maxParticipants = volunteerWork.getMaxParticipants();
-        this.coordinateInfoResponseDto = new CoordinateInfoResponseDto(volunteerWork.getCoordinate());
+        this.organInfoResponseDto = Optional.ofNullable(volunteerWork.getOrganization())
+                .map(OrganInfoResponseDto::new)
+                .orElse(null);
+
+        this.coordinateInfoResponseDto = Optional.ofNullable(volunteerWork.getCoordinate())
+                .map(CoordinateInfoResponseDto::new)
+                .orElse(null);
     }
 }
