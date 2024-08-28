@@ -32,6 +32,7 @@ public class UserVolunteerWork extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private ApplyStatus status;
 
+
     public UserVolunteerWork(User user, VolunteerWork volunteerWork) {
         this.user = user;
         this.volunteerWork = volunteerWork;
@@ -40,5 +41,15 @@ public class UserVolunteerWork extends BaseTimeEntity {
 
     public void updateStatus(ApplyStatus status) {
         this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return "UserVolunteerWork{" +
+                "id=" + id +
+                ", user=" + user +
+                ", volunteerWork=" + volunteerWork +
+                ", status=" + status +
+                '}';
     }
 }

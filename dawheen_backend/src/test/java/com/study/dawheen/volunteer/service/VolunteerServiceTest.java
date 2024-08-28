@@ -1,5 +1,7 @@
 package com.study.dawheen.volunteer.service;
 
+import com.study.dawheen.common.exception.AlreadyProcessedException;
+import com.study.dawheen.common.exception.AuthorizationFailedException;
 import com.study.dawheen.config.TestSecurityConfig;
 import com.study.dawheen.infra.file.service.FileService;
 import com.study.dawheen.organization.entity.Organization;
@@ -8,8 +10,10 @@ import com.study.dawheen.user.entity.User;
 import com.study.dawheen.user.repository.UserRepository;
 import com.study.dawheen.volunteer.dto.VolunteerCreateRequestDto;
 import com.study.dawheen.volunteer.dto.VolunteerInfoResponseDto;
+import com.study.dawheen.volunteer.dto.VolunteerUpdateRequestDto;
 import com.study.dawheen.volunteer.entity.UserVolunteerWork;
 import com.study.dawheen.volunteer.entity.VolunteerWork;
+import com.study.dawheen.volunteer.entity.type.ApplyStatus;
 import com.study.dawheen.volunteer.entity.type.TargetAudience;
 import com.study.dawheen.volunteer.entity.type.VolunteerType;
 import com.study.dawheen.volunteer.repository.UserVolunteerRepository;
@@ -25,18 +29,19 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -65,6 +70,7 @@ class VolunteerServiceTest {
     @InjectMocks
     private VolunteerService volunteerService;
 
+
     private VolunteerWork volunteerWork;
     private User user;
     private String userEmail;
@@ -83,10 +89,8 @@ class VolunteerServiceTest {
                 .organization(organization)
                 .title("Sample Volunteer Work")
                 .content("This is a sample content.")
-                .serviceStartDate(LocalDate.of(2024, 1, 1))
-                .serviceEndDate(LocalDate.of(2024, 12, 31))
-                .serviceStartTime(LocalTime.of(9, 0))
-                .serviceEndTime(LocalTime.of(17, 0))
+                .serviceStartDatetime(LocalDateTime.of(2024, 1, 1, 9, 0))
+                .serviceEndDatetime(LocalDateTime.of(2024, 12, 31, 17, 0))
                 .serviceDays(Set.of(LocalDate.now().getDayOfWeek()))
                 .targetAudiences(Set.of(TargetAudience.ANIMAL))
                 .volunteerTypes(Set.of(VolunteerType.ADULT))
@@ -107,7 +111,7 @@ class VolunteerServiceTest {
     }
 
     @Test
-    @DisplayName("봉사 생성 성공 테스트")
+    @DisplayName("봉사 생성 성공")
     void create_Success() throws IOException {
         // When
         when(organization.getId()).thenReturn(1L);
@@ -151,13 +155,11 @@ class VolunteerServiceTest {
         List<MultipartFile> files = List.of(file);
 
         // When & Then
-        assertThrows(EntityNotFoundException.class, () -> {
-            volunteerService.create(nonExistentEmail, createResponseDto, file, files);
-        });
+        assertThrows(EntityNotFoundException.class, () -> volunteerService.create(nonExistentEmail, createResponseDto, file, files));
     }
 
     @Test
-    @DisplayName("봉사 생성 실패 케이스 : 파일 저장 중 IOException")
+    @DisplayName("봉사 생성 실패: 파일 저장 중 IOException 발생")
     void create_IOException() throws IOException {
         // Given
         when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
@@ -167,13 +169,11 @@ class VolunteerServiceTest {
                 .saveImgFileByVolunteerWork(any(MultipartFile.class), any(VolunteerWork.class));
 
         // When & Then
-        assertThrows(IOException.class, () -> {
-            volunteerService.create(userEmail, createResponseDto, file, List.of(file));
-        });
+        assertThrows(IOException.class, () -> volunteerService.create(userEmail, createResponseDto, file, List.of(file)));
     }
 
     @Test
-    @DisplayName("봉사 활동 삭제 성공 케이스")
+    @DisplayName("봉사 활동 삭제 성공")
     void delete_Success() {
         // Given
         Long volunteerWorkId = 1L;
@@ -198,7 +198,7 @@ class VolunteerServiceTest {
     }
 
     @Test
-    @DisplayName("봉사 활동 삭제 실패: 존재하지 않는 봉사 활동 ID")
+    @DisplayName("봉사 활동 삭제 실패: 봉사 활동 ID 미존재")
     void delete_Fail_NonExistentVolunteerWork() {
         // Given
         Long nonExistentVolunteerWorkId = 999L;
@@ -207,15 +207,13 @@ class VolunteerServiceTest {
                 .thenReturn(Optional.empty());
 
         // When & Then
-        assertThrows(EntityNotFoundException.class, () -> {
-            volunteerService.delete(nonExistentVolunteerWorkId);
-        });
+        assertThrows(EntityNotFoundException.class, () -> volunteerService.delete(nonExistentVolunteerWorkId));
 
         verify(userVolunteerRepository).findAllByVolunteerWorkIdWithFetch(nonExistentVolunteerWorkId);
     }
 
     @Test
-    @DisplayName("봉사 활동 삭제 실패: 삭제할 UserVolunteerWork 없음")
+    @DisplayName("봉사 활동 삭제 실패: UserVolunteerWork 미존재")
     void delete_Fail_NoUserVolunteerWork() {
         // Given
         Long volunteerWorkId = 1L;
@@ -225,18 +223,16 @@ class VolunteerServiceTest {
 
 
         // When & Then
-        assertThrows(EntityNotFoundException.class, () -> {
-            volunteerService.delete(volunteerWorkId);
-        });
+        assertThrows(EntityNotFoundException.class, () -> volunteerService.delete(volunteerWorkId));
 
         verify(userVolunteerRepository).findAllByVolunteerWorkIdWithFetch(volunteerWorkId);
         verify(volunteerWorkRepository, never()).delete(any(VolunteerWork.class));
     }
 
     @Test
-    @DisplayName("봉사 활동 삭제 실패: 삭제할 UserVolunteerWork은 있으나 VolunteerWork은 없음")
+    @DisplayName("봉사 활동 삭제 실패: UserVolunteerWork 존재 VolunteerWork 미존재")
     void delete_Failure_UserVolunteerWorkExists_But_VolunteerWorkNotFound() {
-        // Given: 봉사활동 ID와 관련된 UserVolunteerWork는 있지만 VolunteerWork는 없음
+        // Given
         Long volunteerWorkId = 1L;
 
         UserVolunteerWork userVolunteerWork = new UserVolunteerWork(user, volunteerWork);
@@ -252,13 +248,421 @@ class VolunteerServiceTest {
         when(volunteerWorkRepository.findById(volunteerWorkId))
                 .thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> {
-            volunteerService.delete(volunteerWorkId);
-        });
+        assertThrows(EntityNotFoundException.class, () -> volunteerService.delete(volunteerWorkId));
 
         verify(userVolunteerRepository, times(1)).findAllByVolunteerWorkIdWithFetch(volunteerWorkId);
         verify(volunteerWorkRepository, times(1)).findById(volunteerWorkId);
         verify(volunteerWorkRepository, never()).delete(any(VolunteerWork.class));  // 삭제 시도하지 않았는지 확인
     }
 
+    @Test
+    @DisplayName("봉사 활동 업데이트 성공 테스트")
+    @Transactional
+    void update_Success() {
+        Long volunteerWorkId = 1L;
+
+        // Given
+        VolunteerUpdateRequestDto updateRequestDto = new VolunteerUpdateRequestDto(
+                "New Title",
+                "New Content",
+                LocalDateTime.of(2023, 1, 1, 9, 0),
+                LocalDateTime.of(2023, 12, 31, 17, 0),
+                new HashSet<>(Set.of(DayOfWeek.MONDAY, DayOfWeek.FRIDAY)),
+                new HashSet<>(Set.of(TargetAudience.ANIMAL)),
+                new HashSet<>(Set.of(VolunteerType.ADULT)),
+                LocalDateTime.now(),
+                LocalDateTime.now().plusDays(30),
+                10,
+                37.7749,
+                -122.4194
+        );
+
+        // When
+        when(volunteerWorkRepository.findById(volunteerWorkId)).thenReturn(Optional.of(volunteerWork));
+
+        VolunteerInfoResponseDto response = volunteerService.update(volunteerWorkId, updateRequestDto);
+
+        // Then
+        assertNotNull(response);
+        assertEquals(volunteerWork.getTitle(), response.getTitle());
+        assertEquals(volunteerWork.getContent(), response.getContent());
+        // 나머지 필드 검증
+        verify(volunteerWorkRepository).findById(volunteerWorkId);
+    }
+
+    @Test
+    @DisplayName("봉사 활동 업데이트 성공: null 포함")
+    @Transactional
+    void update_Success_with_null() {
+        Long volunteerWorkId = 1L;
+
+        // Given
+        VolunteerUpdateRequestDto updateRequestDto = new VolunteerUpdateRequestDto(
+                null,
+                null,
+                LocalDateTime.of(2023, 1, 1, 9, 0),
+                LocalDateTime.of(2023, 12, 31, 17, 0),
+                new HashSet<>(Set.of(DayOfWeek.MONDAY, DayOfWeek.FRIDAY)),
+                new HashSet<>(Set.of(TargetAudience.ANIMAL)),
+                new HashSet<>(Set.of(VolunteerType.ADULT)),
+                LocalDateTime.now(),
+                LocalDateTime.now().plusDays(30),
+                10,
+                37.7749,
+                -122.4194
+        );
+
+        // When
+        when(volunteerWorkRepository.findById(volunteerWorkId)).thenReturn(Optional.of(volunteerWork));
+
+        VolunteerInfoResponseDto response = volunteerService.update(volunteerWorkId, updateRequestDto);
+
+        // Then
+        assertNotNull(response);
+        assertEquals(volunteerWork.getTitle(), response.getTitle());
+        assertEquals(volunteerWork.getContent(), response.getContent());
+        // 나머지 필드 검증
+        verify(volunteerWorkRepository).findById(volunteerWorkId);
+    }
+
+    @Test
+    @DisplayName("봉사 활동 업데이트 실패: 존재하지 않는 봉사 활동 ID")
+    void update_Failure_EntityNotFound() {
+        Long volunteerWorkId = 1L;
+
+        // Given
+        VolunteerUpdateRequestDto updateRequestDto = new VolunteerUpdateRequestDto(
+                "New Title",
+                "New Content",
+                LocalDateTime.of(2023, 1, 1, 9, 0),
+                LocalDateTime.of(2023, 12, 31, 17, 0),
+                new HashSet<>(Set.of(DayOfWeek.MONDAY, DayOfWeek.FRIDAY)),
+                new HashSet<>(Set.of(TargetAudience.ANIMAL)),
+                new HashSet<>(Set.of(VolunteerType.ADULT)),
+                LocalDateTime.now(),
+                LocalDateTime.now().plusDays(30),
+                10,
+                37.7749,
+                -122.4194
+        );
+
+
+        // When
+        when(volunteerWorkRepository.findById(volunteerWorkId)).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(EntityNotFoundException.class, () -> volunteerService.update(volunteerWorkId, updateRequestDto));
+
+        verify(volunteerWorkRepository).findById(volunteerWorkId);
+    }
+
+    @Test
+    @DisplayName("봉사 활동 신청 성공 테스트")
+    void apply_Success() {
+        Long volunteerWorkId = 1L;
+        String email = "user@example.com";
+
+        volunteerWork = VolunteerWork.builder()
+                .organization(organization)
+                .title("Sample Volunteer Work")
+                .content("This is a sample content.")
+                .serviceStartDatetime(LocalDateTime.of(2024, 1, 1, 9, 0))
+                .serviceEndDatetime(LocalDateTime.now().plusDays(1))
+                .serviceDays(Set.of(LocalDate.now().getDayOfWeek()))
+                .targetAudiences(Set.of(TargetAudience.ANIMAL))
+                .volunteerTypes(Set.of(VolunteerType.ADULT))
+                .recruitStartDateTime(LocalDateTime.now())
+                .recruitEndDateTime(LocalDateTime.now().plusMonths(1))
+                .maxParticipants(100)
+                .build();
+
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(volunteerWorkRepository.findById(volunteerWorkId)).thenReturn(Optional.of(volunteerWork));
+        when(userVolunteerRepository.existsByVolunteerWorkAndEmailAndStatus(volunteerWorkId, email, List.of(ApplyStatus.APPROVED, ApplyStatus.PENDING)))
+                .thenReturn(false);
+
+        // When
+        volunteerService.apply(volunteerWorkId, email);
+
+        // Then
+        verify(userVolunteerRepository).save(any(UserVolunteerWork.class));
+    }
+
+    @Test
+    @DisplayName("봉사 활동 신청 실패: 이미 신청한 사용자")
+    void apply_Failure_AlreadyProcessed() {
+        Long volunteerWorkId = 1L;
+        String email = "user@example.com";
+
+        when(userVolunteerRepository.existsByVolunteerWorkAndEmailAndStatus(volunteerWorkId, email, List.of(ApplyStatus.APPROVED, ApplyStatus.PENDING)))
+                .thenReturn(true);
+
+        // When & Then
+        assertThrows(AlreadyProcessedException.class, () -> volunteerService.apply(volunteerWorkId, email));
+
+        verify(userVolunteerRepository, never()).save(any(UserVolunteerWork.class));
+    }
+
+    @Test
+    @DisplayName("봉사 활동 신청 실패: 신청 기간이 지나간 봉사 활동")
+    void apply_Failure_RecruitEndDateTimePassed() {
+        Long volunteerWorkId = 1L;
+        String email = "user@example.com";
+        volunteerWork = VolunteerWork.builder()
+                .organization(organization)
+                .title("Sample Volunteer Work")
+                .content("This is a sample content.")
+                .serviceStartDatetime(LocalDateTime.of(2024, 1, 1, 9, 0))
+                .serviceEndDatetime(LocalDateTime.now().plusDays(1))
+                .serviceDays(Set.of(LocalDate.now().getDayOfWeek()))
+                .targetAudiences(Set.of(TargetAudience.ANIMAL))
+                .volunteerTypes(Set.of(VolunteerType.ADULT))
+                .recruitStartDateTime(LocalDateTime.now())
+                .recruitEndDateTime(LocalDateTime.now().minusDays(1))
+                .maxParticipants(100)
+                .build();
+
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(volunteerWorkRepository.findById(volunteerWorkId)).thenReturn(Optional.of(volunteerWork));
+        when(userVolunteerRepository.existsByVolunteerWorkAndEmailAndStatus(volunteerWorkId, email, List.of(ApplyStatus.APPROVED, ApplyStatus.PENDING)))
+                .thenReturn(false);
+
+        // When & Then
+        assertThrows(IllegalStateException.class, () -> volunteerService.apply(volunteerWorkId, email));
+
+        verify(userVolunteerRepository, never()).save(any(UserVolunteerWork.class));
+    }
+
+    @Test
+    @DisplayName("봉사 활동 승인 성공 테스트")
+    void approve_Success() throws IllegalAccessException {
+        Long volunteerWorkId = 1L;
+        Long userId = 2L;
+
+        UserVolunteerWork userVolunteerWork = new UserVolunteerWork(user, volunteerWork);
+
+        when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId)).thenReturn(Optional.of(userVolunteerWork));
+        when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
+
+        volunteerService.approve(userEmail, volunteerWorkId, userId);
+
+        assertEquals(1, volunteerWork.getAppliedParticipants().get());
+    }
+
+
+    @Test
+    @DisplayName("봉사 활동 승인 실패: 승인 권한 없음")
+    void approve_Failure_AuthorizationFailed() {
+        Long volunteerWorkId = 1L;
+        Long userId = 2L;
+
+        // 유저 기관 연결 삭제
+        user.revokeOrganization();
+        UserVolunteerWork userVolunteerWork = new UserVolunteerWork(user, volunteerWork);
+
+        when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId)).thenReturn(Optional.of(userVolunteerWork));
+        when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
+
+        assertThrows(AuthorizationFailedException.class, () -> volunteerService.approve(userEmail, volunteerWorkId, userId));
+
+        verify(userVolunteerRepository, never()).save(any(UserVolunteerWork.class));
+    }
+
+    @Test
+    @DisplayName("봉사 활동 승인 실패: 최대 참가 인원 초과")
+    void approve_Failure_MaxParticipantsExceeded() {
+        Long volunteerWorkId = 1L;
+        Long userId = 2L;
+
+        volunteerWork = VolunteerWork.builder()
+                .organization(organization)
+                .title("Sample Volunteer Work")
+                .content("This is a sample content.")
+                .serviceStartDatetime(LocalDateTime.of(2024, 1, 1, 9, 0))
+                .serviceEndDatetime(LocalDateTime.now().plusDays(1))
+                .serviceDays(Set.of(LocalDate.now().getDayOfWeek()))
+                .targetAudiences(Set.of(TargetAudience.ANIMAL))
+                .volunteerTypes(Set.of(VolunteerType.ADULT))
+                .recruitStartDateTime(LocalDateTime.now())
+                .recruitEndDateTime(LocalDateTime.now().minusDays(1))
+                .maxParticipants(0)
+                .build();
+
+        UserVolunteerWork userVolunteerWork = new UserVolunteerWork(user, volunteerWork);
+
+        when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId)).thenReturn(Optional.of(userVolunteerWork));
+        when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
+
+        assertThrows(IllegalAccessException.class, () -> volunteerService.approve(userEmail, volunteerWorkId, userId));
+
+        verify(userVolunteerRepository, never()).save(any(UserVolunteerWork.class));
+    }
+
+    @Test
+    @DisplayName("봉사 활동 완료 성공")
+    void completed_Success() {
+        // Given
+        Long volunteerWorkId = 1L;
+        Long userId = 1L;
+        UserVolunteerWork userVolunteerWork = new UserVolunteerWork(user, volunteerWork);
+        userVolunteerWork.updateStatus(ApplyStatus.APPROVED);
+
+        when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId))
+                .thenReturn(Optional.of(userVolunteerWork));
+
+        // When
+        volunteerService.completed(volunteerWorkId, userId);
+
+        // Then
+        assertEquals(ApplyStatus.COMPLETED, userVolunteerWork.getStatus());
+    }
+
+    @Test
+    @DisplayName("봉사 활동 완료 실패: Approved 아님")
+    void completed_failed_not_approved() {
+        // Given
+        Long volunteerWorkId = 1L;
+        Long userId = 1L;
+        UserVolunteerWork userVolunteerWork = new UserVolunteerWork(user, volunteerWork);
+
+        when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId))
+                .thenReturn(Optional.of(userVolunteerWork));
+
+        // When & Then
+        assertThrows(IllegalStateException.class, () -> {
+            volunteerService.completed(volunteerWorkId, userId);
+        });
+    }
+
+    @Test
+    @DisplayName("봉사 활동 완료 실패: user || volunteer 미존재")
+    void completed_failed_not_found() {
+        // Given
+        Long volunteerWorkId = 1L;
+        Long userId = 1L;
+
+        when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId))
+                .thenReturn(Optional.empty());
+
+        // When & Then
+        assertThrows(EntityNotFoundException.class, () -> {
+            volunteerService.completed(volunteerWorkId, userId);
+        });
+    }
+
+    @Test
+    @DisplayName("봉사 활동 대기 취소 성공")
+    void cancelWhenPending() {
+        // Given
+        Long volunteerWorkId = 1L;
+        Long userId = 1L;
+        UserVolunteerWork userVolunteerWork = new UserVolunteerWork(user, volunteerWork);
+
+        // Mock behavior
+        when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId))
+                .thenReturn(Optional.of(userVolunteerWork));
+
+        // When
+        volunteerService.cancelPending(volunteerWorkId, userId);
+
+        // Then
+        assertEquals(ApplyStatus.REJECTED, userVolunteerWork.getStatus());
+        verify(userVolunteerRepository, times(1))
+                .findByVolunteerWorkIdAndUserId(volunteerWorkId, userId);
+    }
+
+    @Test
+    @DisplayName("봉사 활동 대기 취소 실패 : 대기 상태 아님")
+    void shouldThrowIllegalStateExceptionWhenStatusNotPending() {
+        // Given
+        Long volunteerWorkId = 1L;
+        Long userId = 1L;
+        UserVolunteerWork userVolunteerWork = new UserVolunteerWork(user, volunteerWork);
+        userVolunteerWork.updateStatus(ApplyStatus.APPROVED);
+
+        // Mock behavior
+        when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId))
+                .thenReturn(Optional.of(userVolunteerWork));
+
+        // When & Then
+        assertThrows(IllegalStateException.class, () -> {
+            volunteerService.cancelPending(volunteerWorkId, userId);
+        });
+
+        verify(userVolunteerRepository, times(1))
+                .findByVolunteerWorkIdAndUserId(volunteerWorkId, userId);
+    }
+
+    @Test
+    @DisplayName("봉사 활동 대기 취소 실패 : volunteer || user not found")
+    void shouldThrowEntityNotFoundExceptionWhenNotFound() {
+        // Given
+        Long volunteerWorkId = 1L;
+        Long userId = 1L;
+
+        when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId))
+                .thenReturn(Optional.empty());
+
+        // When & Then
+        assertThrows(EntityNotFoundException.class, () -> {
+            volunteerService.cancelPending(volunteerWorkId, userId);
+        });
+
+        verify(userVolunteerRepository, times(1))
+                .findByVolunteerWorkIdAndUserId(volunteerWorkId, userId);
+    }
+
+    @Test
+    @DisplayName("기관이 대기 상태 취소 성공")
+    void shouldUpdateStatusToRejectedWhenPending() {
+        // Given
+        // 해당 유저는 기관과 연결되어 있음
+        String email = "admin@example.com";
+        Long volunteerWorkId = 1L;
+        Long userId = 1L;
+        UserVolunteerWork userVolunteerWork = new UserVolunteerWork(user, volunteerWork);
+
+        when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId))
+                .thenReturn(Optional.of(userVolunteerWork));
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(volunteerWorkRepository.findById(volunteerWorkId)).thenReturn(Optional.of(volunteerWork));
+
+        // When
+        volunteerService.cancelPendingForOrganization(email, volunteerWorkId, userId);
+
+        // Then
+        assertEquals(ApplyStatus.REJECTED, userVolunteerWork.getStatus());
+        verify(userVolunteerRepository, times(1))
+                .findByVolunteerWorkIdAndUserId(volunteerWorkId, userId);
+    }
+
+    @Test
+    @DisplayName("기관이 대기 상태 취소 실패: 권한 없음")
+    void shouldThrowAuthorizationFailedExceptionWhenUnauthorized() {
+        // Given
+        // 해당 유저는 기관과 연결되어 있지 않음
+        user = User.builder()
+                .email(userEmail)
+                .password(passwordEncoder.encode("1234"))
+                .name("user")
+                .build();
+
+        Long volunteerWorkId = 1L;
+        Long userId = 1L;
+
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(volunteerWorkRepository.findById(volunteerWorkId)).thenReturn(Optional.of(volunteerWork));
+        // When & Then
+        assertThrows(AuthorizationFailedException.class, () -> {
+            volunteerService.cancelPendingForOrganization(userEmail, volunteerWorkId, userId);
+        });
+
+        verify(userVolunteerRepository, times(0))
+                .findByVolunteerWorkIdAndUserId(volunteerWorkId, userId);
+    }
+
+
 }
+
+
+

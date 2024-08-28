@@ -4,8 +4,10 @@ import com.study.dawheen.user.entity.User;
 import com.study.dawheen.volunteer.dto.VolunteerInfoResponseDto;
 import com.study.dawheen.volunteer.entity.UserVolunteerWork;
 import com.study.dawheen.volunteer.entity.type.ApplyStatus;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Lock;
 
 import java.util.List;
 import java.util.Optional;

@@ -11,7 +11,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Set;
@@ -26,13 +25,9 @@ public class VolunteerCreateRequestDto {
     @NotNull
     String content;
     @FutureOrPresent
-    LocalDate serviceStartDate;
+    LocalDateTime serviceStartDatetime;
     @FutureOrPresent
-    LocalDate serviceEndDate;
-    @FutureOrPresent
-    LocalTime serviceStartTime;
-    @FutureOrPresent
-    LocalTime serviceEndTime;
+    LocalDateTime serviceEndDatetime;
     @NotNull
     Set<DayOfWeek> serviceDays;
     @FutureOrPresent
@@ -46,13 +41,11 @@ public class VolunteerCreateRequestDto {
     @NotNull
     Set<VolunteerType> volunteerTypes;
 
-    public VolunteerCreateRequestDto(String title, String content, LocalDate serviceStartDate, LocalDate serviceEndDate, LocalTime serviceStartTime, LocalTime serviceEndTime, Set<DayOfWeek> serviceDays, LocalDateTime recruitStartDateTime, LocalDateTime recruitEndDateTime, int maxParticipants, Set<TargetAudience> targetAudiences, Set<VolunteerType> volunteerTypes) {
+    public VolunteerCreateRequestDto(String title, String content, LocalDateTime serviceStartDatetime, LocalDateTime serviceEndDatetime, LocalTime serviceStartTime, LocalTime serviceEndTime, Set<DayOfWeek> serviceDays, LocalDateTime recruitStartDateTime, LocalDateTime recruitEndDateTime, int maxParticipants, Set<TargetAudience> targetAudiences, Set<VolunteerType> volunteerTypes) {
         this.title = title;
         this.content = content;
-        this.serviceStartDate = serviceStartDate;
-        this.serviceEndDate = serviceEndDate;
-        this.serviceStartTime = serviceStartTime;
-        this.serviceEndTime = serviceEndTime;
+        this.serviceStartDatetime = serviceStartDatetime;
+        this.serviceEndDatetime = serviceEndDatetime;
         this.serviceDays = serviceDays;
         this.recruitStartDateTime = recruitStartDateTime;
         this.recruitEndDateTime = recruitEndDateTime;

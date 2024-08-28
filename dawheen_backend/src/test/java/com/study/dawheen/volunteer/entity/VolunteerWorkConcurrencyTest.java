@@ -18,7 +18,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -53,10 +52,8 @@ class VolunteerWorkConcurrencyTest {
                 .organization(mockOrganization)
                 .title("Sample Volunteer Work")
                 .content("This is a sample content.")
-                .serviceStartDate(LocalDate.of(2024, 1, 1))
-                .serviceEndDate(LocalDate.of(2024, 12, 31))
-                .serviceStartTime(LocalTime.of(9, 0))
-                .serviceEndTime(LocalTime.of(17, 0))
+                .serviceStartDatetime(LocalDateTime.of(2024, 1, 1, 0, 0))
+                .serviceEndDatetime(LocalDateTime.of(2024, 12, 31, 0, 0))
                 .serviceDays(Set.of(LocalDate.now().getDayOfWeek())) // 예시로 현재 요일 사용
                 .targetAudiences(Set.of(TargetAudience.ANIMAL)) // 예시로 TargetAudience.ALL 사용
                 .volunteerTypes(Set.of(VolunteerType.ADULT)) // 예시로 VolunteerType.GENERAL 사용

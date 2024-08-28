@@ -14,17 +14,20 @@ import com.study.dawheen.volunteer.entity.VolunteerWork;
 import com.study.dawheen.volunteer.entity.type.ApplyStatus;
 import com.study.dawheen.volunteer.repository.UserVolunteerRepositoryCustom;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Repository
+@Log4j2
 public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositoryCustom {
 
     private static final QUserVolunteerWork userVolunteerWork = QUserVolunteerWork.userVolunteerWork;
@@ -100,7 +103,6 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
         return Optional.of(
                 queryFactory
                         .select(userVolunteerWork.user)
-                        .distinct()
                         .from(userVolunteerWork)
                         .join(userVolunteerWork.user, user).fetchJoin()
                         .where(userVolunteerWork.volunteerWork.id.eq(volunteerWorkId))
@@ -109,26 +111,26 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
         );
     }
 
-
+    @Lock(LockModeType.PESSIMISTIC_READ)
     @Override
-    public Optional<UserVolunteerWork> findByVolunteerWorkIdAndUserId(Long volunteerWorkId, Long userId) {
+    public synchronized Optional<UserVolunteerWork> findByVolunteerWorkIdAndUserId(Long volunteerWorkId, Long userId) {
 
-        return Optional.of(Objects.requireNonNull(
-                queryFactory
-                        .selectFrom(userVolunteerWork)
-                        .join(userVolunteerWork.volunteerWork, volunteerWork)
-                        .join(userVolunteerWork.user, user).fetchJoin()
-                        .where(
-                                userVolunteerWork.volunteerWork.id.eq(volunteerWorkId)
-                                        .and(userVolunteerWork.user.id.eq(userId))
-                        ).fetchOne()));
+        return Optional.ofNullable(queryFactory
+                .selectFrom(userVolunteerWork)
+                .join(userVolunteerWork.volunteerWork, volunteerWork)
+                .join(userVolunteerWork.user, user).fetchJoin()
+                .where(
+                        userVolunteerWork.volunteerWork.id.eq(volunteerWorkId)
+                                .and(userVolunteerWork.user.id.eq(userId))
+                ).setLockMode(LockModeType.PESSIMISTIC_READ)
+                .fetchOne());
     }
 
 
     @Override
     public Optional<UserVolunteerWork> findByVolunteerWorkIdAndEmail(Long volunteerWorkId, String email) {
 
-        return Optional.of(Objects.requireNonNull(
+        return Optional.ofNullable(
                 queryFactory
                         .selectFrom(userVolunteerWork)
                         .join(userVolunteerWork.volunteerWork, volunteerWork)
@@ -136,11 +138,14 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
                         .where(
                                 userVolunteerWork.volunteerWork.id.eq(volunteerWorkId)
                                         .and(userVolunteerWork.user.email.eq(email))
-                        ).fetchOne()));
+                        ).fetchOne()
+
+        );
     }
 
     @Override
-    public Page<VolunteerInfoResponseDto> findVolunteerWorkByEmailAndStatus(String email, ApplyStatus status, Pageable pageable) {
+    public Page<VolunteerInfoResponseDto> findVolunteerWorkByEmailAndStatus(String email, ApplyStatus
+            status, Pageable pageable) {
 
         List<VolunteerInfoResponseDto> content = queryFactory.select(
                         Projections.constructor(VolunteerInfoResponseDto.class, volunteerWork))

@@ -18,7 +18,6 @@ import com.study.dawheen.volunteer.repository.VolunteerWorkRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,8 +42,7 @@ public class VolunteerService {
 
     @Transactional
     public VolunteerInfoResponseDto create(String email, VolunteerCreateRequestDto createResponseDto, MultipartFile file, List<MultipartFile> files) throws IOException, IllegalArgumentException {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
         VolunteerWork volunteerWork = VolunteerWork.toEntity(createResponseDto);
 
         // 이미지 저장
@@ -69,7 +67,7 @@ public class VolunteerService {
     }
 
 
-    @Transactional
+    @Transactional(timeout = 5)
     public void delete(Long volunteerWorkId) throws EntityNotFoundException {
         List<UserVolunteerWork> userVolunteerWorks = userVolunteerRepository.findAllByVolunteerWorkIdWithFetch(volunteerWorkId).orElseThrow(EntityNotFoundException::new);
 
@@ -79,15 +77,14 @@ public class VolunteerService {
         }
 
 //      volunteerWorkRepository.deleteById(volunteerWorkId) 에서 volunteerWorkId가 없으면 에러를 반환하지 않는다.
-        VolunteerWork volunteerWork = volunteerWorkRepository.findById(volunteerWorkId)
-                .orElseThrow(EntityNotFoundException::new);
+        VolunteerWork volunteerWork = volunteerWorkRepository.findById(volunteerWorkId).orElseThrow(EntityNotFoundException::new);
         volunteerWorkRepository.delete(volunteerWork);
     }
 
     @Transactional
     public VolunteerInfoResponseDto update(Long volunteerWorkId, VolunteerUpdateRequestDto updateResponseDto) {
         VolunteerWork volunteerWork = volunteerWorkRepository.findById(volunteerWorkId).orElseThrow(EntityNotFoundException::new);
-        volunteerWork.update(updateResponseDto);
+        volunteerWork.update(updateResponseDto.getTitle(), updateResponseDto.getContent(), updateResponseDto.getServiceStartDatetime(), updateResponseDto.getServiceEndDatetime(), updateResponseDto.getServiceDays(), updateResponseDto.getTargetAudiences(), updateResponseDto.getVolunteerTypes(), updateResponseDto.getRecruitStartDateTime(), updateResponseDto.getRecruitEndDateTime(), updateResponseDto.getMaxParticipants(), updateResponseDto.getCoordinate().getLatitude(), updateResponseDto.getCoordinate().getLongitude());
 
         return new VolunteerInfoResponseDto(volunteerWork);
     }
@@ -115,14 +112,18 @@ public class VolunteerService {
         userVolunteerRepository.save(userVolunteerWork);
     }
 
-
     @Transactional
-    public void approve(Long volunteerWorkId, Long userId) throws IllegalAccessException {
+    public void approve(String email, Long volunteerWorkId, Long userId) throws IllegalAccessException {
         // 승인권한은 해당 기관담당만 가능하도록 해야함.
+
         UserVolunteerWork userVolunteerWork = userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId).orElseThrow(EntityNotFoundException::new);
+
+        if (userVolunteerWork.getStatus() != ApplyStatus.PENDING) {
+            throw new IllegalStateException("대기 상태가 아닙니다. userVolunteerWorkId =" + userVolunteerWork.getId());
+        }
+
         VolunteerWork volunteerWork = userVolunteerWork.getVolunteerWork();
-        String requestEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        Organization organization = userRepository.findByEmail(requestEmail).orElseThrow(EntityNotFoundException::new).getOrganization();
+        Organization organization = userRepository.findByEmail(email).orElseThrow(EntityNotFoundException::new).getOrganization();
 
         if (!volunteerWork.getOrganization().equals(organization)) {
             throw new AuthorizationFailedException(AUTHORIZATION_ERR_MSG);
@@ -136,6 +137,7 @@ public class VolunteerService {
         user.attendVolunteerWork(userVolunteerWork);
         volunteerWork.attendUser(userVolunteerWork);
         volunteerWork.increaseParticipants();
+        userVolunteerWork.updateStatus(ApplyStatus.APPROVED);
     }
 
     @Transactional
@@ -173,43 +175,20 @@ public class VolunteerService {
     public void cancelApproved(Long volunteerWorkId, Long userId) {
         UserVolunteerWork userVolunteerWork = userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId).orElseThrow(EntityNotFoundException::new);
 
-        if (userVolunteerWork.getStatus() != ApplyStatus.APPROVED) {
-            throw new IllegalStateException();
-        }
-
-        userVolunteerWork.updateStatus(ApplyStatus.REJECTED);
-
-        User user = userVolunteerWork.getUser();
-        VolunteerWork volunteerWork = userVolunteerWork.getVolunteerWork();
-
-        user.leaveVolunteerWork(userVolunteerWork);
-        volunteerWork.leaveUser(userVolunteerWork);
-
-        volunteerWork.decreaseParticipants();
+        cancel(userVolunteerWork);
     }
 
     @Transactional
     public void cancelApproved(Long volunteerWorkId, String email) {
         UserVolunteerWork userVolunteerWork = userVolunteerRepository.findByVolunteerWorkIdAndEmail(volunteerWorkId, email).orElseThrow(EntityNotFoundException::new);
 
-        if (userVolunteerWork.getStatus() != ApplyStatus.APPROVED) {
-            throw new IllegalStateException();
-        }
-
-        userVolunteerWork.updateStatus(ApplyStatus.REJECTED);
-
-        User user = userVolunteerWork.getUser();
-        VolunteerWork volunteerWork = userVolunteerWork.getVolunteerWork();
-
-        user.leaveVolunteerWork(userVolunteerWork);
-        volunteerWork.leaveUser(userVolunteerWork);
+        cancel(userVolunteerWork);
     }
 
     @Transactional
-    public void cancelPendingForOrganization(Long volunteerWorkId, Long userId) {
-        String requestEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+    public void cancelPendingForOrganization(String email, Long volunteerWorkId, Long userId) {
 
-        if (equalOrganizationByUserAndVolunteerWork(requestEmail, volunteerWorkId)) {
+        if (equalOrganizationByUserAndVolunteerWork(email, volunteerWorkId)) {
             throw new AuthorizationFailedException(AUTHORIZATION_ERR_MSG);
         }
 
@@ -223,10 +202,9 @@ public class VolunteerService {
     }
 
     @Transactional
-    public void cancelApprovedForOrganization(Long volunteerWorkId, Long userId) {
-        String requestEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+    public void cancelApprovedForOrganization(String email, Long volunteerWorkId, Long userId) {
 
-        if (equalOrganizationByUserAndVolunteerWork(requestEmail, volunteerWorkId)) {
+        if (equalOrganizationByUserAndVolunteerWork(email, volunteerWorkId)) {
             throw new AuthorizationFailedException(AUTHORIZATION_ERR_MSG);
         }
 
@@ -234,9 +212,32 @@ public class VolunteerService {
     }
 
     private boolean equalOrganizationByUserAndVolunteerWork(String email, Long volunteerWorkId) {
-        Organization userOrganization = userRepository.findByEmail(email).orElseThrow(EntityNotFoundException::new).getOrganization();
-        Organization volunteerOrganization = volunteerWorkRepository.findById(volunteerWorkId).orElseThrow(EntityNotFoundException::new).getOrganization();
+        User user = userRepository.findByEmail(email).orElseThrow(EntityNotFoundException::new);
+        VolunteerWork volunteerWork = volunteerWorkRepository.findById(volunteerWorkId).orElseThrow(EntityNotFoundException::new);
+        Organization userOrganization = user.getOrganization();
+        Organization volunteerOrganization = volunteerWork.getOrganization();
+
+        if (userOrganization == null || volunteerOrganization == null) {
+            throw new AuthorizationFailedException(AUTHORIZATION_ERR_MSG);
+        }
+
         return !userOrganization.equals(volunteerOrganization);
+    }
+
+    private void cancel(UserVolunteerWork userVolunteerWork) {
+        if (userVolunteerWork.getStatus() != ApplyStatus.APPROVED) {
+            throw new IllegalStateException();
+        }
+
+        userVolunteerWork.updateStatus(ApplyStatus.REJECTED);
+
+        User user = userVolunteerWork.getUser();
+        VolunteerWork volunteerWork = userVolunteerWork.getVolunteerWork();
+
+        user.leaveVolunteerWork(userVolunteerWork);
+        volunteerWork.leaveUser(userVolunteerWork);
+
+        volunteerWork.decreaseParticipants();
     }
 
 }

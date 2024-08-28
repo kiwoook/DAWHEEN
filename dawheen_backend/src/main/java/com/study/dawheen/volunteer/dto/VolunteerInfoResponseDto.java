@@ -10,9 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Optional;
 import java.util.Set;
 
@@ -27,10 +25,8 @@ public class VolunteerInfoResponseDto {
     private OrganInfoResponseDto organInfoResponseDto;
     private String title;
     private String content;
-    private LocalDate serviceStartDate;
-    private LocalDate serviceEndDate;
-    private LocalTime serviceStartTime;
-    private LocalTime serviceEndTime;
+    private LocalDateTime serviceStartDatetime;
+    private LocalDateTime serviceEndDatetime;
     private Set<DayOfWeek> serviceDays;
     private Set<TargetAudience> targetAudiences;
     private Set<VolunteerType> volunteerTypes;
@@ -44,10 +40,8 @@ public class VolunteerInfoResponseDto {
         this.modifiedDate = volunteerWork.getModifiedDate();
         this.title = volunteerWork.getTitle();
         this.content = volunteerWork.getContent();
-        this.serviceStartDate = volunteerWork.getServiceStartDate();
-        this.serviceEndDate = volunteerWork.getServiceEndDate();
-        this.serviceStartTime = volunteerWork.getServiceStartTime();
-        this.serviceEndTime = volunteerWork.getServiceEndTime();
+        this.serviceStartDatetime = volunteerWork.getServiceStartDatetime();
+        this.serviceEndDatetime = volunteerWork.getServiceEndDatetime();
         this.serviceDays = volunteerWork.getServiceDays();
         this.targetAudiences = volunteerWork.getTargetAudiences();
         this.volunteerTypes = volunteerWork.getVolunteerTypes();
@@ -58,7 +52,6 @@ public class VolunteerInfoResponseDto {
         this.organInfoResponseDto = Optional.ofNullable(volunteerWork.getOrganization())
                 .map(OrganInfoResponseDto::new)
                 .orElse(null);
-
         this.coordinateInfoResponseDto = Optional.ofNullable(volunteerWork.getCoordinate())
                 .map(CoordinateInfoResponseDto::new)
                 .orElse(null);

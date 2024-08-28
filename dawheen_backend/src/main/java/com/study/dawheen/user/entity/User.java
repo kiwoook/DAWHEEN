@@ -69,6 +69,9 @@ public class User extends BaseTimeEntity {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private Set<UserVolunteerWork> volunteerWorks = new HashSet<>();
 
+    @Version
+    private Long version;
+
     @Builder
     public User(String socialId, String password, String name, String email, String birth, ProviderType providerType, RoleType roleType) {
         this.socialId = socialId;
@@ -143,5 +146,23 @@ public class User extends BaseTimeEntity {
     @Override
     public int hashCode() {
         return Objects.hash(getId(), getEmail(), getSocialId(), getPassword(), getBirth(), getName(), getPhone(), getAddress(), getRole(), getProviderType(), getOrganization(), getVolunteerWorks());
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", socialId='" + socialId + '\'' +
+                ", password='" + password + '\'' +
+                ", birth='" + birth + '\'' +
+                ", name='" + name + '\'' +
+                ", phone='" + phone + '\'' +
+                ", address=" + address +
+                ", role=" + role +
+                ", providerType=" + providerType +
+                ", organization=" + organization +
+                ", volunteerWorks=" + volunteerWorks +
+                '}';
     }
 }

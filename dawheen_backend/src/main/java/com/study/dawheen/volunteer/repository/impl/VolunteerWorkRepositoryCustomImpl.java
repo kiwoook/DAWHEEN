@@ -44,7 +44,7 @@ public class VolunteerWorkRepositoryCustomImpl implements VolunteerWorkRepositor
     }
 
     @Override
-    public List<VolunteerInfoResponseDto> getByFiltersAndDataRangeWithinRadius(double latitude, double longitude, int radius, Set<VolunteerType> volunteerTypes, Set<TargetAudience> targetAudiences, LocalDate startDate, LocalDate endDate) {
+    public List<VolunteerInfoResponseDto> getByFiltersAndDataRangeWithinRadius(double latitude, double longitude, int radius, Set<VolunteerType> volunteerTypes, Set<TargetAudience> targetAudiences, LocalDateTime startDate, LocalDateTime endDate) {
 
         NumberTemplate<Double> haversineFormula = Expressions.numberTemplate(Double.class, "6371 * acos(cos(radians({0}))*cos(radians({1}))*cos(radians({2}) - radians({3})) + sin(radians({4}))*sin(radians({5})))", latitude, volunteerWork.coordinate.latitude, volunteerWork.coordinate.longitude, longitude, latitude, volunteerWork.coordinate.latitude);
 
@@ -56,8 +56,8 @@ public class VolunteerWorkRepositoryCustomImpl implements VolunteerWorkRepositor
                 .join(volunteerWork.coordinate, coordinate)
                 .where(haversineFormula.loe(radius),
                         volunteerWork.recruitEndDateTime.after(now),
-                        volunteerWork.serviceStartDate.between(startDate, endDate),
-                        volunteerWork.serviceEndDate.between(startDate, endDate),
+                        volunteerWork.serviceStartDatetime.between(startDate, endDate),
+                        volunteerWork.serviceEndDatetime.between(startDate, endDate),
                         isContainVolunteerTypes(volunteerTypes),
                         isContainTargetAudiences(targetAudiences))
                 .fetch();

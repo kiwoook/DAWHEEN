@@ -69,8 +69,6 @@ public class VolunteerUserController {
         try {
             List<UserInfoResponseDto> infoResponseDtos = volunteerUserQueryService.getUserListByStatusForOrganization(id, email, status);
             return ResponseEntity.ok(infoResponseDtos);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.badRequest().build();
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         } catch (RuntimeException e) {
@@ -111,13 +109,13 @@ public class VolunteerUserController {
     @Operation(summary = "봉사활동 유저 승인", description = "봉사활동을 승인합니다.")
     @PostMapping("/{id}/approve/{userId}")
     public ResponseEntity<UserInfoResponseDto> approve(@PathVariable Long id, @PathVariable Long userId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
         try {
-            volunteerService.approve(id, userId);
+            volunteerService.approve(email, id, userId);
             return ResponseEntity.ok().build();
         } catch (IllegalAccessException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.badRequest().build();
         }
     }
 
@@ -140,12 +138,13 @@ public class VolunteerUserController {
             @Parameter(description = "volunteerWorkId에 대한 정보", required = true) @PathVariable Long id,
             @Parameter(name = "유저 아이디") @PathVariable Long userId,
             @Parameter(name = "등록 상태", description = "등록 상태에 따라 유저가 추방되거나 거절됨 pending, approved 여야만 함") @RequestParam ApplyStatus status) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
         try {
             if (status == ApplyStatus.APPROVED) {
-                volunteerService.cancelApprovedForOrganization(id, userId);
+                volunteerService.cancelApprovedForOrganization(email, id, userId);
             }
             if (status == ApplyStatus.PENDING) {
-                volunteerService.cancelPendingForOrganization(id, userId);
+                volunteerService.cancelPendingForOrganization(email, id, userId);
             }
             return ResponseEntity.ok().build();
         } catch (AuthorizationFailedException e) {

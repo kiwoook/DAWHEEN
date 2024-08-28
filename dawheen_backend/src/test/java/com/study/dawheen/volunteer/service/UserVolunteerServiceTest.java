@@ -5,6 +5,7 @@ import com.study.dawheen.user.entity.User;
 import com.study.dawheen.user.repository.UserRepository;
 import com.study.dawheen.volunteer.entity.UserVolunteerWork;
 import com.study.dawheen.volunteer.entity.VolunteerWork;
+import com.study.dawheen.volunteer.entity.type.ApplyStatus;
 import com.study.dawheen.volunteer.repository.UserVolunteerRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -87,5 +88,23 @@ class UserVolunteerServiceTest {
 
         // 사용자 저장이 호출되지 않았는지 확인
         verify(userRepository, never()).saveAll(anyList());
+    }
+
+    @Test
+    @DisplayName("승인 유저_봉사활동 분리 성공")
+    void deleteApprovedUserVolunteerWorkSuccess_Approved() {
+        // given
+        Long userVolunteerWorkId = 1L;
+        UserVolunteerWork mockUserVolunteerWork = mock(UserVolunteerWork.class);
+        when(mockUserVolunteerWork.getStatus()).thenReturn(ApplyStatus.APPROVED);
+        when(userVolunteerRepository.findById(userVolunteerWorkId)).thenReturn(Optional.of(mockUserVolunteerWork));
+
+        // when
+        userVolunteerService.deleteApprovedUserVolunteerWork(userVolunteerWorkId);
+
+        // then
+        verify(mockUserVolunteerWork.getUser()).leaveVolunteerWork(mockUserVolunteerWork);
+        verify(mockUserVolunteerWork.getVolunteerWork()).leaveUser(mockUserVolunteerWork);
+        verify(userVolunteerRepository).delete(mockUserVolunteerWork);
     }
 }

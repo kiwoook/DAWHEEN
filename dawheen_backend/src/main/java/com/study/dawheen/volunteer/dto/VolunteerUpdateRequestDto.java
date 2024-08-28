@@ -1,5 +1,6 @@
 package com.study.dawheen.volunteer.dto;
 
+import com.study.dawheen.common.dto.CoordinateDto;
 import com.study.dawheen.volunteer.entity.type.TargetAudience;
 import com.study.dawheen.volunteer.entity.type.VolunteerType;
 import jakarta.validation.constraints.NotEmpty;
@@ -9,9 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Set;
 
 /**
@@ -25,11 +24,9 @@ public class VolunteerUpdateRequestDto {
     @NotEmpty
     private String content;
     @NotNull
-    private LocalDate serviceStartDate;
+    private LocalDateTime serviceStartDatetime;
     @NotNull
-    private LocalDate serviceEndDate;
-    private LocalTime serviceStartTime;
-    private LocalTime serviceEndTime;
+    private LocalDateTime serviceEndDatetime;
     private Set<DayOfWeek> serviceDays;
     private Set<TargetAudience> targetAudiences;
     private Set<VolunteerType> volunteerTypes;
@@ -38,6 +35,19 @@ public class VolunteerUpdateRequestDto {
     @NotNull
     private LocalDateTime recruitEndDateTime;
     private Integer maxParticipants;
-    private Double longitude;
-    private Double latitude;
+    private CoordinateDto coordinate;
+
+    public VolunteerUpdateRequestDto(String title, String content, LocalDateTime serviceStartDatetime, LocalDateTime serviceEndDatetime, Set<DayOfWeek> serviceDays, Set<TargetAudience> targetAudiences, Set<VolunteerType> volunteerTypes, LocalDateTime recruitStartDateTime, LocalDateTime recruitEndDateTime, Integer maxParticipants, Double longitude, Double latitude) {
+        this.title = title;
+        this.content = content;
+        this.serviceStartDatetime = serviceStartDatetime;
+        this.serviceEndDatetime = serviceEndDatetime;
+        this.serviceDays = serviceDays;
+        this.targetAudiences = targetAudiences;
+        this.volunteerTypes = volunteerTypes;
+        this.recruitStartDateTime = recruitStartDateTime;
+        this.recruitEndDateTime = recruitEndDateTime;
+        this.maxParticipants = maxParticipants;
+        this.coordinate = new CoordinateDto(latitude, longitude);
+    }
 }

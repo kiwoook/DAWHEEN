@@ -6,7 +6,6 @@ import com.study.dawheen.common.entity.BaseTimeEntity;
 import com.study.dawheen.common.entity.Coordinate;
 import com.study.dawheen.organization.entity.Organization;
 import com.study.dawheen.volunteer.dto.VolunteerCreateRequestDto;
-import com.study.dawheen.volunteer.dto.VolunteerUpdateRequestDto;
 import com.study.dawheen.volunteer.entity.type.TargetAudience;
 import com.study.dawheen.volunteer.entity.type.VolunteerType;
 import jakarta.persistence.*;
@@ -17,9 +16,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -36,7 +33,7 @@ public class VolunteerWork extends BaseTimeEntity {
     @Column(name = "ID", nullable = false)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Organization organization;
 
     @OneToMany(mappedBy = "volunteerWork")
@@ -49,18 +46,12 @@ public class VolunteerWork extends BaseTimeEntity {
     private String content;
 
     @NotNull
-    @Column(name = "SERVICE_START_DATE")
-    private LocalDate serviceStartDate;
+    @Column(name = "SERVICE_START_DATETIME")
+    private LocalDateTime serviceStartDatetime;
 
     @NotNull
-    @Column(name = "SERVICE_END_DATE")
-    private LocalDate serviceEndDate;
-
-    @Column(name = "SERVICE_START_TIME")
-    private LocalTime serviceStartTime;
-
-    @Column(name = "SERVICE_END_TIME")
-    private LocalTime serviceEndTime;
+    @Column(name = "SERVICE_END_DATETIME")
+    private LocalDateTime serviceEndDatetime;
 
     @ElementCollection(targetClass = DayOfWeek.class)
     @CollectionTable(name = "SERVICE_DAYS_OF_WEEK", joinColumns =
@@ -102,15 +93,16 @@ public class VolunteerWork extends BaseTimeEntity {
     @JoinColumn(name = "CHATROOM_ID")
     private ChatRoom chatRoom;
 
+    @Version
+    private Long version;
+
     @Builder
-    public VolunteerWork(Organization organization, String title, String content, LocalDate serviceStartDate, LocalDate serviceEndDate, LocalTime serviceStartTime, LocalTime serviceEndTime, Set<DayOfWeek> serviceDays, Set<TargetAudience> targetAudiences, Set<VolunteerType> volunteerTypes, LocalDateTime recruitStartDateTime, LocalDateTime recruitEndDateTime, int maxParticipants) {
+    public VolunteerWork(Organization organization, String title, String content, LocalDateTime serviceStartDatetime, LocalDateTime serviceEndDatetime, Set<DayOfWeek> serviceDays, Set<TargetAudience> targetAudiences, Set<VolunteerType> volunteerTypes, LocalDateTime recruitStartDateTime, LocalDateTime recruitEndDateTime, int maxParticipants) {
         this.organization = organization;
         this.title = title;
         this.content = content;
-        this.serviceStartDate = serviceStartDate;
-        this.serviceEndDate = serviceEndDate;
-        this.serviceStartTime = serviceStartTime;
-        this.serviceEndTime = serviceEndTime;
+        this.serviceStartDatetime = serviceStartDatetime;
+        this.serviceEndDatetime = serviceEndDatetime;
         this.serviceDays = serviceDays;
         this.targetAudiences = targetAudiences;
         this.volunteerTypes = volunteerTypes;
@@ -125,10 +117,8 @@ public class VolunteerWork extends BaseTimeEntity {
         return VolunteerWork.builder()
                 .title(requestDto.getTitle())
                 .content(requestDto.getContent())
-                .serviceStartDate(requestDto.getServiceStartDate())
-                .serviceEndDate(requestDto.getServiceEndDate())
-                .serviceStartTime(requestDto.getServiceStartTime())
-                .serviceEndTime(requestDto.getServiceEndTime())
+                .serviceStartDatetime(requestDto.getServiceStartDatetime())
+                .serviceEndDatetime(requestDto.getServiceEndDatetime())
                 .serviceDays(requestDto.getServiceDays())
                 .recruitStartDateTime(requestDto.getRecruitStartDateTime())
                 .recruitEndDateTime(requestDto.getRecruitEndDateTime())
@@ -138,24 +128,64 @@ public class VolunteerWork extends BaseTimeEntity {
                 .build();
     }
 
-    public void update(VolunteerUpdateRequestDto volunteerUpdateRequestDto) {
-        this.title = volunteerUpdateRequestDto.getTitle();
-        this.content = volunteerUpdateRequestDto.getContent();
-        this.serviceDays = volunteerUpdateRequestDto.getServiceDays();
-        this.serviceStartTime = volunteerUpdateRequestDto.getServiceStartTime();
-        this.serviceEndTime = volunteerUpdateRequestDto.getServiceEndTime();
-        this.serviceStartDate = volunteerUpdateRequestDto.getServiceStartDate();
-        this.serviceEndDate = volunteerUpdateRequestDto.getServiceEndDate();
-        this.recruitStartDateTime = volunteerUpdateRequestDto.getRecruitStartDateTime();
-        this.recruitEndDateTime = volunteerUpdateRequestDto.getRecruitEndDateTime();
-        this.maxParticipants = volunteerUpdateRequestDto.getMaxParticipants();
-        this.volunteerTypes = volunteerUpdateRequestDto.getVolunteerTypes();
-        this.targetAudiences = volunteerUpdateRequestDto.getTargetAudiences();
-        this.coordinate = new Coordinate(volunteerUpdateRequestDto.getLatitude(), volunteerUpdateRequestDto.getLongitude());
+    public void update(
+            String title,
+            String content,
+            LocalDateTime serviceStartDatetime,
+            LocalDateTime serviceEndDatetime,
+            Set<DayOfWeek> serviceDays,
+            Set<TargetAudience> targetAudiences,
+            Set<VolunteerType> volunteerTypes,
+            LocalDateTime recruitStartDateTime,
+            LocalDateTime recruitEndDateTime,
+            Integer maxParticipants,
+            Double latitude, // Assuming latitude and longitude are represented as Double
+            Double longitude
+    ) {
+        if (title != null) {
+            this.title = title;
+        }
+        if (content != null) {
+            this.content = content;
+        }
+        if (serviceStartDatetime != null) {
+            this.serviceStartDatetime = serviceStartDatetime;
+        }
+        if (serviceEndDatetime != null) {
+            this.serviceEndDatetime = serviceEndDatetime;
+        }
+        if (serviceDays != null) {
+            this.serviceDays = serviceDays;
+        }
+        if (targetAudiences != null) {
+            this.targetAudiences = targetAudiences;
+        }
+        if (volunteerTypes != null) {
+            this.volunteerTypes = volunteerTypes;
+        }
+        if (recruitStartDateTime != null) {
+            this.recruitStartDateTime = recruitStartDateTime;
+        }
+        if (recruitEndDateTime != null) {
+            this.recruitEndDateTime = recruitEndDateTime;
+        }
+        if (maxParticipants != null) {
+            this.maxParticipants = maxParticipants;
+        }
+        if (latitude != null && longitude != null && (this.coordinate == null ||
+                !this.coordinate.getLatitude().equals(latitude) ||
+                !this.coordinate.getLongitude().equals(longitude))) {
+            this.coordinate = new Coordinate(latitude, longitude);
+        }
+
     }
 
     public void updateCoordinate(CoordinateDto coordinateDto) {
-        this.coordinate = new Coordinate(coordinateDto.getLatitude(), coordinateDto.getLongitude());
+        if (this.coordinate == null ||
+                !this.coordinate.getLatitude().equals(coordinateDto.getLatitude()) ||
+                !this.coordinate.getLongitude().equals(coordinateDto.getLongitude())) {
+            this.coordinate = new Coordinate(coordinateDto.getLatitude(), coordinateDto.getLongitude());
+        }
     }
 
     public void updateOrganization(Organization organization) {
@@ -186,4 +216,25 @@ public class VolunteerWork extends BaseTimeEntity {
         users.remove(userVolunteerWork);
     }
 
+    @Override
+    public String toString() {
+        return "VolunteerWork{" +
+                "title='" + title + '\'' +
+                ", content='" + content + '\'' +
+                ", serviceStartDatetime=" + serviceStartDatetime +
+                ", serviceEndDatetime=" + serviceEndDatetime +
+                ", serviceDays=" + serviceDays +
+                ", targetAudiences=" + targetAudiences +
+                ", volunteerTypes=" + volunteerTypes +
+                ", recruitStartDateTime=" + recruitStartDateTime +
+                ", recruitEndDateTime=" + recruitEndDateTime +
+                ", appliedParticipants=" + appliedParticipants +
+                ", maxParticipants=" + maxParticipants +
+                ", coordinate=" + coordinate +
+                ", chatRoom=" + chatRoom +
+                ", version=" + version +
+                ", organization=" + organization +
+                ", id=" + id +
+                '}';
+    }
 }
