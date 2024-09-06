@@ -4,6 +4,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.study.dawheen.user.dto.UserInfoResponseDto;
 import com.study.dawheen.user.entity.QUser;
+import com.study.dawheen.volunteer.dto.VolunteerUserRankingDto;
 import com.study.dawheen.volunteer.entity.QUserVolunteerWork;
 import com.study.dawheen.volunteer.entity.type.ApplyStatus;
 import com.study.dawheen.volunteer.repository.UserVolunteerWorkRankingRepositoryCustom;
@@ -25,14 +26,13 @@ public class UserVolunteerWorkRankingRepositoryCustomImpl implements UserVolunte
     }
 
     @Override
-    public List<UserInfoResponseDto> getMonthlyVolunteerActivityRankings() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime startDate = now.minusMonths(1);
+    public List<UserInfoResponseDto> getVolunteerActivityRankings(LocalDateTime startDateTime) {
+
         return queryFactory.select(Projections.constructor(UserInfoResponseDto.class, user))
                 .from(userVolunteerWork)
                 .join(userVolunteerWork.user, user)
                 .where(userVolunteerWork.status.eq(ApplyStatus.COMPLETED)
-                        .and(userVolunteerWork.modifiedDate.between(startDate, LocalDateTime.now())))
+                        .and(userVolunteerWork.modifiedDate.between(startDateTime, LocalDateTime.now())))
                 .groupBy(userVolunteerWork.user)
                 .orderBy(userVolunteerWork.count().desc())
                 .limit(20)
@@ -40,32 +40,14 @@ public class UserVolunteerWorkRankingRepositoryCustomImpl implements UserVolunte
     }
 
     @Override
-    public List<UserInfoResponseDto> getSemiAnnualVolunteerActivityRankings() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime startDate = now.minusMonths(6);
-        return queryFactory.select(Projections.constructor(UserInfoResponseDto.class, user))
+    public List<VolunteerUserRankingDto> getUserVolunteerCountByPeriod(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        return queryFactory.select(Projections.constructor(VolunteerUserRankingDto.class, user.email, userVolunteerWork.count()))
                 .from(userVolunteerWork)
-                .join(userVolunteerWork.user, user)
+                .join(userVolunteerWork.user, user)// Fetch join 사용
                 .where(userVolunteerWork.status.eq(ApplyStatus.COMPLETED)
-                        .and(userVolunteerWork.modifiedDate.between(startDate, LocalDateTime.now())))
-                .groupBy(userVolunteerWork.user)
-                .orderBy(userVolunteerWork.count().desc())
-                .limit(20)
+                        .and(userVolunteerWork.modifiedDate.between(startDateTime, endDateTime)))
+                .groupBy(user.email) // User 엔티티의 이메일로 그룹화
                 .fetch();
     }
 
-    @Override
-    public List<UserInfoResponseDto> getYearlyVolunteerActivityRankings() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime startDate = now.minusYears(1);
-        return queryFactory.select(Projections.constructor(UserInfoResponseDto.class, user))
-                .from(userVolunteerWork)
-                .join(userVolunteerWork.user, user)
-                .where(userVolunteerWork.status.eq(ApplyStatus.COMPLETED)
-                        .and(userVolunteerWork.modifiedDate.between(startDate, LocalDateTime.now())))
-                .groupBy(userVolunteerWork.user)
-                .orderBy(userVolunteerWork.count().desc())
-                .limit(20)
-                .fetch();
-    }
 }

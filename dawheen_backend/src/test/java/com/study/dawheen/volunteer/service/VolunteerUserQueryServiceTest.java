@@ -4,7 +4,6 @@ import com.study.dawheen.organization.entity.Organization;
 import com.study.dawheen.user.dto.UserInfoResponseDto;
 import com.study.dawheen.user.entity.User;
 import com.study.dawheen.user.repository.UserRepository;
-import com.study.dawheen.volunteer.entity.UserVolunteerWork;
 import com.study.dawheen.volunteer.entity.VolunteerWork;
 import com.study.dawheen.volunteer.entity.type.ApplyStatus;
 import com.study.dawheen.volunteer.repository.UserVolunteerRepository;
@@ -16,13 +15,17 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 class VolunteerUserQueryServiceTest {
+
+
 
     @Mock
     private UserRepository userRepository;
@@ -35,6 +38,9 @@ class VolunteerUserQueryServiceTest {
 
     @InjectMocks
     private VolunteerUserQueryService volunteerUserQueryService;
+
+    @MockBean
+    private VolunteerRankingService volunteerRankingService;
 
     @BeforeEach
     void setUp() {
@@ -108,7 +114,7 @@ class VolunteerUserQueryServiceTest {
             volunteerUserQueryService.getUserListByStatusForOrganization(volunteerWorkId, email, status);
         });
 
-        assertEquals("소속된 기관이 없습니다.", exception.getMessage());
+        assertEquals("해당 유저는 소속된 기관이 없습니다: " + email, exception.getMessage());
         verify(userRepository).findByEmail(email);
     }
 

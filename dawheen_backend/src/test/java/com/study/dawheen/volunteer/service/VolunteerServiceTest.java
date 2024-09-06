@@ -1,5 +1,6 @@
 package com.study.dawheen.volunteer.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.study.dawheen.common.exception.AlreadyProcessedException;
 import com.study.dawheen.common.exception.AuthorizationFailedException;
 import com.study.dawheen.config.TestSecurityConfig;
@@ -18,6 +19,7 @@ import com.study.dawheen.volunteer.entity.type.TargetAudience;
 import com.study.dawheen.volunteer.entity.type.VolunteerType;
 import com.study.dawheen.volunteer.repository.UserVolunteerRepository;
 import com.study.dawheen.volunteer.repository.VolunteerWorkRepository;
+import com.study.dawheen.volunteer.service.impl.VolunteerRankingServiceV2;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -69,6 +71,8 @@ class VolunteerServiceTest {
     private PasswordEncoder passwordEncoder;
     @InjectMocks
     private VolunteerService volunteerService;
+    @Mock
+    private VolunteerRankingServiceV2 volunteerRankingService;
 
 
     private VolunteerWork volunteerWork;
@@ -85,27 +89,11 @@ class VolunteerServiceTest {
             return String.format("%1$-" + 60 + "s", encodedPassword).replace(' ', 'x');
         });
 
-        volunteerWork = VolunteerWork.builder()
-                .organization(organization)
-                .title("Sample Volunteer Work")
-                .content("This is a sample content.")
-                .serviceStartDatetime(LocalDateTime.of(2024, 1, 1, 9, 0))
-                .serviceEndDatetime(LocalDateTime.of(2024, 12, 31, 17, 0))
-                .serviceDays(Set.of(LocalDate.now().getDayOfWeek()))
-                .targetAudiences(Set.of(TargetAudience.ANIMAL))
-                .volunteerTypes(Set.of(VolunteerType.ADULT))
-                .recruitStartDateTime(LocalDateTime.now())
-                .recruitEndDateTime(LocalDateTime.now().plusMonths(1))
-                .maxParticipants(100)
-                .build();
+        volunteerWork = VolunteerWork.builder().organization(organization).title("Sample Volunteer Work").content("This is a sample content.").serviceStartDatetime(LocalDateTime.of(2024, 1, 1, 9, 0)).serviceEndDatetime(LocalDateTime.of(2024, 12, 31, 17, 0)).serviceDays(Set.of(LocalDate.now().getDayOfWeek())).targetAudiences(Set.of(TargetAudience.ANIMAL)).volunteerTypes(Set.of(VolunteerType.ADULT)).recruitStartDateTime(LocalDateTime.now()).recruitEndDateTime(LocalDateTime.now().plusMonths(1)).maxParticipants(100).build();
 
         userEmail = "test@example.com";
 
-        user = User.builder()
-                .email(userEmail)
-                .password(passwordEncoder.encode("1234"))
-                .name("user")
-                .build();
+        user = User.builder().email(userEmail).password(passwordEncoder.encode("1234")).name("user").build();
 
         user.grantOrganization(organization);
     }
@@ -122,8 +110,7 @@ class VolunteerServiceTest {
 
 
         // Then
-        verify(fileService, times(2))
-                .saveImgFileByVolunteerWork(any(MultipartFile.class), any(VolunteerWork.class));
+        verify(fileService, times(2)).saveImgFileByVolunteerWork(any(MultipartFile.class), any(VolunteerWork.class));
         verify(organSubscribeService).sendNotify(anyLong());
         assertNotNull(response);
     }
@@ -139,8 +126,7 @@ class VolunteerServiceTest {
         VolunteerInfoResponseDto response = volunteerService.create(userEmail, createResponseDto, null, null);
 
         // Then
-        verify(fileService, times(0))
-                .saveImgFileByVolunteerWork(any(MultipartFile.class), any(VolunteerWork.class)); // No file operations should be invoked
+        verify(fileService, times(0)).saveImgFileByVolunteerWork(any(MultipartFile.class), any(VolunteerWork.class)); // No file operations should be invoked
         verify(organSubscribeService).sendNotify(anyLong());
         assertNotNull(response); // Ensure the response is not null
     }
@@ -164,9 +150,7 @@ class VolunteerServiceTest {
         // Given
         when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
 
-        doThrow(new IOException("File I/O error"))
-                .when(fileService)
-                .saveImgFileByVolunteerWork(any(MultipartFile.class), any(VolunteerWork.class));
+        doThrow(new IOException("File I/O error")).when(fileService).saveImgFileByVolunteerWork(any(MultipartFile.class), any(VolunteerWork.class));
 
         // When & Then
         assertThrows(IOException.class, () -> volunteerService.create(userEmail, createResponseDto, file, List.of(file)));
@@ -183,8 +167,7 @@ class VolunteerServiceTest {
         UserVolunteerWork mockUserVolunteerWork = mock(UserVolunteerWork.class);
         User mockUser = mock(User.class);
 
-        when(userVolunteerRepository.findAllByVolunteerWorkIdWithFetch(volunteerWorkId))
-                .thenReturn(Optional.of(List.of(mockUserVolunteerWork)));
+        when(userVolunteerRepository.findAllByVolunteerWorkIdWithFetch(volunteerWorkId)).thenReturn(Optional.of(List.of(mockUserVolunteerWork)));
         when(mockUserVolunteerWork.getUser()).thenReturn(mockUser);
         when(volunteerWorkRepository.findById(volunteerWorkId)).thenReturn(Optional.of(mockVolunteerWork));
 
@@ -203,8 +186,7 @@ class VolunteerServiceTest {
         // Given
         Long nonExistentVolunteerWorkId = 999L;
 
-        when(userVolunteerRepository.findAllByVolunteerWorkIdWithFetch(nonExistentVolunteerWorkId))
-                .thenReturn(Optional.empty());
+        when(userVolunteerRepository.findAllByVolunteerWorkIdWithFetch(nonExistentVolunteerWorkId)).thenReturn(Optional.empty());
 
         // When & Then
         assertThrows(EntityNotFoundException.class, () -> volunteerService.delete(nonExistentVolunteerWorkId));
@@ -218,8 +200,7 @@ class VolunteerServiceTest {
         // Given
         Long volunteerWorkId = 1L;
 
-        when(userVolunteerRepository.findAllByVolunteerWorkIdWithFetch(volunteerWorkId))
-                .thenReturn(Optional.empty());
+        when(userVolunteerRepository.findAllByVolunteerWorkIdWithFetch(volunteerWorkId)).thenReturn(Optional.empty());
 
 
         // When & Then
@@ -237,16 +218,12 @@ class VolunteerServiceTest {
 
         UserVolunteerWork userVolunteerWork = new UserVolunteerWork(user, volunteerWork);
 
-        List<UserVolunteerWork> userVolunteerWorks = List.of(
-                userVolunteerWork
-        );
+        List<UserVolunteerWork> userVolunteerWorks = List.of(userVolunteerWork);
 
 
-        when(userVolunteerRepository.findAllByVolunteerWorkIdWithFetch(anyLong()))
-                .thenReturn(Optional.of(userVolunteerWorks));
+        when(userVolunteerRepository.findAllByVolunteerWorkIdWithFetch(anyLong())).thenReturn(Optional.of(userVolunteerWorks));
 
-        when(volunteerWorkRepository.findById(volunteerWorkId))
-                .thenReturn(Optional.empty());
+        when(volunteerWorkRepository.findById(volunteerWorkId)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> volunteerService.delete(volunteerWorkId));
 
@@ -262,20 +239,7 @@ class VolunteerServiceTest {
         Long volunteerWorkId = 1L;
 
         // Given
-        VolunteerUpdateRequestDto updateRequestDto = new VolunteerUpdateRequestDto(
-                "New Title",
-                "New Content",
-                LocalDateTime.of(2023, 1, 1, 9, 0),
-                LocalDateTime.of(2023, 12, 31, 17, 0),
-                new HashSet<>(Set.of(DayOfWeek.MONDAY, DayOfWeek.FRIDAY)),
-                new HashSet<>(Set.of(TargetAudience.ANIMAL)),
-                new HashSet<>(Set.of(VolunteerType.ADULT)),
-                LocalDateTime.now(),
-                LocalDateTime.now().plusDays(30),
-                10,
-                37.7749,
-                -122.4194
-        );
+        VolunteerUpdateRequestDto updateRequestDto = new VolunteerUpdateRequestDto("New Title", "New Content", LocalDateTime.of(2023, 1, 1, 9, 0), LocalDateTime.of(2023, 12, 31, 17, 0), new HashSet<>(Set.of(DayOfWeek.MONDAY, DayOfWeek.FRIDAY)), new HashSet<>(Set.of(TargetAudience.ANIMAL)), new HashSet<>(Set.of(VolunteerType.ADULT)), LocalDateTime.now(), LocalDateTime.now().plusDays(30), 10, 37.7749, -122.4194);
 
         // When
         when(volunteerWorkRepository.findById(volunteerWorkId)).thenReturn(Optional.of(volunteerWork));
@@ -297,20 +261,7 @@ class VolunteerServiceTest {
         Long volunteerWorkId = 1L;
 
         // Given
-        VolunteerUpdateRequestDto updateRequestDto = new VolunteerUpdateRequestDto(
-                null,
-                null,
-                LocalDateTime.of(2023, 1, 1, 9, 0),
-                LocalDateTime.of(2023, 12, 31, 17, 0),
-                new HashSet<>(Set.of(DayOfWeek.MONDAY, DayOfWeek.FRIDAY)),
-                new HashSet<>(Set.of(TargetAudience.ANIMAL)),
-                new HashSet<>(Set.of(VolunteerType.ADULT)),
-                LocalDateTime.now(),
-                LocalDateTime.now().plusDays(30),
-                10,
-                37.7749,
-                -122.4194
-        );
+        VolunteerUpdateRequestDto updateRequestDto = new VolunteerUpdateRequestDto(null, null, LocalDateTime.of(2023, 1, 1, 9, 0), LocalDateTime.of(2023, 12, 31, 17, 0), new HashSet<>(Set.of(DayOfWeek.MONDAY, DayOfWeek.FRIDAY)), new HashSet<>(Set.of(TargetAudience.ANIMAL)), new HashSet<>(Set.of(VolunteerType.ADULT)), LocalDateTime.now(), LocalDateTime.now().plusDays(30), 10, 37.7749, -122.4194);
 
         // When
         when(volunteerWorkRepository.findById(volunteerWorkId)).thenReturn(Optional.of(volunteerWork));
@@ -331,20 +282,7 @@ class VolunteerServiceTest {
         Long volunteerWorkId = 1L;
 
         // Given
-        VolunteerUpdateRequestDto updateRequestDto = new VolunteerUpdateRequestDto(
-                "New Title",
-                "New Content",
-                LocalDateTime.of(2023, 1, 1, 9, 0),
-                LocalDateTime.of(2023, 12, 31, 17, 0),
-                new HashSet<>(Set.of(DayOfWeek.MONDAY, DayOfWeek.FRIDAY)),
-                new HashSet<>(Set.of(TargetAudience.ANIMAL)),
-                new HashSet<>(Set.of(VolunteerType.ADULT)),
-                LocalDateTime.now(),
-                LocalDateTime.now().plusDays(30),
-                10,
-                37.7749,
-                -122.4194
-        );
+        VolunteerUpdateRequestDto updateRequestDto = new VolunteerUpdateRequestDto("New Title", "New Content", LocalDateTime.of(2023, 1, 1, 9, 0), LocalDateTime.of(2023, 12, 31, 17, 0), new HashSet<>(Set.of(DayOfWeek.MONDAY, DayOfWeek.FRIDAY)), new HashSet<>(Set.of(TargetAudience.ANIMAL)), new HashSet<>(Set.of(VolunteerType.ADULT)), LocalDateTime.now(), LocalDateTime.now().plusDays(30), 10, 37.7749, -122.4194);
 
 
         // When
@@ -362,24 +300,11 @@ class VolunteerServiceTest {
         Long volunteerWorkId = 1L;
         String email = "user@example.com";
 
-        volunteerWork = VolunteerWork.builder()
-                .organization(organization)
-                .title("Sample Volunteer Work")
-                .content("This is a sample content.")
-                .serviceStartDatetime(LocalDateTime.of(2024, 1, 1, 9, 0))
-                .serviceEndDatetime(LocalDateTime.now().plusDays(1))
-                .serviceDays(Set.of(LocalDate.now().getDayOfWeek()))
-                .targetAudiences(Set.of(TargetAudience.ANIMAL))
-                .volunteerTypes(Set.of(VolunteerType.ADULT))
-                .recruitStartDateTime(LocalDateTime.now())
-                .recruitEndDateTime(LocalDateTime.now().plusMonths(1))
-                .maxParticipants(100)
-                .build();
+        volunteerWork = VolunteerWork.builder().organization(organization).title("Sample Volunteer Work").content("This is a sample content.").serviceStartDatetime(LocalDateTime.of(2024, 1, 1, 9, 0)).serviceEndDatetime(LocalDateTime.now().plusDays(1)).serviceDays(Set.of(LocalDate.now().getDayOfWeek())).targetAudiences(Set.of(TargetAudience.ANIMAL)).volunteerTypes(Set.of(VolunteerType.ADULT)).recruitStartDateTime(LocalDateTime.now()).recruitEndDateTime(LocalDateTime.now().plusMonths(1)).maxParticipants(100).build();
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(volunteerWorkRepository.findById(volunteerWorkId)).thenReturn(Optional.of(volunteerWork));
-        when(userVolunteerRepository.existsByVolunteerWorkAndEmailAndStatus(volunteerWorkId, email, List.of(ApplyStatus.APPROVED, ApplyStatus.PENDING)))
-                .thenReturn(false);
+        when(userVolunteerRepository.existsByVolunteerWorkAndEmailAndStatus(volunteerWorkId, email, List.of(ApplyStatus.APPROVED, ApplyStatus.PENDING))).thenReturn(false);
 
         // When
         volunteerService.apply(volunteerWorkId, email);
@@ -394,8 +319,7 @@ class VolunteerServiceTest {
         Long volunteerWorkId = 1L;
         String email = "user@example.com";
 
-        when(userVolunteerRepository.existsByVolunteerWorkAndEmailAndStatus(volunteerWorkId, email, List.of(ApplyStatus.APPROVED, ApplyStatus.PENDING)))
-                .thenReturn(true);
+        when(userVolunteerRepository.existsByVolunteerWorkAndEmailAndStatus(volunteerWorkId, email, List.of(ApplyStatus.APPROVED, ApplyStatus.PENDING))).thenReturn(true);
 
         // When & Then
         assertThrows(AlreadyProcessedException.class, () -> volunteerService.apply(volunteerWorkId, email));
@@ -408,24 +332,11 @@ class VolunteerServiceTest {
     void apply_Failure_RecruitEndDateTimePassed() {
         Long volunteerWorkId = 1L;
         String email = "user@example.com";
-        volunteerWork = VolunteerWork.builder()
-                .organization(organization)
-                .title("Sample Volunteer Work")
-                .content("This is a sample content.")
-                .serviceStartDatetime(LocalDateTime.of(2024, 1, 1, 9, 0))
-                .serviceEndDatetime(LocalDateTime.now().plusDays(1))
-                .serviceDays(Set.of(LocalDate.now().getDayOfWeek()))
-                .targetAudiences(Set.of(TargetAudience.ANIMAL))
-                .volunteerTypes(Set.of(VolunteerType.ADULT))
-                .recruitStartDateTime(LocalDateTime.now())
-                .recruitEndDateTime(LocalDateTime.now().minusDays(1))
-                .maxParticipants(100)
-                .build();
+        volunteerWork = VolunteerWork.builder().organization(organization).title("Sample Volunteer Work").content("This is a sample content.").serviceStartDatetime(LocalDateTime.of(2024, 1, 1, 9, 0)).serviceEndDatetime(LocalDateTime.now().plusDays(1)).serviceDays(Set.of(LocalDate.now().getDayOfWeek())).targetAudiences(Set.of(TargetAudience.ANIMAL)).volunteerTypes(Set.of(VolunteerType.ADULT)).recruitStartDateTime(LocalDateTime.now()).recruitEndDateTime(LocalDateTime.now().minusDays(1)).maxParticipants(100).build();
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(volunteerWorkRepository.findById(volunteerWorkId)).thenReturn(Optional.of(volunteerWork));
-        when(userVolunteerRepository.existsByVolunteerWorkAndEmailAndStatus(volunteerWorkId, email, List.of(ApplyStatus.APPROVED, ApplyStatus.PENDING)))
-                .thenReturn(false);
+        when(userVolunteerRepository.existsByVolunteerWorkAndEmailAndStatus(volunteerWorkId, email, List.of(ApplyStatus.APPROVED, ApplyStatus.PENDING))).thenReturn(false);
 
         // When & Then
         assertThrows(IllegalStateException.class, () -> volunteerService.apply(volunteerWorkId, email));
@@ -474,19 +385,7 @@ class VolunteerServiceTest {
         Long volunteerWorkId = 1L;
         Long userId = 2L;
 
-        volunteerWork = VolunteerWork.builder()
-                .organization(organization)
-                .title("Sample Volunteer Work")
-                .content("This is a sample content.")
-                .serviceStartDatetime(LocalDateTime.of(2024, 1, 1, 9, 0))
-                .serviceEndDatetime(LocalDateTime.now().plusDays(1))
-                .serviceDays(Set.of(LocalDate.now().getDayOfWeek()))
-                .targetAudiences(Set.of(TargetAudience.ANIMAL))
-                .volunteerTypes(Set.of(VolunteerType.ADULT))
-                .recruitStartDateTime(LocalDateTime.now())
-                .recruitEndDateTime(LocalDateTime.now().minusDays(1))
-                .maxParticipants(0)
-                .build();
+        volunteerWork = VolunteerWork.builder().organization(organization).title("Sample Volunteer Work").content("This is a sample content.").serviceStartDatetime(LocalDateTime.of(2024, 1, 1, 9, 0)).serviceEndDatetime(LocalDateTime.now().plusDays(1)).serviceDays(Set.of(LocalDate.now().getDayOfWeek())).targetAudiences(Set.of(TargetAudience.ANIMAL)).volunteerTypes(Set.of(VolunteerType.ADULT)).recruitStartDateTime(LocalDateTime.now()).recruitEndDateTime(LocalDateTime.now().minusDays(1)).maxParticipants(0).build();
 
         UserVolunteerWork userVolunteerWork = new UserVolunteerWork(user, volunteerWork);
 
@@ -500,15 +399,16 @@ class VolunteerServiceTest {
 
     @Test
     @DisplayName("봉사 활동 완료 성공")
-    void completed_Success() {
+    void completed_Success() throws JsonProcessingException, InterruptedException {
         // Given
         Long volunteerWorkId = 1L;
         Long userId = 1L;
         UserVolunteerWork userVolunteerWork = new UserVolunteerWork(user, volunteerWork);
         userVolunteerWork.updateStatus(ApplyStatus.APPROVED);
 
-        when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId))
-                .thenReturn(Optional.of(userVolunteerWork));
+        when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId)).thenReturn(Optional.of(userVolunteerWork));
+
+        doNothing().when(volunteerRankingService).addVolunteerUser(anyString());
 
         // When
         volunteerService.completed(volunteerWorkId, userId);
@@ -525,8 +425,7 @@ class VolunteerServiceTest {
         Long userId = 1L;
         UserVolunteerWork userVolunteerWork = new UserVolunteerWork(user, volunteerWork);
 
-        when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId))
-                .thenReturn(Optional.of(userVolunteerWork));
+        when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId)).thenReturn(Optional.of(userVolunteerWork));
 
         // When & Then
         assertThrows(IllegalStateException.class, () -> {
@@ -541,8 +440,7 @@ class VolunteerServiceTest {
         Long volunteerWorkId = 1L;
         Long userId = 1L;
 
-        when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId))
-                .thenReturn(Optional.empty());
+        when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId)).thenReturn(Optional.empty());
 
         // When & Then
         assertThrows(EntityNotFoundException.class, () -> {
@@ -559,16 +457,14 @@ class VolunteerServiceTest {
         UserVolunteerWork userVolunteerWork = new UserVolunteerWork(user, volunteerWork);
 
         // Mock behavior
-        when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId))
-                .thenReturn(Optional.of(userVolunteerWork));
+        when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId)).thenReturn(Optional.of(userVolunteerWork));
 
         // When
         volunteerService.cancelPending(volunteerWorkId, userId);
 
         // Then
         assertEquals(ApplyStatus.REJECTED, userVolunteerWork.getStatus());
-        verify(userVolunteerRepository, times(1))
-                .findByVolunteerWorkIdAndUserId(volunteerWorkId, userId);
+        verify(userVolunteerRepository, times(1)).findByVolunteerWorkIdAndUserId(volunteerWorkId, userId);
     }
 
     @Test
@@ -581,16 +477,14 @@ class VolunteerServiceTest {
         userVolunteerWork.updateStatus(ApplyStatus.APPROVED);
 
         // Mock behavior
-        when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId))
-                .thenReturn(Optional.of(userVolunteerWork));
+        when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId)).thenReturn(Optional.of(userVolunteerWork));
 
         // When & Then
         assertThrows(IllegalStateException.class, () -> {
             volunteerService.cancelPending(volunteerWorkId, userId);
         });
 
-        verify(userVolunteerRepository, times(1))
-                .findByVolunteerWorkIdAndUserId(volunteerWorkId, userId);
+        verify(userVolunteerRepository, times(1)).findByVolunteerWorkIdAndUserId(volunteerWorkId, userId);
     }
 
     @Test
@@ -600,16 +494,14 @@ class VolunteerServiceTest {
         Long volunteerWorkId = 1L;
         Long userId = 1L;
 
-        when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId))
-                .thenReturn(Optional.empty());
+        when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId)).thenReturn(Optional.empty());
 
         // When & Then
         assertThrows(EntityNotFoundException.class, () -> {
             volunteerService.cancelPending(volunteerWorkId, userId);
         });
 
-        verify(userVolunteerRepository, times(1))
-                .findByVolunteerWorkIdAndUserId(volunteerWorkId, userId);
+        verify(userVolunteerRepository, times(1)).findByVolunteerWorkIdAndUserId(volunteerWorkId, userId);
     }
 
     @Test
@@ -622,8 +514,7 @@ class VolunteerServiceTest {
         Long userId = 1L;
         UserVolunteerWork userVolunteerWork = new UserVolunteerWork(user, volunteerWork);
 
-        when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId))
-                .thenReturn(Optional.of(userVolunteerWork));
+        when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId)).thenReturn(Optional.of(userVolunteerWork));
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(volunteerWorkRepository.findById(volunteerWorkId)).thenReturn(Optional.of(volunteerWork));
 
@@ -632,8 +523,7 @@ class VolunteerServiceTest {
 
         // Then
         assertEquals(ApplyStatus.REJECTED, userVolunteerWork.getStatus());
-        verify(userVolunteerRepository, times(1))
-                .findByVolunteerWorkIdAndUserId(volunteerWorkId, userId);
+        verify(userVolunteerRepository, times(1)).findByVolunteerWorkIdAndUserId(volunteerWorkId, userId);
     }
 
     @Test
@@ -641,11 +531,7 @@ class VolunteerServiceTest {
     void shouldThrowAuthorizationFailedExceptionWhenUnauthorized() {
         // Given
         // 해당 유저는 기관과 연결되어 있지 않음
-        user = User.builder()
-                .email(userEmail)
-                .password(passwordEncoder.encode("1234"))
-                .name("user")
-                .build();
+        user = User.builder().email(userEmail).password(passwordEncoder.encode("1234")).name("user").build();
 
         Long volunteerWorkId = 1L;
         Long userId = 1L;
@@ -657,8 +543,7 @@ class VolunteerServiceTest {
             volunteerService.cancelPendingForOrganization(userEmail, volunteerWorkId, userId);
         });
 
-        verify(userVolunteerRepository, times(0))
-                .findByVolunteerWorkIdAndUserId(volunteerWorkId, userId);
+        verify(userVolunteerRepository, times(0)).findByVolunteerWorkIdAndUserId(volunteerWorkId, userId);
     }
 
 

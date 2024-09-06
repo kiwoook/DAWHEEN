@@ -19,7 +19,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
@@ -62,6 +61,7 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
                 .where(userVolunteerWork.user.email.eq(email)
                         .and(userVolunteerWork.volunteerWork.id.eq(volunteerWorkId))
                         .and(userVolunteerWork.status.in(statuses)))
+                .setLockMode(LockModeType.OPTIMISTIC)
                 .fetchFirst() != null;
     }
 
@@ -111,9 +111,8 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
         );
     }
 
-    @Lock(LockModeType.PESSIMISTIC_READ)
     @Override
-    public synchronized Optional<UserVolunteerWork> findByVolunteerWorkIdAndUserId(Long volunteerWorkId, Long userId) {
+    public Optional<UserVolunteerWork> findByVolunteerWorkIdAndUserId(Long volunteerWorkId, Long userId) {
 
         return Optional.ofNullable(queryFactory
                 .selectFrom(userVolunteerWork)

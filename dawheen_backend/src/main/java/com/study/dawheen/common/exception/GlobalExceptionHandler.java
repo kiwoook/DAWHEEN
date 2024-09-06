@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.io.IOException;
+
 
 /**
  * 모든 예외 처리 핸들러
@@ -68,9 +70,39 @@ public class GlobalExceptionHandler {
         파라미터의 값이 잘못될 시 error
      */
     @ExceptionHandler(IllegalArgumentException.class)
-    protected  ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e){
+    protected ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e) {
         log.error("IllegalArgumentExceptionError : {}", e.getMessage());
         return ResponseEntity.badRequest().build();
+    }
+
+    /*
+        비정상적인 접근으로 인해 발생하는 Error
+     */
+
+    @ExceptionHandler(IllegalAccessException.class)
+    protected ResponseEntity<ErrorResponse> handleIllegalAccessException(IllegalArgumentException e) {
+        log.error("IllegalAccessException : {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
+    /*
+        서버 입출력 에러 시
+     */
+
+    @ExceptionHandler(IOException.class)
+    protected ResponseEntity<ErrorResponse> handleIOException(IOException e) {
+        log.error("IOExceptionExceptionError : {}", e.getMessage());
+        return ResponseEntity.internalServerError().build();
+    }
+
+    /*
+        동시성 처리에러로 시간 초과 발생
+     */
+
+    @ExceptionHandler(InterruptedException.class)
+    protected ResponseEntity<ErrorResponse> handleInterruptException(InterruptedException e) {
+        log.error("InterruptedExceptionError : {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
     }
 
 }

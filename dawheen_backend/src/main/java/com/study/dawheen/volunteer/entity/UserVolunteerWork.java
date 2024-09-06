@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "USER_VOLUNTEERWORK", uniqueConstraints = @UniqueConstraint(columnNames = {"VOLUNTEER_WORK_ID", "USER_ID"}), indexes = @Index(name = "idx_status", columnList = "status"))
+@Table(name = "USER_VOLUNTEERWORK", indexes = @Index(name = "IDX_USER_ID_AND_STATUS", columnList = "USER_ID, STATUS"), uniqueConstraints = @UniqueConstraint(columnNames = {"VOLUNTEER_WORK_ID", "USER_ID"}))
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserVolunteerWork extends BaseTimeEntity {
 
@@ -21,7 +21,7 @@ public class UserVolunteerWork extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "USER_ID")
+    @JoinColumn(name = "USER_ID", referencedColumnName = "email")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -31,6 +31,9 @@ public class UserVolunteerWork extends BaseTimeEntity {
     @Column(name = "STATUS")
     @Enumerated(EnumType.STRING)
     private ApplyStatus status;
+
+    @Version
+    private Long version;
 
 
     public UserVolunteerWork(User user, VolunteerWork volunteerWork) {
@@ -52,4 +55,5 @@ public class UserVolunteerWork extends BaseTimeEntity {
                 ", status=" + status +
                 '}';
     }
+
 }

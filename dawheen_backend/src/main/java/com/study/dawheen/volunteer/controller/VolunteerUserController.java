@@ -1,5 +1,6 @@
 package com.study.dawheen.volunteer.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.study.dawheen.common.exception.AuthorizationFailedException;
 import com.study.dawheen.user.dto.UserInfoResponseDto;
 import com.study.dawheen.volunteer.dto.VolunteerInfoResponseDto;
@@ -108,27 +109,18 @@ public class VolunteerUserController {
 
     @Operation(summary = "봉사활동 유저 승인", description = "봉사활동을 승인합니다.")
     @PostMapping("/{id}/approve/{userId}")
-    public ResponseEntity<UserInfoResponseDto> approve(@PathVariable Long id, @PathVariable Long userId) {
+    public ResponseEntity<UserInfoResponseDto> approve(@PathVariable Long id, @PathVariable Long userId) throws IllegalAccessException {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        try {
-            volunteerService.approve(email, id, userId);
-            return ResponseEntity.ok().build();
-        } catch (IllegalAccessException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+        volunteerService.approve(email, id, userId);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "봉사활동 유저 완료 처리", description = "봉사활동을 approved 된 유저를 completed 처리합니다.")
     @PostMapping("/{id}/complete/{userId}")
-    public ResponseEntity<UserInfoResponseDto> complete(@PathVariable Long id, @PathVariable Long userId) {
+    public ResponseEntity<UserInfoResponseDto> complete(@PathVariable Long id, @PathVariable Long userId) throws JsonProcessingException, InterruptedException {
 
-        try {
-            volunteerService.completed(id, userId);
-            return ResponseEntity.ok().build();
-        } catch (EntityNotFoundException | IllegalStateException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        volunteerService.completed(id, userId);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "봉사활동 유저 취소", description = "기관 역할을 가진 사용자가 취소")

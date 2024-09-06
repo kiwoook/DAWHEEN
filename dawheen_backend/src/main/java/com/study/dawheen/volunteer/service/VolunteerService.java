@@ -1,5 +1,6 @@
 package com.study.dawheen.volunteer.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.study.dawheen.common.exception.AlreadyProcessedException;
 import com.study.dawheen.common.exception.AuthorizationFailedException;
 import com.study.dawheen.infra.file.service.FileService;
@@ -15,16 +16,22 @@ import com.study.dawheen.volunteer.entity.VolunteerWork;
 import com.study.dawheen.volunteer.entity.type.ApplyStatus;
 import com.study.dawheen.volunteer.repository.UserVolunteerRepository;
 import com.study.dawheen.volunteer.repository.VolunteerWorkRepository;
+import com.study.dawheen.volunteer.service.impl.VolunteerRankingServiceV2;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,12 +39,12 @@ import java.util.List;
 public class VolunteerService {
 
     private static final String AUTHORIZATION_ERR_MSG = "you are not allowed to approve method";
+
     private final VolunteerWorkRepository volunteerWorkRepository;
     private final UserVolunteerRepository userVolunteerRepository;
     private final OrganSubscribeService organSubscribeService;
-
+    private final VolunteerRankingServiceV2 volunteerRankingService;
     private final FileService fileService;
-
     private final UserRepository userRepository;
 
     @Transactional
@@ -91,20 +98,29 @@ public class VolunteerService {
 
     // 대기중인 유저를 확인해 신청할지 안할지 정할 수 있음.
     // 소속된 기관의 유저 리스트 반환
+    @Retryable(
+            retryFor = {OptimisticLockException.class},
+            backoff = @Backoff(delay = 500)
+    )
     @Transactional
     public void apply(Long volunteerWorkId, String email) {
+
+        log.info("apply 실행 volunteerWorkId = {}, email = {}", volunteerWorkId, email);
 
         if (userVolunteerRepository.existsByVolunteerWorkAndEmailAndStatus(volunteerWorkId, email, List.of(ApplyStatus.APPROVED, ApplyStatus.PENDING))) {
             log.info("이미 신청한 아이디 email = {}, volunteerWorkId = {}", email, volunteerWorkId);
             throw new AlreadyProcessedException();
         }
 
-        User user = userRepository.findByEmail(email).orElseThrow(EntityNotFoundException::new);
-        VolunteerWork volunteerWork = volunteerWorkRepository.findById(volunteerWorkId).orElseThrow(EntityNotFoundException::new);
+        Optional<User> user1 = userRepository.findByEmail(email);
+        log.info("user1 = {}", user1);
+
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User not found for email: " + email));
+        VolunteerWork volunteerWork = volunteerWorkRepository.findById(volunteerWorkId).orElseThrow(() -> new EntityNotFoundException("VolunteerWork not found for id: " + volunteerWorkId));
 
         LocalDateTime now = LocalDateTime.now();
         if (now.isAfter(volunteerWork.getRecruitEndDateTime())) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Recruitment period has ended.");
         }
 
         UserVolunteerWork userVolunteerWork = new UserVolunteerWork(user, volunteerWork);
@@ -112,10 +128,15 @@ public class VolunteerService {
         userVolunteerRepository.save(userVolunteerWork);
     }
 
-    @Transactional
+    @Retryable(
+            retryFor = {EntityNotFoundException.class},
+            backoff = @Backoff(delay = 3000)
+    )
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void approve(String email, Long volunteerWorkId, Long userId) throws IllegalAccessException {
         // 승인권한은 해당 기관담당만 가능하도록 해야함.
 
+        log.info("approve 호출 email = {}, volunteerWork = {}, userId = {}", email, volunteerWorkId, userId);
         UserVolunteerWork userVolunteerWork = userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId).orElseThrow(EntityNotFoundException::new);
 
         if (userVolunteerWork.getStatus() != ApplyStatus.PENDING) {
@@ -141,36 +162,36 @@ public class VolunteerService {
     }
 
     @Transactional
-    public void completed(Long volunteerWorkId, Long userId) throws IllegalStateException {
+    public void completed(Long volunteerWorkId, Long userId) throws IllegalStateException, JsonProcessingException {
         UserVolunteerWork userVolunteerWork = userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId).orElseThrow(EntityNotFoundException::new);
         if (userVolunteerWork.getStatus() != ApplyStatus.APPROVED) {
             throw new IllegalStateException();
         }
         userVolunteerWork.updateStatus(ApplyStatus.COMPLETED);
+        volunteerRankingService.addVolunteerUser(userVolunteerWork.getUser().getEmail());
     }
 
     @Transactional
     public void cancelPending(Long volunteerWorkId, Long userId) {
         UserVolunteerWork userVolunteerWork = userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId).orElseThrow(EntityNotFoundException::new);
 
-        if (userVolunteerWork.getStatus() != ApplyStatus.PENDING) {
-            throw new IllegalStateException();
-        }
-
-        userVolunteerWork.updateStatus(ApplyStatus.REJECTED);
+        cancelPending(userVolunteerWork);
     }
 
     @Transactional
     public void cancelPending(Long volunteerWorkId, String email) {
         UserVolunteerWork userVolunteerWork = userVolunteerRepository.findByVolunteerWorkIdAndEmail(volunteerWorkId, email).orElseThrow(EntityNotFoundException::new);
 
+        cancelPending(userVolunteerWork);
+    }
+
+    private void cancelPending(UserVolunteerWork userVolunteerWork) {
         if (userVolunteerWork.getStatus() != ApplyStatus.PENDING) {
             throw new IllegalStateException();
         }
 
         userVolunteerWork.updateStatus(ApplyStatus.REJECTED);
     }
-
 
     public void cancelApproved(Long volunteerWorkId, Long userId) {
         UserVolunteerWork userVolunteerWork = userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId).orElseThrow(EntityNotFoundException::new);
@@ -239,6 +260,7 @@ public class VolunteerService {
 
         volunteerWork.decreaseParticipants();
     }
+
 
 }
 

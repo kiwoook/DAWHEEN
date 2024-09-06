@@ -3,7 +3,6 @@ package com.study.dawheen.volunteer.controller;
 import com.study.dawheen.user.dto.UserInfoResponseDto;
 import com.study.dawheen.volunteer.service.VolunteerRankingService;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,35 +21,21 @@ public class VolunteerRankingController {
     private final VolunteerRankingService rankingService;
 
     @GetMapping("/monthly")
-    public ResponseEntity<List<UserInfoResponseDto>> getMonthlyRanking() {
-        try {
-            List<UserInfoResponseDto> responseDtoList = rankingService.getMonthlyRanking();
-            return ResponseEntity.ok(responseDtoList);
-
-        } catch (IOException | EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<List<UserInfoResponseDto>> getMonthlyRanking() throws InterruptedException, IOException {
+        List<UserInfoResponseDto> responseDtoList = rankingService.getMonthlyRanking();
+        return ResponseEntity.ok(responseDtoList);
     }
 
     @GetMapping("/semi-annual")
-    public ResponseEntity<List<UserInfoResponseDto>> getSemiAnnualRanking() {
-        try {
-            List<UserInfoResponseDto> responseDtoList = rankingService.getSemiAnnualRanking();
-            return ResponseEntity.ok(responseDtoList);
+    public ResponseEntity<List<UserInfoResponseDto>> getSemiAnnualRanking() throws InterruptedException, IOException {
+        List<UserInfoResponseDto> responseDtoList = rankingService.getSemiAnnualRanking();
+        return ResponseEntity.ok(responseDtoList);
 
-        } catch (IOException | EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
     }
 
     @GetMapping("/annual")
-    public ResponseEntity<List<UserInfoResponseDto>> getAnnualRanking() {
-        try {
-            List<UserInfoResponseDto> responseDtoList = rankingService.getAnnualRanking();
-            return ResponseEntity.ok(responseDtoList);
-
-        } catch (IOException | EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<List<UserInfoResponseDto>> getAnnualRanking() throws InterruptedException, IOException {
+        List<UserInfoResponseDto> responseDtoList = rankingService.getAnnualRanking();
+        return ResponseEntity.ok(responseDtoList);
     }
 }

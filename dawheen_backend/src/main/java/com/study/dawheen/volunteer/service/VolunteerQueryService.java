@@ -27,6 +27,19 @@ public class VolunteerQueryService {
 
     @Transactional(readOnly = true)
     public List<VolunteerInfoResponseDto> getVolunteersWithinRadius(double latitude, double longitude, int radius) {
+
+        if (latitude < -90 || latitude > 90) {
+            throw new IllegalArgumentException("위도 범위 초과");
+        }
+
+        if (longitude < -180 || longitude > 180) {
+            throw new IllegalArgumentException("경도 범위 초과");
+        }
+
+        if (radius <= 0) {
+            throw new IllegalArgumentException("지름 범위 초과");
+        }
+
         return volunteerWorkRepository.getByRadiusAndBeforeEndDate(latitude, longitude, radius);
     }
 

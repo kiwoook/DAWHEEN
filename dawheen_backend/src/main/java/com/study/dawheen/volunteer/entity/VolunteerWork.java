@@ -93,9 +93,6 @@ public class VolunteerWork extends BaseTimeEntity {
     @JoinColumn(name = "CHATROOM_ID")
     private ChatRoom chatRoom;
 
-    @Version
-    private Long version;
-
     @Builder
     public VolunteerWork(Organization organization, String title, String content, LocalDateTime serviceStartDatetime, LocalDateTime serviceEndDatetime, Set<DayOfWeek> serviceDays, Set<TargetAudience> targetAudiences, Set<VolunteerType> volunteerTypes, LocalDateTime recruitStartDateTime, LocalDateTime recruitEndDateTime, int maxParticipants) {
         this.organization = organization;
@@ -219,7 +216,8 @@ public class VolunteerWork extends BaseTimeEntity {
     @Override
     public String toString() {
         return "VolunteerWork{" +
-                "title='" + title + '\'' +
+                "id=" + id +
+                ", title='" + title + '\'' +
                 ", content='" + content + '\'' +
                 ", serviceStartDatetime=" + serviceStartDatetime +
                 ", serviceEndDatetime=" + serviceEndDatetime +
@@ -231,10 +229,7 @@ public class VolunteerWork extends BaseTimeEntity {
                 ", appliedParticipants=" + appliedParticipants +
                 ", maxParticipants=" + maxParticipants +
                 ", coordinate=" + coordinate +
-                ", chatRoom=" + chatRoom +
-                ", version=" + version +
                 ", organization=" + organization +
-                ", id=" + id +
-                '}';
+                "} " + super.toString();
     }
 }

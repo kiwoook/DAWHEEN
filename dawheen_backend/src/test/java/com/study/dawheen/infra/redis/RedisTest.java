@@ -40,6 +40,7 @@ class RedisTest {
 
     @Autowired
     VolunteerRankingService volunteerRankingService;
+
     User user1 = User.builder()
             .name("user1")
             .email("user1@gmail.com")

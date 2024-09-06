@@ -26,21 +26,21 @@ public class VolunteerUserQueryService {
     private final VolunteerWorkRepository volunteerWorkRepository;
 
     public List<UserInfoResponseDto> getUserListByStatusForOrganization(Long volunteerWorkId, String email, ApplyStatus status) {
-        User user = userRepository.findByEmail(email).orElseThrow(EntityNotFoundException::new);
-        Long organizationId = Optional.ofNullable(user.getOrganization())
-                .map(Organization::getId)
-                .orElse(null);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("해당 이메일을 가진 유저를 찾을 수 없습니다: " + email));
 
-        if (organizationId == null) {
-            log.info("소속된 기관이 없는 유저 email = {}", email);
-            throw new IllegalStateException("소속된 기관이 없습니다.");
-        }
+        Organization userOrganization = Optional.of(user.getOrganization())
+                .orElseThrow(() -> new IllegalStateException("해당 유저는 소속된 기관이 없습니다: " + email));
 
-        VolunteerWork volunteerWork = volunteerWorkRepository.findById(volunteerWorkId).orElseThrow(EntityNotFoundException::new);
+        VolunteerWork volunteerWork = volunteerWorkRepository.findById(volunteerWorkId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 봉사활동을 찾을 수 없습니다: " + volunteerWorkId));
 
-        if (!organizationId.equals(volunteerWork.getOrganization().getId())) {
-            log.info("해당 봉사활동과 관련된 기관 담당이 아닙니다");
-            throw new IllegalStateException();
+        Organization volunteerOrganization = Optional.of(volunteerWork.getOrganization())
+                .orElseThrow(() -> new IllegalStateException("해당 봉사활동에 소속된 기관이 없습니다: " + volunteerWorkId));
+
+        if (!userOrganization.equals(volunteerOrganization)) {
+            log.info("해당 봉사활동과 관련된 기관 담당이 아닙니다. email: {}, volunteerWorkId: {}", email, volunteerWorkId);
+            throw new IllegalStateException("해당 봉사활동에 대한 권한이 없습니다.");
         }
 
         // Status 에 따라 UserList가 반환이 다름

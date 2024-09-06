@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.Set;
 
 
@@ -20,6 +19,7 @@ import java.util.Set;
 public class VolunteerInfoResponseDto {
     int appliedParticipants;
     int maxParticipants;
+    private Long id;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private OrganInfoResponseDto organInfoResponseDto;
@@ -36,6 +36,7 @@ public class VolunteerInfoResponseDto {
 
 
     public VolunteerInfoResponseDto(VolunteerWork volunteerWork) {
+        this.id = volunteerWork.getId();
         this.createdDate = volunteerWork.getCreatedDate();
         this.modifiedDate = volunteerWork.getModifiedDate();
         this.title = volunteerWork.getTitle();
@@ -49,11 +50,11 @@ public class VolunteerInfoResponseDto {
         this.recruitEndDateTime = volunteerWork.getRecruitEndDateTime();
         this.appliedParticipants = volunteerWork.getAppliedParticipants().get();
         this.maxParticipants = volunteerWork.getMaxParticipants();
-        this.organInfoResponseDto = Optional.ofNullable(volunteerWork.getOrganization())
-                .map(OrganInfoResponseDto::new)
-                .orElse(null);
-        this.coordinateInfoResponseDto = Optional.ofNullable(volunteerWork.getCoordinate())
-                .map(CoordinateInfoResponseDto::new)
-                .orElse(null);
+        this.organInfoResponseDto = volunteerWork.getOrganization() != null
+                ? new OrganInfoResponseDto(volunteerWork.getOrganization())
+                : null;
+        this.coordinateInfoResponseDto = volunteerWork.getCoordinate() != null
+                ? new CoordinateInfoResponseDto(volunteerWork.getCoordinate())
+                : null;
     }
 }

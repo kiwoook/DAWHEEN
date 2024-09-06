@@ -95,16 +95,21 @@ class UserVolunteerServiceTest {
     void deleteApprovedUserVolunteerWorkSuccess_Approved() {
         // given
         Long userVolunteerWorkId = 1L;
+        User mockUser = mock(User.class);
+        VolunteerWork mockVolunteerWork = mock(VolunteerWork.class);
         UserVolunteerWork mockUserVolunteerWork = mock(UserVolunteerWork.class);
+
         when(mockUserVolunteerWork.getStatus()).thenReturn(ApplyStatus.APPROVED);
+        when(mockUserVolunteerWork.getUser()).thenReturn(mockUser);
+        when(mockUserVolunteerWork.getVolunteerWork()).thenReturn(mockVolunteerWork);
         when(userVolunteerRepository.findById(userVolunteerWorkId)).thenReturn(Optional.of(mockUserVolunteerWork));
 
         // when
         userVolunteerService.deleteApprovedUserVolunteerWork(userVolunteerWorkId);
 
         // then
-        verify(mockUserVolunteerWork.getUser()).leaveVolunteerWork(mockUserVolunteerWork);
-        verify(mockUserVolunteerWork.getVolunteerWork()).leaveUser(mockUserVolunteerWork);
+        verify(mockUser).leaveVolunteerWork(mockUserVolunteerWork);
+        verify(mockVolunteerWork).leaveUser(mockUserVolunteerWork);
         verify(userVolunteerRepository).delete(mockUserVolunteerWork);
     }
 }

@@ -1,5 +1,6 @@
 package com.study.dawheen.volunteer.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.study.dawheen.user.dto.UserInfoResponseDto;
 import jakarta.persistence.EntityNotFoundException;
 
@@ -8,15 +9,17 @@ import java.util.List;
 
 public interface VolunteerRankingService {
 
-    String MONTHLY_RANKING = "monthly-ranking";
-    String SEMI_ANNUAL_RANKING = "semi-annual-ranking";
-    String ANNUAL_RANKING = "annual-ranking";
 
-    List<UserInfoResponseDto> getMonthlyRanking() throws IOException, EntityNotFoundException;
 
-    List<UserInfoResponseDto> getSemiAnnualRanking() throws IOException, EntityNotFoundException;
+    void addVolunteerUser(String email) throws JsonProcessingException, InterruptedException;
 
-    List<UserInfoResponseDto> getAnnualRanking() throws IOException, EntityNotFoundException;
+    void fetchRankingData();
+
+    List<UserInfoResponseDto> getMonthlyRanking() throws IOException, EntityNotFoundException, InterruptedException;
+
+    List<UserInfoResponseDto> getSemiAnnualRanking() throws IOException, EntityNotFoundException, InterruptedException;
+
+    List<UserInfoResponseDto> getAnnualRanking() throws IOException, EntityNotFoundException, InterruptedException;
 
 
 }
