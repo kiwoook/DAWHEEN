@@ -30,7 +30,7 @@ public class UserInfoResponseDto {
         this.name = user.getName();
         this.email = user.getEmail();
         this.phone = user.getPhone();
-        this.address = user.getAddress() != null ? new AddressDto(user.getAddress()) : null;
+        this.address = AddressDto.toDto(user.getAddress());
         this.providerType = user.getProviderType();
     }
 }

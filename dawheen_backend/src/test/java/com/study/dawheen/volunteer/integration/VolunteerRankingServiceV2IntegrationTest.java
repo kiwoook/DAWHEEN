@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.study.dawheen.volunteer.dto.VolunteerUserRankingDto;
 import com.study.dawheen.volunteer.repository.UserVolunteerRepository;
+import com.study.dawheen.volunteer.service.impl.RankingProcessServiceImpl;
 import com.study.dawheen.volunteer.service.impl.VolunteerRankingServiceV2;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -64,6 +65,9 @@ class VolunteerRankingServiceV2IntegrationTest {
     private VolunteerRankingServiceV2 volunteerRankingServiceV2;
 
     @Autowired
+    private RankingProcessServiceImpl rankingProcessService;
+
+    @Autowired
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @DynamicPropertySource
@@ -89,12 +93,13 @@ class VolunteerRankingServiceV2IntegrationTest {
 
     @Test
     @DisplayName("addVolunteerUser 테스트")
-    void testAddVolunteerUser() throws JsonProcessingException, InterruptedException {
+    void testAddVolunteerUser() {
         // Given
         String email = "user1@example.com";
 
         // When
-        volunteerRankingServiceV2.addVolunteerUser(email);
+
+        rankingProcessService.incrementRankingScores(email);
 
         // Then
         ZSetOperations<String, Object> zSetOperations = redisTemplate.opsForZSet();

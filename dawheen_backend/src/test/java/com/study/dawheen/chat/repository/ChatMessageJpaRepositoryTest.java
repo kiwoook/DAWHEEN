@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Import({TestMongoConfig.class})
 @ActiveProfiles("test")
 @MockBean(JpaMetamodelMappingContext.class)
-class ChatMessageRepositoryTest {
+class ChatMessageJpaRepositoryTest {
 
     @Autowired
     private ChatMessageRepository chatMessageRepository;

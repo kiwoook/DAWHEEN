@@ -31,9 +31,9 @@ import static org.mockito.Mockito.when;
 @ExtendWith(OutputCaptureExtension.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 @ActiveProfiles("test")
-class NotificationRepositoryTest {
+class NotificationJpaRepositoryTest {
 
-    private static final Logger log = LoggerFactory.getLogger(NotificationRepositoryTest.class);
+    private static final Logger log = LoggerFactory.getLogger(NotificationJpaRepositoryTest.class);
 
     @Autowired
     NotificationRepository notificationRepository;

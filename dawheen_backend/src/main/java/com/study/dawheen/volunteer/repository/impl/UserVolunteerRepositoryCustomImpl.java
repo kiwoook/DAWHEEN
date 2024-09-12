@@ -83,17 +83,16 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
     @Override
     public Optional<List<User>> findUsersByVolunteerWorkIdAndStatus(Long volunteerWorkId, ApplyStatus status) {
 
-        return Optional.of(
-                queryFactory
-                        .select(userVolunteerWork.user)
-                        .distinct()
-                        .from(userVolunteerWork)
-                        .join(userVolunteerWork.user, user).fetchJoin()
-                        .where(
-                                userVolunteerWork.volunteerWork.id.eq(volunteerWorkId)
-                                        .and(userVolunteerWork.status.eq(status))
-                        )
-                        .fetch()
+        return Optional.of(queryFactory
+                .select(userVolunteerWork.user)
+                .distinct()
+                .from(userVolunteerWork)
+                .join(userVolunteerWork.user, user)
+                .where(
+                        userVolunteerWork.volunteerWork.id.eq(volunteerWorkId)
+                                .and(userVolunteerWork.status.eq(status))
+                )
+                .fetch()
         );
     }
 
@@ -121,7 +120,7 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
                 .where(
                         userVolunteerWork.volunteerWork.id.eq(volunteerWorkId)
                                 .and(userVolunteerWork.user.id.eq(userId))
-                ).setLockMode(LockModeType.PESSIMISTIC_READ)
+                )
                 .fetchOne());
     }
 
@@ -159,7 +158,7 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
                                         )
 
                         )
-                ).offset(pageable.getOffset() - 1)
+                ).offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 

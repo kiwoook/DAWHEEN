@@ -64,7 +64,6 @@ public class VolunteerService {
         }
 
         Organization organization = user.getOrganization();
-
         if (organization != null) {
             volunteerWork.updateOrganization(organization);
             organSubscribeService.sendNotify(organization.getId());

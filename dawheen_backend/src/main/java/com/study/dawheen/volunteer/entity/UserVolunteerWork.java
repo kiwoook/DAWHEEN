@@ -32,10 +32,6 @@ public class UserVolunteerWork extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private ApplyStatus status;
 
-    @Version
-    private Long version;
-
-
     public UserVolunteerWork(User user, VolunteerWork volunteerWork) {
         this.user = user;
         this.volunteerWork = volunteerWork;

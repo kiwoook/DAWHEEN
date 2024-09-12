@@ -24,7 +24,7 @@ public class UserVolunteerController {
 
     private final UserVolunteerService userVolunteerService;
 
-    public ResponseEntity<Page<VolunteerInfoResponseDto>> getMyVolunteerInfo(@PageableDefault(page = 1, size = 20) Pageable pageable) {
+    public ResponseEntity<Page<VolunteerInfoResponseDto>> getMyVolunteerInfo(@PageableDefault(size = 20) Pageable pageable) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
         Page<VolunteerInfoResponseDto> responseDtos = userVolunteerService.getParticipateVolunteerWorkByUser(email, pageable);

@@ -29,13 +29,13 @@ public class VolunteerUserQueryService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("해당 이메일을 가진 유저를 찾을 수 없습니다: " + email));
 
-        Organization userOrganization = Optional.of(user.getOrganization())
+        Organization userOrganization = Optional.ofNullable(user.getOrganization())
                 .orElseThrow(() -> new IllegalStateException("해당 유저는 소속된 기관이 없습니다: " + email));
 
         VolunteerWork volunteerWork = volunteerWorkRepository.findById(volunteerWorkId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 봉사활동을 찾을 수 없습니다: " + volunteerWorkId));
 
-        Organization volunteerOrganization = Optional.of(volunteerWork.getOrganization())
+        Organization volunteerOrganization = Optional.ofNullable(volunteerWork.getOrganization())
                 .orElseThrow(() -> new IllegalStateException("해당 봉사활동에 소속된 기관이 없습니다: " + volunteerWorkId));
 
         if (!userOrganization.equals(volunteerOrganization)) {

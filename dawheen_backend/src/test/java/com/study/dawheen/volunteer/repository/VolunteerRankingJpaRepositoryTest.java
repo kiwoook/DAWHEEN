@@ -1,7 +1,7 @@
 package com.study.dawheen.volunteer.repository;
 
 import com.study.dawheen.chat.repository.ChatMessageRepository;
-import com.study.dawheen.config.TestSecurityConfig;
+import com.study.dawheen.custom.JpaRepositoryTest;
 import com.study.dawheen.organization.entity.Organization;
 import com.study.dawheen.organization.repository.OrganRepository;
 import com.study.dawheen.user.dto.UserInfoResponseDto;
@@ -19,11 +19,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.system.OutputCaptureExtension;
-import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
@@ -37,11 +34,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 
-@DataJpaTest
 @ExtendWith(OutputCaptureExtension.class)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(TestSecurityConfig.class)
-class VolunteerRankingRepositoryTest {
+@JpaRepositoryTest
+class VolunteerRankingJpaRepositoryTest {
     static final int NUM_USERS = 50; // 생성할 사용자 수
 
     @Autowired
@@ -200,4 +195,10 @@ class VolunteerRankingRepositoryTest {
 //                .containsExactlyInAnyOrder(15L, 20L, 25L, 30L, 35L); // 각 유저의 봉사활동 개수는 max_value에 따라 다릅니다.
     }
 
+    @AfterEach
+    void cleanUp(){
+        userRepository.deleteAll();
+        organRepository.deleteAll();
+        volunteerWorkRepository.deleteAll();
+    }
 }

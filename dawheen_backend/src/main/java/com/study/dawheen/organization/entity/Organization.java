@@ -50,7 +50,7 @@ public class Organization extends BaseTimeEntity {
     @Column(name = "REPRESENT_NAME")
     private String representName;
 
-    @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Address address;
 
     @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)

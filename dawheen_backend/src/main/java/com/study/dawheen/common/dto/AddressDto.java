@@ -26,5 +26,15 @@ public class AddressDto {
         this.zipCode = address.getZipCode();
     }
 
+    public AddressDto(String roadAddress, String detailAddress, String zipCode) {
+        this.roadAddress = roadAddress;
+        this.detailAddress = detailAddress;
+        this.zipCode = zipCode;
+    }
 
+    public static AddressDto toDto(Address address) {
+        if (address == null) {
+            return null;
+        }
+        return new AddressDto(address.getRoadAddress(), address.getDetailAddress(), address.getZipCode());    }
 }

@@ -31,18 +31,10 @@ public class RankingProcessServiceImpl implements RankingProcessService {
 
     @Override
     public void incrementRankingScores(String email) {
-
-        zSetOperations.getOperations().multi();
-        try {
-            zSetOperations.incrementScore(MONTHLY_RANKING, email, 1);
-            zSetOperations.incrementScore(SEMI_ANNUAL_RANKING, email, 1);
-            zSetOperations.incrementScore(ANNUAL_RANKING, email, 1);
-            zSetOperations.getOperations().exec();
-        } catch (Exception e) {
-            zSetOperations.getOperations().discard();
-            log.error("트랜잭션 에러 발생 message = {}", e.getMessage());
-            throw e;
-        }
+        log.info("incrementRankingScores 실행");
+        zSetOperations.incrementScore(MONTHLY_RANKING, email, 1);
+        zSetOperations.incrementScore(SEMI_ANNUAL_RANKING, email, 1);
+        zSetOperations.incrementScore(ANNUAL_RANKING, email, 1);
     }
 
     @Override

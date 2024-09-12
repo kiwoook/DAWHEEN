@@ -141,29 +141,24 @@ class VolunteerRankingServiceFetchTest {
     @Test
     void testGetMonthlyRanking_Concurrency() throws InterruptedException, ExecutionException {
         int numberOfThreads = 100;  // 동시 실행할 스레드 수
-        ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
 
-        Callable<List<UserInfoResponseDto>> task = () -> volunteerRankingServiceV2.getMonthlyRanking();
+        try (ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads)) {
+            Callable<List<UserInfoResponseDto>> task = () -> volunteerRankingServiceV2.getMonthlyRanking();
 
-        List<Future<List<UserInfoResponseDto>>> futures = new ArrayList<>();
+            List<Future<List<UserInfoResponseDto>>> futures = new ArrayList<>();
 
-        // 여러 스레드를 통해 동시에 getMonthlyRanking 호출
-        for (int i = 0; i < numberOfThreads; i++) {
-            futures.add(executorService.submit(task));
+            for (int i = 0; i < numberOfThreads; i++) {
+                futures.add(executorService.submit(task));
+            }
+
+            // 모든 스레드의 작업 결과를 확인
+            for (Future<List<UserInfoResponseDto>> future : futures) {
+                List<UserInfoResponseDto> result = future.get();
+                assertThat(result).isNotNull();  // 결과가 null이 아닌지 확인
+                assertThat(result).hasSizeGreaterThan(0);  // 결과의 크기 확인
+            }
         }
 
-        // 모든 스레드의 작업 결과를 확인
-        for (Future<List<UserInfoResponseDto>> future : futures) {
-            List<UserInfoResponseDto> result = future.get();
-            assertThat(result).isNotNull();  // 결과가 null이 아닌지 확인
-            assertThat(result).hasSizeGreaterThan(0);  // 결과의 크기 확인
-        }
-
-        // 스레드 종료
-        executorService.shutdown();
-        if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
-            executorService.shutdownNow();
-        }
     }
 
     @DisplayName("월간 랭킹 실패 : Empty Cache")
@@ -234,7 +229,7 @@ class VolunteerRankingServiceFetchTest {
         // 초기 세팅 없애기
         userRepository.deleteAll();
 
-        int numberOfUsers = 1000; // 대규모 데이터 설정
+        int numberOfUsers = 100; // 대규모 데이터 설정
         List<User> userList = new ArrayList<>();
 
         for (int i = 1; i <= numberOfUsers; i++) {

@@ -11,8 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Coordinate {
 
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "COORDINATE_ID", nullable = false)
@@ -24,6 +22,9 @@ public class Coordinate {
 
 
     public Coordinate(Double latitude, Double longitude) {
+        if (latitude == null && longitude == null) {
+            throw new IllegalArgumentException("Both latitude and longitude cannot be null.");
+        }
         this.latitude = latitude;
         this.longitude = longitude;
     }

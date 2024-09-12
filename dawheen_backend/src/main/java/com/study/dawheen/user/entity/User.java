@@ -50,7 +50,7 @@ public class User extends BaseTimeEntity {
     @Column
     private String phone;
 
-    @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Address address;
 
     @NotNull
@@ -83,7 +83,6 @@ public class User extends BaseTimeEntity {
         this.role = roleType;
     }
 
-
     public void changePassword(String password) {
         this.password = password;
     }
@@ -100,7 +99,6 @@ public class User extends BaseTimeEntity {
         }
         this.phone = phone;
         this.address = address;
-
     }
 
     public void verifyOAuth2User() {

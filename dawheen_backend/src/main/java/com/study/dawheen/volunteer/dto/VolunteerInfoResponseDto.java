@@ -1,6 +1,6 @@
 package com.study.dawheen.volunteer.dto;
 
-import com.study.dawheen.common.dto.CoordinateInfoResponseDto;
+import com.study.dawheen.common.dto.CoordinateDto;
 import com.study.dawheen.organization.dto.OrganInfoResponseDto;
 import com.study.dawheen.volunteer.entity.VolunteerWork;
 import com.study.dawheen.volunteer.entity.type.TargetAudience;
@@ -32,8 +32,7 @@ public class VolunteerInfoResponseDto {
     private Set<VolunteerType> volunteerTypes;
     private LocalDateTime recruitStartDateTime;
     private LocalDateTime recruitEndDateTime;
-    private CoordinateInfoResponseDto coordinateInfoResponseDto;
-
+    private CoordinateDto coordinateDto;
 
     public VolunteerInfoResponseDto(VolunteerWork volunteerWork) {
         this.id = volunteerWork.getId();
@@ -50,11 +49,15 @@ public class VolunteerInfoResponseDto {
         this.recruitEndDateTime = volunteerWork.getRecruitEndDateTime();
         this.appliedParticipants = volunteerWork.getAppliedParticipants().get();
         this.maxParticipants = volunteerWork.getMaxParticipants();
-        this.organInfoResponseDto = volunteerWork.getOrganization() != null
-                ? new OrganInfoResponseDto(volunteerWork.getOrganization())
-                : null;
-        this.coordinateInfoResponseDto = volunteerWork.getCoordinate() != null
-                ? new CoordinateInfoResponseDto(volunteerWork.getCoordinate())
-                : null;
+        this.organInfoResponseDto = OrganInfoResponseDto.toDto(volunteerWork.getOrganization());
+        this.coordinateDto = CoordinateDto.toDto(volunteerWork.getCoordinate());
+    }
+
+    public static VolunteerInfoResponseDto toDto(VolunteerWork volunteerWork) {
+        if (volunteerWork == null) {
+            return null;
+        }
+
+        return new VolunteerInfoResponseDto(volunteerWork);
     }
 }

@@ -1,7 +1,7 @@
 package com.study.dawheen.organization.dto;
 
 import com.study.dawheen.common.dto.AddressDto;
-import com.study.dawheen.common.dto.CoordinateInfoResponseDto;
+import com.study.dawheen.common.dto.CoordinateDto;
 import com.study.dawheen.organization.entity.Organization;
 import jakarta.validation.constraints.Email;
 import lombok.AccessLevel;
@@ -22,8 +22,7 @@ public class OrganInfoResponseDto {
     private String facilityType;
     private String representName;
     private AddressDto address;
-
-    private CoordinateInfoResponseDto coordinateInfoResponseDto;
+    private CoordinateDto coordinateDto;
 
     public OrganInfoResponseDto(Organization organization) {
         this.name = organization.getName();
@@ -31,7 +30,15 @@ public class OrganInfoResponseDto {
         this.email = organization.getEmail();
         this.facilityType = organization.getFacilityType();
         this.representName = organization.getRepresentName();
-        this.address = organization.getAddress() != null ? new AddressDto(organization.getAddress()) : null;
-        this.coordinateInfoResponseDto = organization.getCoordinate() != null ? new CoordinateInfoResponseDto(organization.getCoordinate()) : null;
+        this.address = AddressDto.toDto(organization.getAddress());
+        this.coordinateDto = CoordinateDto.toDto(organization.getCoordinate());
+    }
+
+    public static OrganInfoResponseDto toDto(Organization organization) {
+        if (organization == null) {
+            return null;
+        }
+
+        return new OrganInfoResponseDto(organization);
     }
 }

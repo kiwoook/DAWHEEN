@@ -52,6 +52,7 @@ public class VolunteerRankingServiceV2 implements VolunteerRankingService {
             backoff = @Backoff(delay = 2000)
     )
     @Override
+    @Transactional
     public void addVolunteerUser(String email) throws JsonProcessingException {
         // 각 key 에 추가한다.
 
