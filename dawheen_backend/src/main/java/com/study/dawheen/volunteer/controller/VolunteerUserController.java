@@ -95,7 +95,7 @@ public class VolunteerUserController {
     public ResponseEntity<VolunteerInfoResponseDto> applyVolunteerWork(@PathVariable("id") Long id) {
         try {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
-            volunteerService.apply(id, email);
+            userVolunteerService.apply(id, email);
             return ResponseEntity.ok().build();
         } catch (EntityNotFoundException | ConstraintViolationException e) {
             return ResponseEntity.badRequest().build();
@@ -111,7 +111,7 @@ public class VolunteerUserController {
     @PostMapping("/{id}/approve/{userId}")
     public ResponseEntity<UserInfoResponseDto> approve(@PathVariable Long id, @PathVariable Long userId) throws IllegalAccessException {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        volunteerService.approve(email, id, userId);
+        userVolunteerService.approve(email, id, userId);
         return ResponseEntity.ok().build();
     }
 
@@ -119,7 +119,7 @@ public class VolunteerUserController {
     @PostMapping("/{id}/complete/{userId}")
     public ResponseEntity<UserInfoResponseDto> complete(@PathVariable Long id, @PathVariable Long userId) throws JsonProcessingException, InterruptedException {
 
-        volunteerService.completed(id, userId);
+        userVolunteerService.completed(id, userId);
         return ResponseEntity.ok().build();
     }
 
@@ -133,10 +133,10 @@ public class VolunteerUserController {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         try {
             if (status == ApplyStatus.APPROVED) {
-                volunteerService.cancelApprovedForOrganization(email, id, userId);
+                userVolunteerService.cancelApprovedForOrganization(email, id, userId);
             }
             if (status == ApplyStatus.PENDING) {
-                volunteerService.cancelPendingForOrganization(email, id, userId);
+                userVolunteerService.cancelPendingForOrganization(email, id, userId);
             }
             return ResponseEntity.ok().build();
         } catch (AuthorizationFailedException e) {
@@ -155,10 +155,10 @@ public class VolunteerUserController {
             @Parameter(name = "등록 상태", description = "등록 상태에 따라 유저가 추방되거나 거절됨 pending, approved 여야만 함", required = true) @RequestParam ApplyStatus status) {
         try {
             if (status == ApplyStatus.APPROVED) {
-                volunteerService.cancelApproved(id, userId);
+                userVolunteerService.cancelApproved(id, userId);
             }
             if (status == ApplyStatus.PENDING) {
-                volunteerService.cancelPending(id, userId);
+                userVolunteerService.cancelPending(id, userId);
             }
             return ResponseEntity.ok().build();
         } catch (AuthorizationFailedException e) {
@@ -175,10 +175,10 @@ public class VolunteerUserController {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
             if (status == ApplyStatus.APPROVED) {
-                volunteerService.cancelApproved(id, email);
+                userVolunteerService.cancelApproved(id, email);
             }
             if (status == ApplyStatus.PENDING) {
-                volunteerService.cancelPending(id, email);
+                userVolunteerService.cancelPending(id, email);
             }
             return ResponseEntity.ok().build();
         } catch (AuthorizationFailedException e) {

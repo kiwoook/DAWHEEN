@@ -29,4 +29,7 @@ public interface UserVolunteerRepositoryCustom {
     Optional<UserVolunteerWork> findByVolunteerWorkIdAndEmail(Long volunteerWorkId, String email);
 
     Page<VolunteerInfoResponseDto> findVolunteerWorkByEmailAndStatus(String email, ApplyStatus status, Pageable pageable);
+
+    // 봉사활동 ID와 STATUS 로 개수 찾기
+    int countAllByVolunteerWorkIdAndStatus(Long volunteerWorkId, ApplyStatus status);
 }

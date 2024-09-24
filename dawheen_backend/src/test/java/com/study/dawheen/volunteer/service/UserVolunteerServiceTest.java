@@ -56,6 +56,20 @@ class UserVolunteerServiceTest {
     }
 
     @Test
+    @DisplayName("Delete 성공")
+    void deleteSuccess(){
+
+    }
+
+    @Test
+    @DisplayName("Delete 실패 : EntityNotFound")
+    void deleteFailedByEntityNotFound(){
+
+    }
+
+
+
+    @Test
     @DisplayName("유저_봉사활동 분리 성공")
     void unregisterUsersFromVolunteerWork_Success() {
         // given

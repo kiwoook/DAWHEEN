@@ -23,7 +23,7 @@ public class OrganRepositoryCustomImpl implements OrganRepositoryCustom {
     }
 
     @Override
-    public Optional<List<Organization>> findOrganizationsWithinRadius(double latitude, double longitude, int radius) {
+    public Optional<List<Organization>> findOrganizationsWithinRadius(double latitude, double longitude, double radius) {
 
         QOrganization organization = QOrganization.organization;
         QCoordinate coordinate = QCoordinate.coordinate;

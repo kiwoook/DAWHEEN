@@ -26,7 +26,7 @@ public class VolunteerQueryService {
     }
 
     @Transactional(readOnly = true)
-    public List<VolunteerInfoResponseDto> getVolunteersWithinRadius(double latitude, double longitude, int radius) {
+    public List<VolunteerInfoResponseDto> getVolunteersWithinRadius(double latitude, double longitude, double radius) {
 
         if (latitude < -90 || latitude > 90) {
             throw new IllegalArgumentException("위도 범위 초과");

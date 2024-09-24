@@ -83,7 +83,7 @@ class UserControllerTest {
 
     @Test
     @WithMockUser(username = "user@example.com", roles = "MEMBER")
-    @DisplayName("비밀번호 변경 실패 테스트 - 비밀번호 불일치")
+    @DisplayName("비밀번호 변경 실패 : 비밀번호 불일치")
     void changePasswordOldPasswordMismatch() throws Exception {
         // Given
         UserPasswordChangeRequestDto requestDto = new UserPasswordChangeRequestDto("wrongOldPassword", "newPassword");

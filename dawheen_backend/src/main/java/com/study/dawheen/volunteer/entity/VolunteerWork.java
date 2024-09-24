@@ -94,7 +94,11 @@ public class VolunteerWork extends BaseTimeEntity {
     private ChatRoom chatRoom;
 
     @Builder
-    public VolunteerWork(Organization organization, String title, String content, LocalDateTime serviceStartDatetime, LocalDateTime serviceEndDatetime, Set<DayOfWeek> serviceDays, Set<TargetAudience> targetAudiences, Set<VolunteerType> volunteerTypes, LocalDateTime recruitStartDateTime, LocalDateTime recruitEndDateTime, int maxParticipants) {
+    public VolunteerWork(Organization organization, String title, String content,
+                         LocalDateTime serviceStartDatetime, LocalDateTime serviceEndDatetime,
+                         Set<DayOfWeek> serviceDays, Set<TargetAudience> targetAudiences, Set<VolunteerType> volunteerTypes,
+                         LocalDateTime recruitStartDateTime, LocalDateTime recruitEndDateTime,
+                         int maxParticipants) {
         this.organization = organization;
         this.title = title;
         this.content = content;

@@ -172,4 +172,16 @@ public class UserVolunteerRepositoryCustomImpl implements UserVolunteerRepositor
 
         return PageableExecutionUtils.getPage(content, pageable, count::fetchCount);
     }
+
+    @Override
+    public int countAllByVolunteerWorkIdAndStatus(Long volunteerWorkId, ApplyStatus status) {
+
+        return queryFactory
+                .selectFrom(userVolunteerWork)
+                .innerJoin(userVolunteerWork.volunteerWork, volunteerWork).fetchJoin()
+                .where(userVolunteerWork.volunteerWork.id.eq(volunteerWorkId)
+                        .and(userVolunteerWork.status.eq(status)))
+                .fetch()
+                .size();
+    }
 }

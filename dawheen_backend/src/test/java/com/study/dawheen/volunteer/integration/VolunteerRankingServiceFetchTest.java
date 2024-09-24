@@ -142,7 +142,8 @@ class VolunteerRankingServiceFetchTest {
     void testGetMonthlyRanking_Concurrency() throws InterruptedException, ExecutionException {
         int numberOfThreads = 100;  // 동시 실행할 스레드 수
 
-        try (ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads)) {
+        ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
+        try {
             Callable<List<UserInfoResponseDto>> task = () -> volunteerRankingServiceV2.getMonthlyRanking();
 
             List<Future<List<UserInfoResponseDto>>> futures = new ArrayList<>();
@@ -157,6 +158,8 @@ class VolunteerRankingServiceFetchTest {
                 assertThat(result).isNotNull();  // 결과가 null이 아닌지 확인
                 assertThat(result).hasSizeGreaterThan(0);  // 결과의 크기 확인
             }
+        } finally {
+            executorService.shutdown();  // 스레드 풀을 종료
         }
 
     }

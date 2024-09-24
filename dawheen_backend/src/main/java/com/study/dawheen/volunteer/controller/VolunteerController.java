@@ -32,12 +32,15 @@ public class VolunteerController {
     private final VolunteerQueryService volunteerQueryService;
     private final VolunteerUserQueryService volunteerUserQueryService;
 
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<List<VolunteerInfoResponseDto>> getVolunteerListWithInRadius(
-            @Parameter(name = "경도", required = true) @RequestParam double latitude,
-            @Parameter(name = "경도", required = true) @RequestParam double longitude,
-            @Parameter(name = "반경", description = "단위 : m", required = true) @RequestParam int radius
+            @Parameter(name = "경도", required = true) @RequestParam(name = "latitude") double latitude,
+            @Parameter(name = "경도", required = true) @RequestParam(name = "longitude") double longitude,
+            @Parameter(name = "반경", description = "단위 : km", required = true) @RequestParam(name ="radius") double radius
     ) {
+
+        log.info("latitude = {}, longitude = {}, radius = {}", latitude, longitude, radius);
+
         try {
             List<VolunteerInfoResponseDto> responseDtos = volunteerQueryService.getVolunteersWithinRadius(latitude, longitude, radius);
             return ResponseEntity.ok(responseDtos);

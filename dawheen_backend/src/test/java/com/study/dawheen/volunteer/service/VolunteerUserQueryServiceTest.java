@@ -89,10 +89,8 @@ class VolunteerUserQueryServiceTest {
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        // when & then
-        assertThrows(EntityNotFoundException.class, () -> {
-            volunteerUserQueryService.getUserListByStatusForOrganization(volunteerWorkId, email, status);
-        });
+        // when and then
+        assertThrows(EntityNotFoundException.class, () -> volunteerUserQueryService.getUserListByStatusForOrganization(volunteerWorkId, email, status));
         verify(userRepository).findByEmail(email);
     }
 
@@ -110,9 +108,7 @@ class VolunteerUserQueryServiceTest {
         when(mockUser.getOrganization()).thenReturn(null);
 
         // when & then
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
-            volunteerUserQueryService.getUserListByStatusForOrganization(volunteerWorkId, email, status);
-        });
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> volunteerUserQueryService.getUserListByStatusForOrganization(volunteerWorkId, email, status));
 
         assertEquals("해당 유저는 소속된 기관이 없습니다: " + email, exception.getMessage());
         verify(userRepository).findByEmail(email);
@@ -140,9 +136,7 @@ class VolunteerUserQueryServiceTest {
         when(otherOrganization.getId()).thenReturn(2L);
 
         // when & then
-        assertThrows(IllegalStateException.class, () -> {
-            volunteerUserQueryService.getUserListByStatusForOrganization(volunteerWorkId, email, status);
-        });
+        assertThrows(IllegalStateException.class, () -> volunteerUserQueryService.getUserListByStatusForOrganization(volunteerWorkId, email, status));
 
         verify(userRepository).findByEmail(email);
         verify(volunteerWorkRepository).findById(volunteerWorkId);
@@ -166,9 +160,7 @@ class VolunteerUserQueryServiceTest {
         when(volunteerWorkRepository.findById(volunteerWorkId)).thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(EntityNotFoundException.class, () -> {
-            volunteerUserQueryService.getUserListByStatusForOrganization(volunteerWorkId, email, status);
-        });
+        assertThrows(EntityNotFoundException.class, () -> volunteerUserQueryService.getUserListByStatusForOrganization(volunteerWorkId, email, status));
 
         verify(userRepository).findByEmail(email);
         verify(volunteerWorkRepository).findById(volunteerWorkId);
@@ -203,9 +195,7 @@ class VolunteerUserQueryServiceTest {
         when(userVolunteerRepository.findUsersByVolunteerWorkIdAndStatus(volunteerWorkId, status)).thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(EntityNotFoundException.class, () -> {
-            volunteerUserQueryService.getUserListByStatusForAdmin(volunteerWorkId, status);
-        });
+        assertThrows(EntityNotFoundException.class, () -> volunteerUserQueryService.getUserListByStatusForAdmin(volunteerWorkId, status));
 
         verify(userVolunteerRepository).findUsersByVolunteerWorkIdAndStatus(volunteerWorkId, status);
     }

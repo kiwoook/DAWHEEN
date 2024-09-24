@@ -12,6 +12,7 @@ import com.study.dawheen.volunteer.entity.type.TargetAudience;
 import com.study.dawheen.volunteer.entity.type.VolunteerType;
 import com.study.dawheen.volunteer.repository.UserVolunteerRepository;
 import com.study.dawheen.volunteer.repository.VolunteerWorkRepository;
+import com.study.dawheen.volunteer.service.UserVolunteerService;
 import com.study.dawheen.volunteer.service.VolunteerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -69,7 +70,8 @@ class UserVolunteerServiceIntegrationTest {
     private BCryptPasswordEncoder passwordEncoder;
     @Autowired
     private UserVolunteerRepository userVolunteerRepository;
-
+    @Autowired
+    private UserVolunteerService userVolunteerService;
 
     @BeforeEach
     void setUp() {
@@ -144,7 +146,7 @@ class UserVolunteerServiceIntegrationTest {
         for (int i = 0; i < 2; i++) {
             for (User user : users) {
                 try {
-                    volunteerService.apply(volunteerWorkId, user.getEmail());
+                    userVolunteerService.apply(volunteerWorkId, user.getEmail());
                     successCount.incrementAndGet();
                 } catch (Exception e) {
                     failCount.incrementAndGet();
@@ -237,7 +239,7 @@ class UserVolunteerServiceIntegrationTest {
             executorService.submit(() -> {
                 try {
                     // 동시성 문제 확인을 위해 동시에 apply() 메서드 호출
-                    volunteerService.apply(volunteerWorkId, user.getEmail());
+                    userVolunteerService.apply(volunteerWorkId, user.getEmail());
                     successCount.incrementAndGet(); // 성공하면 카운트 증가
                 } catch (AlreadyProcessedException e) {
                     log.info("이미 처리된 유저: {}", user.getEmail());
@@ -345,7 +347,7 @@ class UserVolunteerServiceIntegrationTest {
         for (User user : users) {
             executorService.submit(() -> {
                 try {
-                    volunteerService.approve(adminEmail, volunteerWorkId, user.getId());
+                    userVolunteerService.approve(adminEmail, volunteerWorkId, user.getId());
                     successCount.incrementAndGet(); // 성공한 신청 수 증가
                 } catch (Exception e) {
                     failedCount.incrementAndGet(); // 예외 처리
@@ -441,7 +443,7 @@ class UserVolunteerServiceIntegrationTest {
         for (int i = 0; i < tryCnt; i++) {
             User user = users.get(i);
             try {
-                volunteerService.approve(adminEmail, volunteerWorkId, user.getId());
+                userVolunteerService.approve(adminEmail, volunteerWorkId, user.getId());
                 successCount++;  // 성공한 신청 수 증가
             } catch (Exception e) {
                 failedCount++;

@@ -71,6 +71,8 @@ class VolunteerServiceTest {
     private PasswordEncoder passwordEncoder;
     @InjectMocks
     private VolunteerService volunteerService;
+    @InjectMocks
+    private UserVolunteerService userVolunteerService;
     @Mock
     private VolunteerRankingServiceV2 volunteerRankingService;
 
@@ -307,7 +309,7 @@ class VolunteerServiceTest {
         when(userVolunteerRepository.existsByVolunteerWorkAndEmailAndStatus(volunteerWorkId, email, List.of(ApplyStatus.APPROVED, ApplyStatus.PENDING))).thenReturn(false);
 
         // When
-        volunteerService.apply(volunteerWorkId, email);
+        userVolunteerService.apply(volunteerWorkId, email);
 
         // Then
         verify(userVolunteerRepository).save(any(UserVolunteerWork.class));
@@ -322,7 +324,7 @@ class VolunteerServiceTest {
         when(userVolunteerRepository.existsByVolunteerWorkAndEmailAndStatus(volunteerWorkId, email, List.of(ApplyStatus.APPROVED, ApplyStatus.PENDING))).thenReturn(true);
 
         // When & Then
-        assertThrows(AlreadyProcessedException.class, () -> volunteerService.apply(volunteerWorkId, email));
+        assertThrows(AlreadyProcessedException.class, () -> userVolunteerService.apply(volunteerWorkId, email));
 
         verify(userVolunteerRepository, never()).save(any(UserVolunteerWork.class));
     }
@@ -339,7 +341,7 @@ class VolunteerServiceTest {
         when(userVolunteerRepository.existsByVolunteerWorkAndEmailAndStatus(volunteerWorkId, email, List.of(ApplyStatus.APPROVED, ApplyStatus.PENDING))).thenReturn(false);
 
         // When & Then
-        assertThrows(IllegalStateException.class, () -> volunteerService.apply(volunteerWorkId, email));
+        assertThrows(IllegalStateException.class, () -> userVolunteerService.apply(volunteerWorkId, email));
 
         verify(userVolunteerRepository, never()).save(any(UserVolunteerWork.class));
     }
@@ -355,7 +357,7 @@ class VolunteerServiceTest {
         when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId)).thenReturn(Optional.of(userVolunteerWork));
         when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
 
-        volunteerService.approve(userEmail, volunteerWorkId, userId);
+        userVolunteerService.approve(userEmail, volunteerWorkId, userId);
 
         assertEquals(1, volunteerWork.getAppliedParticipants().get());
     }
@@ -374,7 +376,7 @@ class VolunteerServiceTest {
         when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId)).thenReturn(Optional.of(userVolunteerWork));
         when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
 
-        assertThrows(AuthorizationFailedException.class, () -> volunteerService.approve(userEmail, volunteerWorkId, userId));
+        assertThrows(AuthorizationFailedException.class, () -> userVolunteerService.approve(userEmail, volunteerWorkId, userId));
 
         verify(userVolunteerRepository, never()).save(any(UserVolunteerWork.class));
     }
@@ -392,14 +394,14 @@ class VolunteerServiceTest {
         when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId)).thenReturn(Optional.of(userVolunteerWork));
         when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
 
-        assertThrows(IllegalAccessException.class, () -> volunteerService.approve(userEmail, volunteerWorkId, userId));
+        assertThrows(IllegalAccessException.class, () -> userVolunteerService.approve(userEmail, volunteerWorkId, userId));
 
         verify(userVolunteerRepository, never()).save(any(UserVolunteerWork.class));
     }
 
     @Test
     @DisplayName("봉사 활동 완료 성공")
-    void completed_Success() throws JsonProcessingException, InterruptedException {
+    void completed_Success() throws JsonProcessingException{
         // Given
         Long volunteerWorkId = 1L;
         Long userId = 1L;
@@ -411,7 +413,7 @@ class VolunteerServiceTest {
         doNothing().when(volunteerRankingService).addVolunteerUser(anyString());
 
         // When
-        volunteerService.completed(volunteerWorkId, userId);
+        userVolunteerService.completed(volunteerWorkId, userId);
 
         // Then
         assertEquals(ApplyStatus.COMPLETED, userVolunteerWork.getStatus());
@@ -428,9 +430,7 @@ class VolunteerServiceTest {
         when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId)).thenReturn(Optional.of(userVolunteerWork));
 
         // When & Then
-        assertThrows(IllegalStateException.class, () -> {
-            volunteerService.completed(volunteerWorkId, userId);
-        });
+        assertThrows(IllegalStateException.class, () -> userVolunteerService.completed(volunteerWorkId, userId));
     }
 
     @Test
@@ -443,9 +443,7 @@ class VolunteerServiceTest {
         when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId)).thenReturn(Optional.empty());
 
         // When & Then
-        assertThrows(EntityNotFoundException.class, () -> {
-            volunteerService.completed(volunteerWorkId, userId);
-        });
+        assertThrows(EntityNotFoundException.class, () -> userVolunteerService.completed(volunteerWorkId, userId));
     }
 
     @Test
@@ -460,7 +458,7 @@ class VolunteerServiceTest {
         when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId)).thenReturn(Optional.of(userVolunteerWork));
 
         // When
-        volunteerService.cancelPending(volunteerWorkId, userId);
+        userVolunteerService.cancelPending(volunteerWorkId, userId);
 
         // Then
         assertEquals(ApplyStatus.REJECTED, userVolunteerWork.getStatus());
@@ -480,9 +478,7 @@ class VolunteerServiceTest {
         when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId)).thenReturn(Optional.of(userVolunteerWork));
 
         // When & Then
-        assertThrows(IllegalStateException.class, () -> {
-            volunteerService.cancelPending(volunteerWorkId, userId);
-        });
+        assertThrows(IllegalStateException.class, () -> userVolunteerService.cancelPending(volunteerWorkId, userId));
 
         verify(userVolunteerRepository, times(1)).findByVolunteerWorkIdAndUserId(volunteerWorkId, userId);
     }
@@ -497,9 +493,7 @@ class VolunteerServiceTest {
         when(userVolunteerRepository.findByVolunteerWorkIdAndUserId(volunteerWorkId, userId)).thenReturn(Optional.empty());
 
         // When & Then
-        assertThrows(EntityNotFoundException.class, () -> {
-            volunteerService.cancelPending(volunteerWorkId, userId);
-        });
+        assertThrows(EntityNotFoundException.class, () -> userVolunteerService.cancelPending(volunteerWorkId, userId));
 
         verify(userVolunteerRepository, times(1)).findByVolunteerWorkIdAndUserId(volunteerWorkId, userId);
     }
@@ -519,7 +513,7 @@ class VolunteerServiceTest {
         when(volunteerWorkRepository.findById(volunteerWorkId)).thenReturn(Optional.of(volunteerWork));
 
         // When
-        volunteerService.cancelPendingForOrganization(email, volunteerWorkId, userId);
+        userVolunteerService.cancelPendingForOrganization(email, volunteerWorkId, userId);
 
         // Then
         assertEquals(ApplyStatus.REJECTED, userVolunteerWork.getStatus());
@@ -539,9 +533,7 @@ class VolunteerServiceTest {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(volunteerWorkRepository.findById(volunteerWorkId)).thenReturn(Optional.of(volunteerWork));
         // When & Then
-        assertThrows(AuthorizationFailedException.class, () -> {
-            volunteerService.cancelPendingForOrganization(userEmail, volunteerWorkId, userId);
-        });
+        assertThrows(AuthorizationFailedException.class, () -> userVolunteerService.cancelPendingForOrganization(userEmail, volunteerWorkId, userId));
 
         verify(userVolunteerRepository, times(0)).findByVolunteerWorkIdAndUserId(volunteerWorkId, userId);
     }

@@ -49,7 +49,7 @@ public class OrganController {
     public ResponseEntity<List<OrganInfoResponseDto>> getOrganizationInfoWithinRadius(
             @Parameter(name = "경도", required = true) @RequestParam double latitude,
             @Parameter(name = "경도", required = true) @RequestParam double longitude,
-            @Parameter(name = "반경", description = "단위 : m", required = true) @RequestParam int radius) {
+            @Parameter(name = "반경", description = "단위 : m", required = true) @RequestParam double radius) {
 
         List<OrganInfoResponseDto> organInfoResponseDtos = organService.findOrganizationsWithinRadius(latitude, longitude, radius);
         return ResponseEntity.ok(organInfoResponseDtos);

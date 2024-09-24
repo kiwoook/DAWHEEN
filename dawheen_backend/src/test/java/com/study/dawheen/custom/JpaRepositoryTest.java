@@ -17,6 +17,4 @@ import java.lang.annotation.Target;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import({TestSecurityConfig.class, QuerydslConfig.class})
 public @interface JpaRepositoryTest {
-
-
 }

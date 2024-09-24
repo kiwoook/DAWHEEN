@@ -50,16 +50,16 @@ class UserVolunteerJpaRepositoryTest {
     private static final Logger log = LoggerFactory.getLogger(UserVolunteerJpaRepositoryTest.class);
 
     @Autowired
-    UserVolunteerRepository userVolunteerRepository;
+    private UserVolunteerRepository userVolunteerRepository;
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    VolunteerWorkRepository volunteerWorkRepository;
+    private VolunteerWorkRepository volunteerWorkRepository;
 
     @Autowired
-    OrganRepository organRepository;
+    private OrganRepository organRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -213,7 +213,7 @@ class UserVolunteerJpaRepositoryTest {
             );
         }
 
-       userRepository.saveAll(userList);
+        userRepository.saveAll(userList);
 
         List<UserVolunteerWork> userVolunteerWorkList = new ArrayList<>();
         for (User eachUser : userList) {
@@ -332,10 +332,47 @@ class UserVolunteerJpaRepositoryTest {
         Page<VolunteerInfoResponseDto> result =
                 userVolunteerRepository.findVolunteerWorkByEmailAndStatus(email, ApplyStatus.PENDING, pageable);
 
-        assertThat(result).isNotNull(); // 결과가 null이 아닌지 확인
+        assertThat(result).isNotNull(); // 결과가 null 이 아닌지 확인
         assertThat(result.getTotalElements()).isEqualTo(1); // 총 1개의 봉사활동이 반환되어야 함
         assertThat(result.getContent()).hasSize(1); // 페이지 당 1개의 항목이 있어야 함
-        assertThat(result.getContent().get(0).getTitle()).isEqualTo(volunteerWork.getTitle()); // 봉사활동 제목 검증
+        assertThat(result.getContent().getFirst().getTitle()).isEqualTo(volunteerWork.getTitle()); // 봉사활동 제목 검증
+    }
+
+    @Test
+    @DisplayName("countAllByVolunteerWorkIdAndStatus 테스트")
+    void testCountAllByVolunteerWorkIdAndStatus() {
+
+        // given
+
+        final int userSize = 100;
+        List<User> userList = new ArrayList<>();
+
+        for (int i = 1; i < userSize + 1; i++) {
+            userList.add(
+                    User.builder()
+                            .name("user" + i)
+                            .email("user" + i + "@gmail.com")
+                            .password(passwordEncoder.encode("1234"))
+                            .roleType(RoleType.MEMBER)
+                            .build()
+            );
+        }
+
+        userRepository.saveAll(userList);
+
+        List<UserVolunteerWork> userVolunteerWorkList = new ArrayList<>();
+        for (User user : userList) {
+            UserVolunteerWork userVolunteerWork1 = new UserVolunteerWork(user, volunteerWork);
+            userVolunteerWork1.updateStatus(ApplyStatus.APPROVED);
+            userVolunteerWorkList.add(userVolunteerWork1);
+        }
+
+        userVolunteerRepository.saveAll(userVolunteerWorkList);
+
+        // when
+        int result = userVolunteerRepository.countAllByVolunteerWorkIdAndStatus(volunteerWorkId, ApplyStatus.APPROVED);
+
+        assertThat(result).isEqualTo(userSize);
     }
 
 }

@@ -10,7 +10,6 @@ import com.study.dawheen.volunteer.entity.type.TargetAudience;
 import com.study.dawheen.volunteer.entity.type.VolunteerType;
 import com.study.dawheen.volunteer.repository.VolunteerWorkRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -83,31 +82,23 @@ class VolunteerQueryServiceTest {
         Long invalidId = 999L;
         when(volunteerWorkRepository.findById(invalidId)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> {
-            volunteerQueryService.getVolunteer(invalidId);
-        });
+        assertThrows(EntityNotFoundException.class, () -> volunteerQueryService.getVolunteer(invalidId));
     }
 
     @Test
     void testGetVolunteer_NullOrInvalidId() {
-        assertThrows(EntityNotFoundException.class, () -> {
-            volunteerQueryService.getVolunteer(null);
-        });
+        assertThrows(EntityNotFoundException.class, () -> volunteerQueryService.getVolunteer(null));
 
-        assertThrows(EntityNotFoundException.class, () -> {
-            volunteerQueryService.getVolunteer(0L);
-        });
+        assertThrows(EntityNotFoundException.class, () -> volunteerQueryService.getVolunteer(0L));
 
-        assertThrows(EntityNotFoundException.class, () -> {
-            volunteerQueryService.getVolunteer(-1L);
-        });
+        assertThrows(EntityNotFoundException.class, () -> volunteerQueryService.getVolunteer(-1L));
     }
 
     @Test
     void testGetVolunteersWithinRadius_Success() {
         double latitude = 37.7749;
         double longitude = -122.4194;
-        int radius = 10;
+        double radius = 10;
         List<VolunteerInfoResponseDto> volunteerWorks = new ArrayList<>();
 
         when(volunteerWorkRepository.getByRadiusAndBeforeEndDate(latitude, longitude, radius))
@@ -123,7 +114,7 @@ class VolunteerQueryServiceTest {
     void testGetVolunteersWithinRadius_NoResults() {
         double latitude = 37.7749;
         double longitude = -122.4194;
-        int radius = 10;
+        double radius = 10;
         when(volunteerWorkRepository.getByRadiusAndBeforeEndDate(latitude, longitude, radius))
                 .thenReturn(Collections.emptyList());
 
@@ -136,11 +127,9 @@ class VolunteerQueryServiceTest {
     void testGetVolunteersWithinRadius_InvalidCoordinates() {
         double invalidLatitude = 100.0; // Invalid latitude
         double invalidLongitude = -200.0; // Invalid longitude
-        int radius = 10;
+        double radius = 10;
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            volunteerQueryService.getVolunteersWithinRadius(invalidLatitude, invalidLongitude, radius);
-        });
+        assertThrows(IllegalArgumentException.class, () -> volunteerQueryService.getVolunteersWithinRadius(invalidLatitude, invalidLongitude, radius));
     }
 
     @Test
@@ -148,13 +137,9 @@ class VolunteerQueryServiceTest {
         double latitude = 37.7749;
         double longitude = -122.4194;
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            volunteerQueryService.getVolunteersWithinRadius(latitude, longitude, 0);
-        });
+        assertThrows(IllegalArgumentException.class, () -> volunteerQueryService.getVolunteersWithinRadius(latitude, longitude, 0));
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            volunteerQueryService.getVolunteersWithinRadius(latitude, longitude, -10);
-        });
+        assertThrows(IllegalArgumentException.class, () -> volunteerQueryService.getVolunteersWithinRadius(latitude, longitude, -10));
     }
 
     @Test
@@ -175,9 +160,7 @@ class VolunteerQueryServiceTest {
         Long invalidOrganizationId = 999L;
         when(organRepository.findById(invalidOrganizationId)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> {
-            volunteerQueryService.getAllVolunteersByOrganization(invalidOrganizationId);
-        });
+        assertThrows(EntityNotFoundException.class, () -> volunteerQueryService.getAllVolunteersByOrganization(invalidOrganizationId));
     }
 
     @Test
@@ -193,16 +176,8 @@ class VolunteerQueryServiceTest {
 
     @Test
     void testGetAllVolunteersByOrganization_InvalidId() {
-        assertThrows(EntityNotFoundException.class, () -> {
-            volunteerQueryService.getAllVolunteersByOrganization(null);
-        });
-
-        assertThrows(EntityNotFoundException.class, () -> {
-            volunteerQueryService.getAllVolunteersByOrganization(0L);
-        });
-
-        assertThrows(EntityNotFoundException.class, () -> {
-            volunteerQueryService.getAllVolunteersByOrganization(-1L);
-        });
+        assertThrows(EntityNotFoundException.class, () -> volunteerQueryService.getAllVolunteersByOrganization(null));
+        assertThrows(EntityNotFoundException.class, () -> volunteerQueryService.getAllVolunteersByOrganization(0L));
+        assertThrows(EntityNotFoundException.class, () -> volunteerQueryService.getAllVolunteersByOrganization(-1L));
     }
 }

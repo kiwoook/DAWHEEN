@@ -108,7 +108,7 @@ public class OrganService {
         organization.revokeUser(user);
     }
 
-    public List<OrganInfoResponseDto> findOrganizationsWithinRadius(double latitude, double longitude, int radius) {
+    public List<OrganInfoResponseDto> findOrganizationsWithinRadius(double latitude, double longitude, double radius) {
 
         List<Organization> organizationList = organRepository.findOrganizationsWithinRadius(latitude, longitude, radius).orElseThrow(EntityNotFoundException::new);
 

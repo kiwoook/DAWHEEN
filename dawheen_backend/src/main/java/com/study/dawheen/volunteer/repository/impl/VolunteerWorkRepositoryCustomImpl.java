@@ -2,6 +2,7 @@ package com.study.dawheen.volunteer.repository.impl;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -16,7 +17,6 @@ import com.study.dawheen.volunteer.repository.VolunteerWorkRepositoryCustom;
 import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -33,35 +33,57 @@ public class VolunteerWorkRepositoryCustomImpl implements VolunteerWorkRepositor
         this.queryFactory = new JPAQueryFactory(entityManager);
     }
 
+
     @Override
-    public List<VolunteerInfoResponseDto> getByRadiusAndBeforeEndDate(double latitude, double longitude, int radius) {
+    public List<VolunteerInfoResponseDto> getByRadiusAndBeforeEndDate(double latitude, double longitude, double radius) {
 
-        NumberTemplate<Double> haversineFormula = Expressions.numberTemplate(Double.class, "6371 * acos(cos(radians({0}))*cos(radians({1}))*cos(radians({2}) - radians({3})) + sin(radians({4}))*sin(radians({5})))", latitude, volunteerWork.coordinate.latitude, volunteerWork.coordinate.longitude, longitude, latitude, volunteerWork.coordinate.latitude);
-
+        // 현재 시간
         LocalDateTime now = LocalDateTime.now();
 
-        return queryFactory.select(Projections.bean(VolunteerInfoResponseDto.class, volunteerWork)).from(volunteerWork).join(volunteerWork.coordinate, coordinate).fetchJoin().where(haversineFormula.loe(radius).and(volunteerWork.recruitEndDateTime.after(now))).fetch();
+        // 반경 필터 (반경 값을 그대로 사용)
+        return queryFactory.select(Projections.fields(VolunteerInfoResponseDto.class, volunteerWork))
+                .from(volunteerWork)
+                .innerJoin(volunteerWork.coordinate, coordinate)
+                .fetchJoin()
+                .where(stDistanceSphere(latitude, longitude).loe(radius)  // 반경 값은 미터 단위로 제공해야 합니다.
+                        .and(volunteerWork.recruitEndDateTime.after(now)))
+                .fetch();
     }
 
     @Override
-    public List<VolunteerInfoResponseDto> getByFiltersAndDataRangeWithinRadius(double latitude, double longitude, int radius, Set<VolunteerType> volunteerTypes, Set<TargetAudience> targetAudiences, LocalDateTime startDate, LocalDateTime endDate) {
-
-        NumberTemplate<Double> haversineFormula = Expressions.numberTemplate(Double.class, "6371 * acos(cos(radians({0}))*cos(radians({1}))*cos(radians({2}) - radians({3})) + sin(radians({4}))*sin(radians({5})))", latitude, volunteerWork.coordinate.latitude, volunteerWork.coordinate.longitude, longitude, latitude, volunteerWork.coordinate.latitude);
+    public List<VolunteerInfoResponseDto> getByFiltersAndDataRangeWithinRadius(double latitude, double longitude, double radius, Set<VolunteerType> volunteerTypes, Set<TargetAudience> targetAudiences, LocalDateTime startDate, LocalDateTime endDate) {
 
         LocalDateTime now = LocalDateTime.now();
+
+        BooleanExpression isTrue = Expressions.asBoolean(true).isTrue();
 
         return queryFactory
                 .select(Projections.bean(VolunteerInfoResponseDto.class, volunteerWork))
                 .from(volunteerWork)
                 .join(volunteerWork.coordinate, coordinate)
-                .where(haversineFormula.loe(radius),
+                .where(stDistanceSphere(latitude, longitude).loe(radius),
                         volunteerWork.recruitEndDateTime.after(now),
                         volunteerWork.serviceStartDatetime.between(startDate, endDate),
                         volunteerWork.serviceEndDatetime.between(startDate, endDate),
-                        isContainVolunteerTypes(volunteerTypes),
-                        isContainTargetAudiences(targetAudiences))
+                        volunteerTypes.isEmpty() ? isTrue : isContainVolunteerTypes(volunteerTypes),
+                        targetAudiences.isEmpty() ? isTrue : isContainTargetAudiences(targetAudiences))
                 .fetch();
     }
+
+
+
+
+    private NumberTemplate<Double> stDistanceSphere(double latitude, double longitude) {
+        return Expressions.numberTemplate(Double.class,
+                "6371 * acos(cos(radians({0}))*cos(radians({1}))*cos(radians({2}) - radians({3})) + sin(radians({4}))*sin(radians({5})))",
+                latitude,
+                volunteerWork.coordinate.latitude,
+                volunteerWork.coordinate.longitude,
+                longitude,
+                latitude,
+                volunteerWork.coordinate.latitude);
+    }
+
 
     private BooleanBuilder isContainVolunteerTypes(Set<VolunteerType> volunteerTypes) {
 
@@ -84,11 +106,5 @@ public class VolunteerWorkRepositoryCustomImpl implements VolunteerWorkRepositor
         return builder;
     }
 
-
-    @Override
-    public int countAllByVolunteerWorkIdAndStatus(Long volunteerWorkId, ApplyStatus status) {
-
-        return queryFactory.selectFrom(userVolunteerWork).join(userVolunteerWork.volunteerWork, volunteerWork).fetchJoin().where(userVolunteerWork.volunteerWork.id.eq(volunteerWorkId).and(userVolunteerWork.status.eq(status))).fetch().size();
-    }
 
 }

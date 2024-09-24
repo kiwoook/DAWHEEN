@@ -7,6 +7,6 @@ import java.util.Optional;
 
 public interface OrganRepositoryCustom {
 
-    Optional<List<Organization>> findOrganizationsWithinRadius(double latitude, double longitude, int radius);
+    Optional<List<Organization>> findOrganizationsWithinRadius(double latitude, double longitude, double radius);
 
 }

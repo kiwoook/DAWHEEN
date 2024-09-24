@@ -20,12 +20,20 @@ public class Coordinate {
 
     private Double longitude;
 
-
     public Coordinate(Double latitude, Double longitude) {
         if (latitude == null && longitude == null) {
             throw new IllegalArgumentException("Both latitude and longitude cannot be null.");
         }
         this.latitude = latitude;
         this.longitude = longitude;
+    }
+
+    @Override
+    public String toString() {
+        return "Coordinate{" +
+                "id=" + id +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
+                '}';
     }
 }

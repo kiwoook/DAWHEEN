@@ -1,3 +1,9 @@
+buildscript {
+    ext {
+        queryDslVersion = "5.0.0"
+    }
+}
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.2.1'
@@ -8,7 +14,7 @@ group = 'com.study'
 version = '0.0.1-SNAPSHOT'
 
 java {
-    sourceCompatibility = '17'
+    sourceCompatibility = '21'
 }
 
 configurations {
@@ -20,7 +26,6 @@ configurations {
 bootJar {
     archivesBaseName = 'dawheen'
     archiveFileName = 'dawheen.jar'
-    archiveVersion = "0.0.0"
 }
 
 
@@ -44,14 +49,12 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     implementation 'org.springframework.integration:spring-integration-core:6.3.3'
 
-
     // H2
-    runtimeOnly 'com.h2database:h2'
     testRuntimeOnly 'com.h2database:h2'
 
     // QueryDSL
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
-    annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+    annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
 
@@ -87,12 +90,26 @@ dependencies {
     implementation 'org.mongodb:mongodb-driver-sync:5.1.0'
     implementation 'org.mongodb:mongodb-driver-core:5.1.0'
 
-
 }
 
 tasks.named('test') {
     useJUnitPlatform()
 }
 
+// Querydsl 설정부
+def generated = 'src/main/generated'
 
+// querydsl QClass 파일 생성 위치를 지정
+tasks.withType(JavaCompile) {
+    options.getGeneratedSourceOutputDirectory().set(file(generated))
+}
 
+// java source set 에 querydsl QClass 위치 추가
+sourceSets {
+    main.java.srcDirs += [ generated ]
+}
+
+// gradle clean 시에 QClass 디렉토리 삭제
+clean {
+    delete file(generated)
+}
