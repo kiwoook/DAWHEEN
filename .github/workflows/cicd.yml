@@ -26,7 +26,6 @@ jobs:
     - run: touch ./dawheen_backend/src/main/resources/application-oauth.properties
     - run: echo "${{ secrets.APPLICATION_OAUTH }}" > ./dawheen_backend/src/main/resources/application-oauth.properties
     - run: cat ./dawheen_backend/src/main/resources/application-oauth.properties
-    - run: mkdir ./dawheen_backend/src/test/resources/
     - run: touch ./dawheen_backend/src/test/resources/application.properties
     - run: echo "${{ secrets.APPLICATION_TEST }}" > ./dawheen_backend/src/test/resources/application.properties
 
